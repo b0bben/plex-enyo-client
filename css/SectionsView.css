@@ -1,0 +1,25 @@
+/* Copyright 2009-2011 Hewlett-Packard Development Company, L.P. All rights reserved. */
+.enyo-canonview-header {
+	padding: 10px;
+	background: #ccc;
+	margin-bottom: 4px;
+	border-bottom: 1px solid gray;
+}
+
+.enyo-canonview-client {
+	padding: 10px;
+}
+
+.margin-medium {
+	margin: 10px;
+}
+
+.section-button {
+	background: transparent url('../images/bg-menu-item-green.png') right center no-repeat; /* Background image for default color scheme - green */
+	padding: 10px 15px;
+	color: #fff;
+	font-size: 14px;
+	cursor: pointer;
+	display: block;
+	text-decoration: none;
+}
