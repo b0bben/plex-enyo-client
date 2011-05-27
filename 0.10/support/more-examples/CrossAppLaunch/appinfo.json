@@ -1,9 +1,0 @@
-{
-    "id": "com.palm.crossappsource",
-    "version": "1.0.0",
-    "vendor": "HP",
-    "type": "web",
-    "main": "index.html",
-    "title": "Enyo Cross App Source",
-    "uiRevision": 2
-}

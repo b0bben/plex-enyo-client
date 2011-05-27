@@ -1,4 +1,3 @@
-/* Copyright 2009-2011 Hewlett-Packard Development Company, L.P. All rights reserved. */
 enyo.kind({
 	name: "plex.GridView",
 	kind: enyo.VFlexBox,
@@ -17,9 +16,7 @@ enyo.kind({
 			]},
 			{kind: "Selection"},
 		]},
-		{kind: "VFlexBox", flex: 1, components: [
-			{kind: "plex.PreplayView", name: "preplay",style: "width: 75%; top: 56px; bottom: 0;", className: "enyo-bg"}
-		]}
+		{kind: "plex.PreplayView", name: "preplay",style: "width: 75%; top: 56px; bottom: 0;"}
 	],
 	create: function() {
 		this.count = 0;
@@ -59,7 +56,7 @@ enyo.kind({
 		this.$.cells.destroyControls();
 		this.cells = [];
 		for (var i=0; i<this.cellCount; i++) {
-			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;", owner: this, idx: i, onclick: "cellClick"});
+			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;border-bottom: 1px solid rgba(0, 0, 0, 0.199219);", owner: this, idx: i, onclick: "cellClick"});
 			c.createComponent({kind: "Image", className: "cover-image"});
 			c.createComponent({kind: "Item", name: "cover_label", className: "cover-label"});
 			this.cells.push(c);
