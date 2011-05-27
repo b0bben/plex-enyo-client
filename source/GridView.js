@@ -8,7 +8,7 @@ enyo.kind({
 		parentMediaContainer = ""
 	],
 	components: [
-		{kind: "PageHeader", name: "grid_header", content: "bob", className: "enyo-header-dark"},
+		{kind: "PageHeader", name: "grid_header", style: '-webkit-box-align: center !important',pack: 'center',content: "bob", className: "enyo-header-dark"},
 		{kind: "Scroller",flex: 2,components: [
 			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow",height: "1000px",components: [
 

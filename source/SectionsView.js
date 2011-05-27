@@ -11,7 +11,9 @@ enyo.kind({
 		onGo: ""
 	},
 	components: [
-		{name: "header", kind: "Header", content: "Library sections", className: "enyo-header-dark"},
+		{name: "header", kind: "Header",style: '-webkit-box-align: center !important',pack: 'center', className: "enyo-header-dark", components: [
+			{kind: "Image", src: "images/PlexTextLogo.png", style: "padding: none;"}
+		]},
 		{kind: "Scroller", flex: 1, components: [
 			{name: "c_section_list", kind: "VirtualRepeater",flex: 1, className: "section-list",onSetupRow: "setupRowItems", components: [
                   {kind: "Item", layoutKind: "VFlexLayout", style: "border-top:none;",onclick: "rowSelected",Xonmousedown: "rowSelected", components: [
