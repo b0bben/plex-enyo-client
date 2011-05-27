@@ -1,0 +1,14 @@
+{
+	"returnValue": true,
+	"errorCode": 0,
+	"mediaSize":["ISO_A4","HAGAKI","Photo_4x6","Photo_L","Photo_5x7","Photo_10x15","ISO_A6","Photo_8x10","Photo_5x7_MainTray"],
+	"mediaType":["Plain","Photo","Photo Glossy","Premium Photo","Advanced Photo"],
+	"trays":["Auto","Tray1","Photo"],
+	"canDuplex":true,
+	"hasPhotoTray":true,
+	"canPrintBorderless":true,
+	"canPrintQualityDraft":true,
+	"canPrintQualityNormal":true,
+	"canPrintQualityHigh":true,
+	"hasColor":true
+}

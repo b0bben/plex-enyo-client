@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Cross App Launch</title>
+		<script src="../../../../0.10/framework/enyo.js" type="text/javascript"></script>
+	</head>
+	<body>
+	<script type="text/javascript">
+		window.onmessage = function(e) {
+			console.log("Got a message: "+e.data);
+		};
+		new CrossAppLaunch().renderInto(document.body);
+	</script>
+	</body>
+</html>

@@ -1,0 +1,10 @@
+{
+	"id": "com.palmdts.canvas",
+	"version": "1.0.0",
+	"vendor": "PalmDTS",
+	"type": "web",
+	"main": "index.html",
+	"title": "Enyo Canvas Demo",
+	"icon": "icon.png",
+	"uiRevision": 2
+}

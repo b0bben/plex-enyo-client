@@ -1,0 +1,3 @@
+{
+	"dateRangeWithinMonth": "#{startDate}-#{endDate} #{month}, #{year}"
+}

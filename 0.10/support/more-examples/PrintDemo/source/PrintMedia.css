@@ -1,0 +1,6 @@
+/* Copyright 2009-2011 Hewlett-Packard Development Company, L.P. All rights reserved. */
+/* This css is included against media='print' and is used for styling the printed output. */
+
+#printDemo_left, #printDemo_right_shadow, #printDemo_rightPageHeader, #printDemo_printFrameView_hFlexBox {
+  display: none;
+}

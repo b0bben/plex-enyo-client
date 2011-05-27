@@ -1,0 +1,10 @@
+{
+	"id": "com.palmdts.app.multitouch.simple",
+	"version": "0.0.1",
+	"vendor": "HP",
+	"type": "web",
+	"main": "index.html",
+	"title": "Multitouch Simple Sample",
+	"icon": "icon.png",
+	"uiRevision":2
+}

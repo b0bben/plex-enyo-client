@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Mojo3 PrintDemo</title>
+	<script src="../../../../0.10/framework/enyo.js" type="text/javascript"></script>
+</head>
+<body>
+<script type="text/javascript">
+	decorator = function(result, inInfo, inMoreInfo) {
+		var componentId = result && result.id;
+		return componentId ? "   NEW COMPONENT: " + componentId : null;
+	}
+	 wrapMethod(PrintDemo.prototype, "createComponent", decorator); 
+	 wrapMethod(PrintDialog.prototype, "createComponent", decorator);
+	wrapMethod(PrinterSelector.prototype, "createComponent", decorator);
+	wrapMethod(PrinterOptions.prototype, "createComponent", decorator);
+	wrapMethod(PrinterAdder.prototype, "createComponent", decorator); 
+	new PrintDemo().renderInto(document.body);
+</script>
+</body>
+</html>

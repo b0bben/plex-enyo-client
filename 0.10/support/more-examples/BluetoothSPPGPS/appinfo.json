@@ -1,0 +1,10 @@
+{
+    "id": "com.palmdts.bluetoothsppgps",
+    "version": "1.0.0",
+    "vendor": "HP",
+    "type": "web",
+    "main": "index.html",
+	"icon": "icon.png",
+    "title": "Enyo SPP GPS App",
+    "uiRevision": 2
+}

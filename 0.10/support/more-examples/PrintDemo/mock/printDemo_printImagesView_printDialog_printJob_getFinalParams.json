@@ -1,0 +1,18 @@
+{
+    "returnValue": true,
+    "errorCode": 0,
+    "mediaSize": "US_Letter",
+    "mediaType": "Plain",
+    "printQuality": "Normal",
+    "duplex": "None",
+    "dryTime": "Lower",
+    "color": "Color",
+    "tray": "Tray1",
+    "numCopies": 1,
+    "borderless": false,
+    "autoRotate": false,
+    "paramsAdjusted": false,
+    "pixel_units": 300,
+    "width": 2400,
+    "height": 3112
+}
