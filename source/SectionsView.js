@@ -13,8 +13,8 @@ enyo.kind({
 	components: [
 		{name: "header", kind: "Header", content: "Library sections", className: "enyo-header-dark"},
 		{kind: "Scroller", flex: 1, components: [
-			{name: "c_section_list", kind: "VirtualRepeater",flex: 1,onSetupRow: "setupRowItems", components: [
-                  {kind: "Item", layoutKind: "VFlexLayout", onclick: "rowSelected",Xonmousedown: "rowSelected", components: [
+			{name: "c_section_list", kind: "VirtualRepeater",flex: 1, className: "section-list",onSetupRow: "setupRowItems", components: [
+                  {kind: "Item", layoutKind: "VFlexLayout", style: "border-top:none;",onclick: "rowSelected",Xonmousedown: "rowSelected", components: [
                        {name: "c_section_button",kind: "plex.ButtonMenu"}
                       ]
                   }
@@ -26,6 +26,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.headerContentChanged();
 		this.parentMediaContainerChanged();
+		this.objCurrNavItem = "";
 	},
 	headerContentChanged: function() {
 		//this.$.header.setContent(this.headerContent);
@@ -48,5 +49,19 @@ enyo.kind({
 	    this.log("sender: " + inSender + ", parent: " + inSender.owner.owner);
 	    var mainView = inSender.owner.owner;
 	    mainView.showGridView(inEvent.rowIndex);
+		
+
+		
+		if(this.objCurrNavItem)
+		{
+			var classes = this.objCurrNavItem.getClassName();
+		
+			this.objCurrNavItem.removeClass("active");
+			//this.$.c_section_list.render();
+		}
+		
+		inSender.addClass("active");
+		
+		this.objCurrNavItem = inSender;
 	}
 });

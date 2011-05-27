@@ -10,13 +10,12 @@ enyo.kind({
 	components: [
 		{kind: "PageHeader", name: "grid_header", content: "bob", className: "enyo-header-dark"},
 		{kind: "Scroller",flex: 2,components: [
-			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow",height: "500px",components: [
+			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow",height: "1000px",components: [
 
 				{name: "cells", kind: "HFlexBox",onclick: "cellsClick", style: "background-color: #222;"}
 			]},
 			{kind: "Selection"},
 		]},
-		{kind: "Toolbar"}
 	],
 	create: function() {
 		this.count = 0;
@@ -69,8 +68,8 @@ enyo.kind({
 			for (var i=0, c; c=this.cells[i]; i++, idx++) {
 				if (idx < this.count) {
 					var pmo = this.mediaContainer.Video[idx];
-					this.log("idx: " + idx);
-					this.log("i: " + inSender);
+					//this.log("idx: " + idx);
+					//this.log("i: " + inSender);
 					var path = this.plexReq.baseUrl + pmo.thumb;//"images/BlankPoster.png";
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
