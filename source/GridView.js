@@ -8,6 +8,7 @@ enyo.kind({
 		parentMediaContainer = ""
 	],
 	components: [
+		{name: "shadow", className: "enyo-sliding-view-shadow"},
 		{kind: "PageHeader", name: "grid_header", style: '-webkit-box-align: center !important',pack: 'center',content: "bob", className: "enyo-header-dark"},
 		{kind: "Scroller",flex: 2,components: [
 			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow",height: "1000px",components: [
@@ -16,6 +17,9 @@ enyo.kind({
 			]},
 			{kind: "Selection"},
 		]},
+		{kind: "VFlexBox", flex: 1, components: [
+			{kind: "plex.PreplayView", name: "preplay",style: "width: 75%; top: 56px; bottom: 0;", className: "enyo-bg"}
+		]}
 	],
 	create: function() {
 		this.count = 0;
@@ -55,7 +59,7 @@ enyo.kind({
 		this.$.cells.destroyControls();
 		this.cells = [];
 		for (var i=0; i<this.cellCount; i++) {
-			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;border-bottom: 1px solid rgba(0, 0, 0, 0.199219);", owner: this, idx: i, onclick: "cellClick"});
+			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;", owner: this, idx: i, onclick: "cellClick"});
 			c.createComponent({kind: "Image", className: "cover-image"});
 			c.createComponent({kind: "Item", name: "cover_label", className: "cover-label"});
 			this.cells.push(c);
@@ -88,6 +92,10 @@ enyo.kind({
 		var idx = inEvent.rowIndex * this.cellCount + inSender.idx;
 		this.$.selection.select(idx);
 		this.$.grid_list.refresh();
+		
+		var pmo = this.mediaContainer.Video[idx];
+		this.$.preplay.setPlexMediaObject(pmo);
+		this.$.preplay.open();
 	},
 	multiModeChange: function(inSender) {
 		this.$.selection.setMulti(inSender.getState());

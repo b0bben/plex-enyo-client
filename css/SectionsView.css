@@ -14,16 +14,6 @@
 	margin: 10px;
 }
 
-.section-button {
-	background: transparent url('../images/bg-menu-item-green.png') right center no-repeat; /* Background image for default color scheme - green */
-	padding: 10px 15px;
-	color: #fff;
-	font-size: 14px;
-	cursor: pointer;
-	display: block;
-	text-decoration: none;
-}
-
 .section-list {
 	background-color: #222;
 	color: gray;

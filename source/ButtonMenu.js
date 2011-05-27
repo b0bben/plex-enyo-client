@@ -30,7 +30,7 @@ enyo.kind({
 				this.$.sectionImage.setSrc("images/Movies.png");
 				break;
 			case 'show':
-				this.$.sectionImage.setSrc("images/Shows.png");
+				this.$.sectionImage.setSrc("images/TVShows.png");
 				break;
 			case 'artist':
 				this.$.sectionImage.setSrc("images/Music.png");

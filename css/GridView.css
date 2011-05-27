@@ -27,4 +27,5 @@
 	border-bottom-right-radius: 4px 4px; 
 	border-bottom-left-radius: 4px 4px; 
 	-webkit-box-shadow: rgb(10, 10, 10) 0px 0px 8px;
+	box-shadow: rgb(10, 10, 10) 0px 0px 8px;
 }
