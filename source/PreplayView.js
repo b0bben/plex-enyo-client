@@ -1,42 +1,52 @@
 enyo.kind({
-	name: "plex.PreplayView",
-	kind: enyo.Toaster,
-	events: {
-		onBypassClose: ""
-	},
+	name: "plex.PreplayView", 
+	kind: enyo.Toaster, 
+	scrim: true, 
+	scrimClassName: "transparent-scrim", 
+	flyInFrom: "right", 
+	style: "top: 0px; bottom: 0px", 
+	lazy: false,
 	published: {
 		plexMediaObject: "",
-		relatedMedia: []
 	},
-	lazy: true,
-	flyInFrom: "right",
-	className: "enyo-bg", 
 	components: [
-		{name: "shadow", className: "enyo-sliding-view-shadow"},
-		{kind: "VFlexBox", flex: 1, components: [
-			{name: "AllDetails", className: "details", kind: "Scroller", horizontal: false, autoHorizontal: false, showing: true, flex: 1, components: [
-					{kind: "Control", className: "container", components: [
-						{kind: "Control", className: "content", components: [
-							{kind: "HFlexBox", className: "header", components: [
-								{name: "photo", kind: "Control", className: "avatar", components: [
-									{name: "photoImage", className: "img", kind: "Control"},
-									{kind: "Control", className: "mask"}
-								]},
-								{kind: "Control", layoutKind: "VFlexLayout", flex: 1, pack: "justify", align: "end", components: [
-									{name: "favIndicator", kind: "Control", className: "favorite", onclick: "toggleFavorite"},
-									{kind: "Control", layoutKind: "VFlexLayout", className: "nameinfo", align: "start", components: [
-										{name: "title", className: "name", content: "Family Guy - Blue Harvest"},
-										{name: "nickname", className: "nickname", content: "blahaha nickname"},
-										{name: "desc", className: "position", content:"long ass decsro"}
-									]},
-								]}
-							]},
-						]}
-					]}
-		//			{style: "height: 48px;"}
+		{className: "enyo-sliding-view-shadow"},
+		{kind: enyo.VFlexBox, flex: 1, width: "320px", height: "100%", components: [
+			{kind: "Header", className: "enyo-header-dark", components: [
+				{kind: "RadioGroup", flex: 1, components: [
+					{kind: "RadioButton", value: "bookmarks", className: "enyo-radiobutton-dark", icon: "images/chrome/toaster-icon-bookmarks.png", onclick: "showBookmarks"},
+					{kind: "RadioButton", value: "history", className: "enyo-radiobutton-dark", icon: "images/chrome/toaster-icon-history.png", onclick: "showHistory"},
+					{kind: "RadioButton", value: "downloads", className: "enyo-radiobutton-dark", icon: "images/chrome/toaster-icon-downloads.png", onclick: "showDownloads"}
+				]}
 			]},
-		]},
-		{kind: "Toolbar"}
+			{name: "drawerPane", kind: "Pane", flex: 1, lazyViews: [
+				{name: "bookmarks", kind: "BookmarkList",
+					onSelectItem: "selectItem",
+					onEditItem: "showEditBookmarkDialog",
+					onDeleteItem: "deleteBookmark",
+					onAddBookmark: "addBookmark",
+					onClose: "closeToaster"
+				},
+				{name: "history", kind: "HistoryList",
+					onSelectItem: "selectItem",
+					onDeleteItem: "deleteHistory",
+					onClose: "closeToaster",
+				},
+				{name: "downloads", kind: "DownloadList",
+					onOpenItem: "openDownloadedFile",
+					onCancelItem: "cancelDownload",
+					onRetryItem: "retryDownload",
+					onDeleteItem: "deleteDownload",
+					onClearAll: "showClearDownloadsDialog",
+					onClose: "closeToaster",
+					onShow: "downloadListShown"
+				}
+			]},
+			{kind: "Toolbar",components: [
+				{kind: "GrabButton", onclick: "doClose"},
+			]}
+		]}
+
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -52,10 +62,9 @@ enyo.kind({
 	},
 	plexMediaObjectChanged: function() {
 		this.log("preplay with: " + this.plexMediaObject.title);
+		
 	},
-	close: function(e, reason) {
-		if (!this.doBypassClose(e)) {
-			this.inherited(arguments);
-		}
+	doClose: function() {
+		this.close();
 	}
 })
