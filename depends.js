@@ -1,4 +1,3 @@
-/* Copyright 2009-2011 Hewlett-Packard Development Company, L.P. All rights reserved. */
 enyo.depends(
 	//view src
 	"source/MainView.js",
@@ -15,6 +14,7 @@ enyo.depends(
 	//css
 	"css/SectionsView.css",
 	"css/GridView.css",
+	"css/PreplayView.css",
 	//external modules
 	"external/jkl-parsexml.js"
 );

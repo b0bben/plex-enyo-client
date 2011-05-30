@@ -1,68 +1,58 @@
 enyo.kind({
 	name: "plex.PreplayView", 
 	kind: enyo.Toaster, 
-	scrim: true, 
-	scrimClassName: "transparent-scrim", 
 	flyInFrom: "right", 
 	style: "top: 0px; bottom: 0px", 
+	width: "930px",
 	lazy: false,
+	scrim: false,
 	published: {
 		plexMediaObject: "",
 	},
 	components: [
 		{className: "enyo-sliding-view-shadow"},
-		{kind: enyo.VFlexBox, flex: 1, width: "320px", height: "100%", components: [
-			{kind: "Header", className: "enyo-header-dark", components: [
-				{kind: "RadioGroup", flex: 1, components: [
-					{kind: "RadioButton", value: "bookmarks", className: "enyo-radiobutton-dark", icon: "images/chrome/toaster-icon-bookmarks.png", onclick: "showBookmarks"},
-					{kind: "RadioButton", value: "history", className: "enyo-radiobutton-dark", icon: "images/chrome/toaster-icon-history.png", onclick: "showHistory"},
-					{kind: "RadioButton", value: "downloads", className: "enyo-radiobutton-dark", icon: "images/chrome/toaster-icon-downloads.png", onclick: "showDownloads"}
-				]}
-			]},
-			{name: "drawerPane", kind: "Pane", flex: 1, lazyViews: [
-				{name: "bookmarks", kind: "BookmarkList",
-					onSelectItem: "selectItem",
-					onEditItem: "showEditBookmarkDialog",
-					onDeleteItem: "deleteBookmark",
-					onAddBookmark: "addBookmark",
-					onClose: "closeToaster"
-				},
-				{name: "history", kind: "HistoryList",
-					onSelectItem: "selectItem",
-					onDeleteItem: "deleteHistory",
-					onClose: "closeToaster",
-				},
-				{name: "downloads", kind: "DownloadList",
-					onOpenItem: "openDownloadedFile",
-					onCancelItem: "cancelDownload",
-					onRetryItem: "retryDownload",
-					onDeleteItem: "deleteDownload",
-					onClearAll: "showClearDownloadsDialog",
-					onClose: "closeToaster",
-					onShow: "downloadListShown"
-				}
-			]},
-			{kind: "Toolbar",components: [
-				{kind: "GrabButton", onclick: "doClose"},
-			]}
+		{kind: enyo.VFlexBox,	height: "700px",flex: 4, name:"details",components: [
+      {kind: enyo.HFlexBox, width: "100%", height: "50%", components: [
+        {className: "cover", components: [
+				  {name: "thumb", kind: "Image", className: "thumb"},
+				]},
+        {kind: enyo.HFlexBox, className: "title_holder", components: [
+          {name: "title", className: "title"},
+          {name: "year", className: "year"},
+          {kind: enyo.HFlexBox, className:"rating_holder", components: [
+            {name: "rating_1", kind: "Image"},
+            {name: "rating_2", kind: "Image"},
+            {name: "rating_3", kind: "Image"},
+            {name: "rating_4", kind: "Image"},
+            {name: "rating_5", kind: "Image"},  
+          ]},
+        ]},
+      ]},
+      {name: "tagline", className: "tagline"},
+      {name: "desc", className: "desc"},
+		]},
+		{kind: "Toolbar", components: [
+			{kind: "GrabButton", onclick: "doClose"},
 		]}
 
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.plexReq = new PlexRequest();
 		this.plexMediaObjectChanged();
-		
-		//this.$.title.setContent(this.plexMediaObject.title);
-		//this.$.desc.setContent(this.plexMediaObject.summary);
-		//this.$.nickname.setContent(this.getNickName(this.person));
-
-
-		//this.$.photoImage.applyStyle("background-image", "url(" + this.plexMediaObject.thumb + ");");
-
 	},
 	plexMediaObjectChanged: function() {
-		this.log("preplay with: " + this.plexMediaObject.title);
-		
+		if (this.plexMediaObject != null) {
+			this.log("preplay with: " + this.plexMediaObject.title);
+			this.$.thumb.setSrc(this.plexReq.baseUrl + this.plexMediaObject.thumb);
+			this.$.title.setContent(this.plexMediaObject.title);
+			this.$.year.setContent(this.plexMediaObject.year);
+			this.$.tagline.setContent(this.plexMediaObject.tagline);		
+			this.$.desc.setContent(this.plexMediaObject.summary);
+			
+			//this.$.thumb.setSrc("images/BlankPoster.png");
+			//this.$.details.applyStyle("background:#ffffff url('" + this.plexMediaObject.art + "') no-repeat right top");
+		}
 	},
 	doClose: function() {
 		this.close();

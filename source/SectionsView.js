@@ -52,7 +52,11 @@ enyo.kind({
 	    mainView.showGridView(inEvent.rowIndex);
 		
 
+		var classes1 = inSender.getClassName();
 		
+		if (this.objCurrNavItem == inSender) {
+			this.log("same shit ju!")
+		}
 		if(this.objCurrNavItem)
 		{
 			var classes = this.objCurrNavItem.getClassName();

@@ -1,141 +1,162 @@
-/* Details */
-.details {
-	background-color: #222;;
-	padding:4px;
-	border-left:1px solid #a8a8a8;
+.enyo-bg{
+  background-color: #D8D8D8;
 }
-.details .container {
-	-webkit-border-image: url(../images/bg_details.png) 9 repeat;
-	border-width:9px;
+
+.cover {
+  height: 281px;
+  left: 20px;
+  overflow: visible;
+  position: absolute;
+  top: 20px;
+  visibility: visible;
+  width: 200px;
+  z-index: 0;
 }
-.details .content {
-	margin:-3px;
+
+.cover .thumb {
+  -webkit-box-shadow: #333538 0px 0px 40px;
+  border-bottom-left-radius: 7px 7px;
+  border-bottom-right-radius: 7px 7px;
+  border-top-left-radius: 7px 7px;
+  border-top-right-radius: 7px 7px;
+  left: 0px;
+  position: absolute;
+  top: 0px;
+  visibility: visible;
+  width: 194px;
+  height: 273px;
 }
-.details .header {
-	padding:5px 13px 10px 5px;
-	border-bottom:1px solid #d8d8d8;
+
+.title_holder {
+  height: 49px;
+  left: 240px;
+  overflow: hidden;
+  position: absolute;
+  top: 20px;
+  visibility: visible;
+  width: 723px;
+  z-index: 0;
 }
-.details .avatar {
-	width:222px;
-	position:relative;
-	height:222px;
-	margin:0 8px 0 0;
+
+.title_holder .title {
+  font: normal normal bold 40px/normal Arial, sans-serif;
+  height: 45px;
+  left: 0px;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 0px;
+  white-space: nowrap;
+  width: 506px;
+  word-wrap: normal;
+  z-index: 200;
 }
-.details .avatar .img {
-	height:196px;
-	width:196px;
-	top:13px;
-	position:absolute;
-	left:13px;
-	background-color:#f1f1f1;
-	background-repeat:no-repeat;
-	background-position:50% 50%;
+
+.title_holder .year {
+  font: normal normal normal 20px/normal Arial, sans-serif;
+  height: 23px;
+  left: 0px;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: clip;
+  top: 0px;
+  white-space: pre;
+  width: 58px;
+  word-wrap: normal;
+  z-index: 200;
 }
-.details .avatar .mask {
-	background:url(../images/bg_avatar_mask.png) no-repeat 0 0;
+
+.tagline {
+   font: normal normal bold 16px/normal Arial, sans-serif;
+   height: 18px;
+   left: 240px;
+   overflow: hidden;
+   position: absolute;
+   text-overflow: ellipsis;
+   top: 74px;
+   white-space: nowrap;
+   width: 422px;
+   word-wrap: normal;
+   z-index: 200;
 }
-.details .nameinfo {
-	font-size:30px;
-	width:100%;
+
+.desc {
+  font: normal normal normal 18px/normal Arial, sans-serif;
+  left: 20px;
+  overflow: hidden;
+  position: absolute;
+  text-align: left;
+  color: black;
+  text-overflow: clip;
+  white-space: pre-wrap;
+  width: 90%;
+  word-wrap: break-word;
+  z-index: 200;
 }
-.details .nameinfo div {
-	overflow:hidden;
-	text-overflow:ellipsis;
+
+.rating_holder {
+  display: block;
+  height: 16px;
+  left: 791px;
+  overflow: hidden;
+  position: absolute;
+  top: 37px;
+  visibility: visible;
+  width: 85px;
+  z-index: 0;
 }
-.portrait .details .nameinfo {
-	font-size:20px;
+
+.rating_holder .star1 {
+  height: 16px;
+  left: 0px;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  visibility: visible;
+  width: 17px;
+  z-index: 0;
 }
-.details .name {
-	color:#222;
-	font-weight:normal;
-	padding:0 0 0.5em;
-	overflow:hidden;
-	text-overflow:ellipsis;
-	width:100%;
-	white-space: nowrap;
+
+.rating_holder .star2 {
+  height: 16px;
+  left: 17px;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  visibility: visible;
+  width: 17px;
+  z-index: 0;
 }
-.details .nickname {
-	color:#555;
-	font-size:0.8em;
+
+.rating_holder .star3 {
+  height: 16px;
+  left: 34px;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  visibility: visible;
+  width: 17px;
+  z-index: 0;
 }
-.details .position {
-	color:#888;
-	font-size:0.8em;
+
+.rating_holder .star4 {
+  height: 16px;
+  left: 51px;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  visibility: visible;
+  width: 17px;
+  z-index: 0;
 }
-.details .favorite {
-	width:34px;
-	height:34px;
-	margin:10px 0 0 10px;
-	background:url(../images/bg_favorite.png) no-repeat 0 0;
+
+.rating_holder .star5 {
+  height: 16px;
+  left: 68px;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  visibility: visible;
+  width: 17px;
+  z-index: 0;
 }
-.details .favorite.true {
-	background-position: 0 -33px;
-}
-.details .profiles-button span {
-	background:url(../../images/btn_linked_profiles.png) no-repeat 100% 0;
-	padding:0 20px 0 0;
-}
-.details .profiles-button.enyo-button-depressed span {
-	background-position:100% -20px;
-}
-.details .profiles {
-	background:#f4f4f4;
-}
-.details .profiles .enyo-item {
-	border-top:1px dashed #ccc;
-	border-bottom:0;
-	height:73px;
-	color:#222;
-	font-weight:normal;
-	padding:0 14px;
-}
-.details .profiles .icon .img {
-	background-position:50% 50%;
-	background-repeat: no-repeat;
-	background-color:#f1f1f1;
-	background-image:url(../images/bg_icon_img.png)
-}
-.details .enyo-group {
-	-webkit-border-image:none;
-	border:0;
-	border-bottom:1px solid #d8d8d8;
-	-webkit-border-radius:0;
-	margin:0;
-}
-.details .enyo-group-inner {
-	margin:0;
-}
-.details .enyo-group .enyo-item {
-	padding:0.5rem 0.7rem;
-	color:#222;
-	font-size:0.9rem;
-}
-.details .label {
-	color:#1879cd;
-	font-weight:normal;
-	text-transform: uppercase;
-	font-size:0.7rem;
-}
-.details .value {
-	overflow: hidden;
-	margin:0 0 0.2rem;
-	text-overflow: ellipsis;
-}
-.details .button-arrow {
-	height:42px;
-	width:32px;
-	background: url(../images/bg_details_input_skype.png) no-repeat 50% 50%
-}
-.details .enyo-button.action .enyo-button-icon {
-	margin:-6px -8px -10px
-}
-/* this sucks */
-.details-toolbar .border {
-	border-left: 1px solid #A8A8A8;
-	float: left;
-	height: 100%;
-	left: -4px;
-	position: absolute;
-	width: 1px;
-}
-/* sucks ends here */
