@@ -8,16 +8,17 @@ enyo.kind({
 			]}
 		]},
 		{kind:enyo.VFlexBox, flex:1, components: [
-			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", components: [
-
+ 			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", onSelectView: "viewSelected", components: [
+ 			    {kind: "plex.WelcomeView", name:"welcome_view"},
+          {kind: "plex.GridView", name: "grid_view"}
 			]}
 		]}		
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.$.right_pane.createComponents([{kind: "plex.WelcomeView"}]);
-		this.$.right_pane.selectViewByIndex(0);
+		this.$.right_pane.selectViewByName("welcome_view");
 		this.rootMediaContainer = "";
+		this.selectedSection = "";
 		var plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
 		plexReq.librarySections();
 		
@@ -30,9 +31,10 @@ enyo.kind({
 		 this.$.left_pane.selectViewByName("view_sections");
 	},
 	showGridView: function(index) {
-		var section = this.rootMediaContainer.Directory[index];
-		this.$.right_pane.createComponents([{kind: "plex.GridView", parentMediaContainer: section}]);
-		this.$.right_pane.render();
-		this.$.right_pane.selectViewByIndex(1);
+		this.selectedSection = this.rootMediaContainer.Directory[index];
+    this.$.right_pane.selectViewByName("grid_view");
+	},
+	viewSelected: function(inSender, inView, inPreviousView) {
+	    inView.setParentMediaContainer(this.selectedSection);
 	},
 });

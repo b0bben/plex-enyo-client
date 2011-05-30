@@ -1,5 +1,6 @@
 .enyo-bg{
   background-color: #D8D8D8;
+  /*width: 930px;*/
 }
 
 .cover {
@@ -158,5 +159,16 @@
   top: 0px;
   visibility: visible;
   width: 17px;
+  z-index: 0;
+}
+
+.background-art {
+  height: 599px;
+  left: 0px;
+  overflow: hidden;
+  position: absolute;
+  top: -62px;
+  visibility: visible;
+  width: 1064px;
   z-index: 0;
 }

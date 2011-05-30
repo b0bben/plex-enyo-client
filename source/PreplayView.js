@@ -1,8 +1,9 @@
 enyo.kind({
 	name: "plex.PreplayView", 
 	kind: enyo.Toaster, 
-	flyInFrom: "right", 
-	style: "top: 0px; bottom: 0px", 
+	flyInFrom: "right",
+	className: "enyo-bg enyo-toaster enyo-popup-float",
+	style: "top: 0px; bottom: 0px",
 	width: "930px",
 	lazy: false,
 	scrim: false,
@@ -10,6 +11,7 @@ enyo.kind({
 		plexMediaObject: "",
 	},
 	components: [
+	  {name: "backdrop", kind: "Image", className: "background-art"},
 		{className: "enyo-sliding-view-shadow"},
 		{kind: enyo.VFlexBox,	height: "700px",flex: 4, name:"details",components: [
       {kind: enyo.HFlexBox, width: "100%", height: "50%", components: [
@@ -51,7 +53,7 @@ enyo.kind({
 			this.$.desc.setContent(this.plexMediaObject.summary);
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
-			//this.$.details.applyStyle("background:#ffffff url('" + this.plexMediaObject.art + "') no-repeat right top");
+			this.$.backdrop.setSrc(this.plexReq.baseUrl + this.plexMediaObject.art);
 		}
 	},
 	doClose: function() {
