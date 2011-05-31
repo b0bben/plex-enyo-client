@@ -4,7 +4,7 @@ enyo.kind({
 	flyInFrom: "right",
 	className: "enyo-bg enyo-toaster enyo-popup-float",
 	style: "top: 0px; bottom: 0px",
-	width: "930px",
+	width: "945px",
 	lazy: false,
 	scrim: false,
 	published: {
@@ -13,8 +13,8 @@ enyo.kind({
 	components: [
 	  {name: "backdrop", kind: "Image", className: "background-art"},
 		{className: "enyo-sliding-view-shadow"},
-		{kind: enyo.VFlexBox,	height: "700px",flex: 4, name:"details",components: [
-      {kind: enyo.HFlexBox, width: "100%", height: "50%", components: [
+		{kind: enyo.VFlexBox, height: "92%",name:"details",components: [
+      {kind: enyo.HFlexBox, width: "100%", flex: 2, components: [
         {className: "cover", components: [
 				  {name: "thumb", kind: "Image", className: "thumb"},
 				]},
@@ -29,9 +29,9 @@ enyo.kind({
             {name: "rating_5", kind: "Image"},  
           ]},
         ]},
+        {name: "tagline", className: "tagline"},
+        {name: "desc", className: "desc"},
       ]},
-      {name: "tagline", className: "tagline"},
-      {name: "desc", className: "desc"},
 		]},
 		{kind: "Toolbar", components: [
 			{kind: "GrabButton", onclick: "doClose"},
