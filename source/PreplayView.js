@@ -1,12 +1,7 @@
 enyo.kind({
 	name: "plex.PreplayView", 
-	kind: enyo.Toaster, 
-	flyInFrom: "right",
-	className: "enyo-bg enyo-toaster enyo-popup-float",
-	style: "top: 0px; bottom: 0px",
-	width: "945px",
-	lazy: false,
-	scrim: false,
+  kind: enyo.VFlexBox,
+  className: "enyo-fit",
 	published: {
 		plexMediaObject: "",
 	},
@@ -34,8 +29,8 @@ enyo.kind({
       ]},
 		]},
 		{kind: "Toolbar", components: [
-			{kind: "GrabButton", onclick: "doClose"},
-		]}
+	    {kind: "GrabButton"},
+    ]}
 
 	],
 	create: function() {
@@ -44,7 +39,7 @@ enyo.kind({
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
-		if (this.plexMediaObject != null) {
+		if (this.plexMediaObject != undefined) {
 			this.log("preplay with: " + this.plexMediaObject.title);
 			this.$.thumb.setSrc(this.plexReq.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.title);

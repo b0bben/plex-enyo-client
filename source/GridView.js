@@ -15,7 +15,7 @@ enyo.kind({
 				{name: "cells", kind: "HFlexBox",onclick: "cellsClick", style: "background-color: #222;"}
 			]},
 			{kind: "Selection"},
-			{kind: "plex.PreplayView", name: "preplay_view"}
+			
 
 		
 
@@ -127,11 +127,6 @@ enyo.kind({
 		this.$.grid_list.refresh();
 		
 		var pmo = this.getPlexMediaObject(idx);
-		this.$.preplay_view.setPlexMediaObject(pmo);
-		this.$.preplay_view.open();
+		this.owner.showPreplay(pmo);
 	},
-	multiModeChange: function(inSender) {
-		this.$.selection.setMulti(inSender.getState());
-		this.$.grid_list.refresh();
-	}
 });
