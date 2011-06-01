@@ -42,7 +42,7 @@ enyo.kind({
     // color the row if it is
     //if (inIndex == this.selectedRow) {
       this.$.item.addRemoveClass("active", (inIndex == this.selectedRow));
-      //this.addClassName("active");
+      //this.$.item.applyStyle('background', 'url(images/list-highlight.png) no-repeat');
 		//}
 		
 		var pmo = this.getParentMediaContainer();

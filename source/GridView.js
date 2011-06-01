@@ -9,14 +9,14 @@ enyo.kind({
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
 		{kind: "PageHeader", name: "grid_header", style: '-webkit-box-align: center !important',pack: 'center',content: "bob", className: "enyo-header-dark"},
-		{kind: "Scroller",flex: 2,components: [
-			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow",height: "1000px",components: [
+
+			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
 
 				{name: "cells", kind: "HFlexBox",onclick: "cellsClick", style: "background-color: #222;"}
 			]},
 			{kind: "Selection"},
 			{kind: "plex.PreplayView", name: "preplay_view"}
-		]},
+
 		
 
 	],
@@ -29,10 +29,12 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
+		this.buildCells();
+		this.$.grid_list.refresh();
 	},
 	resizeHandler: function() {
-		//this.buildCells();
-		//this.$.grid_list.refresh();
+		this.buildCells();
+		this.$.grid_list.refresh();
 	},
 	loadData: function(inSender) {
 		this.count = 100;
@@ -45,15 +47,47 @@ enyo.kind({
 	},
 	gotMediaContainer: function(pmc) {
 		this.mediaContainer = pmc;
-		this.count = this.mediaContainer.Video.length;
+    
+    switch (this.getMediaType()) {
+      case "movie":
+        this.count = this.mediaContainer.Video.length;
+        break;
+      case "artist":
+      case "show":
+        this.count = this.mediaContainer.Directory.length;
+        break;
+      default:
+        this.count = 0;
+        break;
+    }
+      
+		
 		this.buildCells();
-		this.$.grid_list.render();
+		//this.$.grid_list.render();
 		this.$.grid_list.refresh();
 		
 	},
+	getMediaType: function() {
+	  if (this.mediaContainer.Video != null) {
+	    return this.mediaContainer.Video[0].type;
+	  }
+	  else if (this.mediaContainer.Directory != null) {
+	    return this.mediaContainer.Directory[0].type;
+	  }
+	  else
+	    return "unknown";
+	},
+	getPlexMediaObject: function(index) {
+	  if (this.mediaContainer.Video != null) {
+	    return this.mediaContainer.Video[index];
+	  }
+	  else if (this.mediaContainer.Directory != null) {
+	    return this.mediaContainer.Directory[index];
+	  }
+	},
 	buildCells: function() {
 		var bounds = this.$.grid_list.getBounds();
-		this.cellCount = Math.floor(bounds.width / 156);
+		this.cellCount = Math.floor(bounds.width / 175);
 		this.log(this.cellCount);
 		this.$.cells.destroyControls();
 		this.cells = [];
@@ -70,10 +104,10 @@ enyo.kind({
 		if (idx >= 0 && idx < this.count) {
 			for (var i=0, c; c=this.cells[i]; i++, idx++) {
 				if (idx < this.count) {
-					var pmo = this.mediaContainer.Video[idx];
-					//this.log("idx: " + idx);
-					//this.log("i: " + inSender);
-					var path = this.plexReq.baseUrl + pmo.thumb;//"images/BlankPoster.png";
+				  var pmo = this.getPlexMediaObject(idx);
+					this.log("idx: " + idx);
+
+					var path = this.plexReq.baseUrl + pmo.thumb;
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
 				} else {
@@ -92,7 +126,7 @@ enyo.kind({
 		this.$.selection.select(idx);
 		this.$.grid_list.refresh();
 		
-		var pmo = this.mediaContainer.Video[idx];
+		var pmo = this.getPlexMediaObject(idx);
 		this.$.preplay_view.setPlexMediaObject(pmo);
 		this.$.preplay_view.open();
 	},
