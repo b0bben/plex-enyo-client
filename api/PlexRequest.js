@@ -50,4 +50,7 @@ enyo.kind({
 		this.dataForUrl(url);
 		
 	},
+	getFullUrlForPlexUrl: function(url) {
+	  return this.baseUrl + url;
+	}
 });

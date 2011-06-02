@@ -17,10 +17,10 @@ enyo.kind({
 					{name: "left_pane", width: "320px", fixedWidth: true, components: [
 						
 					]},
-					{name: "middle_pane", width: "100%", flex: 1,components: [
+					{name: "middle_pane", width: "100%", fixedWidth: true,components: [
 					  {kind: "plex.GridView", name: "grid_view"}
 					]},
-					{name: "right_pane", dismissible: true, onResize: "slidingResize", components: [
+					{name: "right_pane", dismissible: true, components: [
   					//{kind: "plex.PreplayView", name: "preplay_view"}
 					]}
 				]}		
@@ -44,16 +44,38 @@ enyo.kind({
 	showGridView: function(index) {
 		this.selectedSection = this.rootMediaContainer.Directory[index];
     this.$.grid_view.setParentMediaContainer(this.selectedSection);
-    this.$.middle_pane.render();
+    //this.$.middle_pane.render();
     //this.$.slidingPane.selectViewByName("middle_pane");
 	},
 	viewSelected: function(inSender, inView, inPreviousView) {
 	    //inView.setParentMediaContainer(this.selectedSection);
 	    //inView.render();
 	},
+	showViewForMediaObject: function(pmo) {
+	  switch(pmo.type) {
+	    case "artist":
+	      this.log("artist chosen");
+	      this.showArtist(pmo);
+	      break;
+	    case "movie":
+	      this.showPreplay(pmo);
+	      break;
+	    case "show":
+	      this.log("show chosen");
+	      break;
+	  }
+	},
+	showArtist: function(pmo) {
+	  this.$.right_pane.destroyControls();
+	  this.$.right_pane.createComponents([{kind: "plex.ArtistView", owner: this, plexMediaObject: pmo}]);
+	  this.$.right_pane.render();
+
+	  this.$.right_pane.setShowing(true);
+	  this.$.slidingPane.selectViewByName("right_pane");
+	},
 	showPreplay: function(pmo) {
 	  this.$.right_pane.destroyControls();
-	  this.$.right_pane.createComponents([{kind: "plex.PreplayView", name: "preplay_view", owner: this, plexMediaObject: pmo}]);
+	  this.$.right_pane.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject: pmo}]);
 	  this.$.right_pane.render();
 
 	  this.$.right_pane.setShowing(true);

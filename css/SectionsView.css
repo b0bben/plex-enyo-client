@@ -21,14 +21,7 @@
 
 .enyo-item.active {
     /*background:url(../images/bg_navigation_item_active.png) no-repeat 0 0;*/
-     color: white;
-	background-image: -webkit-gradient(
-	    linear,
-	    left bottom,
-	    left top,
-	    color-stop(0.80, rgb(51,111,167)),
-	    color-stop(1, rgb(12,37,46))
-	);
+   background: url(../images/list-highlight.png) no-repeat;
 }
 #mainView_view_sections_header_client {
 	padding: 5px 5px 5px 5px;

@@ -15,10 +15,6 @@ enyo.kind({
 				{name: "cells", kind: "HFlexBox",onclick: "cellsClick", style: "background-color: #222;"}
 			]},
 			{kind: "Selection"},
-			
-
-		
-
 	],
 	create: function() {
 		this.count = 0;
@@ -26,6 +22,7 @@ enyo.kind({
 		this.plexReq = new PlexRequest();
 		this.inherited(arguments);
 		this.parentMediaContainerChanged();
+		this.$.grid_list.refresh();
 	},
 	rendered: function() {
 		this.inherited(arguments);
@@ -97,6 +94,7 @@ enyo.kind({
 			c.createComponent({kind: "Item", name: "cover_label", className: "cover-label"});
 			this.cells.push(c);
 		}
+		this.$.grid_list.refresh();
 	},
 	listSetupRow: function(inSender, inIndex) {
 		var idx = inIndex * this.cellCount;
@@ -127,6 +125,6 @@ enyo.kind({
 		this.$.grid_list.refresh();
 		
 		var pmo = this.getPlexMediaObject(idx);
-		this.owner.showPreplay(pmo);
+		this.owner.showViewForMediaObject(pmo);
 	},
 });

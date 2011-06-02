@@ -5,6 +5,6 @@
 	"type": "web",
 	"main": "index.html",
 	"title": "Plex client",
-	"icon": "icon.png",
+	"icon": "PlexMobile_512x512.png",
 	"uiRevision": 2
 }
