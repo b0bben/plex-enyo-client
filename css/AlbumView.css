@@ -1,0 +1,35 @@
+.album-view {
+}
+.album-title-container {
+background-color: black;
+-webkit-box-shadow: #222 0px 0px 5px;
+border-bottom-left-radius: 7px 7px;
+border-bottom-right-radius: 7px 7px;
+border-top-left-radius: 7px 7px;
+border-top-right-radius: 7px 7px;
+display: block;
+height: 35px;
+color: #aaa;
+top: 0px;
+left: 0px;
+width: 100%;
+
+}
+
+.album-title-container .album-title {
+  font: normal normal normal 18px/normal Arial, sans-serif;
+  height: 35px; 
+  line-height: 35px; 
+  padding-left: 20px;
+}
+
+.album-cover {
+  -webkit-box-shadow: black 0px 0px 40px;
+  border-bottom-left-radius: 7px 7px;
+  border-bottom-right-radius: 7px 7px;
+  border-top-left-radius: 7px 7px;
+  border-top-right-radius: 7px 7px;
+  margin: 10px;
+  width: 120px;
+  height: 150px;
+}

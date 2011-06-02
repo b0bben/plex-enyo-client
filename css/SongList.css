@@ -1,0 +1,9 @@
+.track-list {
+  width: 100%;
+  height: auto;
+}
+
+.song {
+  height: 30px;
+  width: 100%;
+}
