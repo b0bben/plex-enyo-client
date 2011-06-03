@@ -4,7 +4,7 @@ enyo.kind({
   flyInFrom: "right",
   className: "enyo-bg enyo-toaster enyo-popup-float",
   style: "top: 0px; bottom: 0px",
-  width: "945px",
+  width: "800px",
   lazy: false,
   scrim: false,
   components: [

@@ -72,5 +72,7 @@ enyo.kind({
 		}
 		this.$.albumList.render();
 	},
-	
+	childContentRendered: function() {
+	  this.$.scroller.render(); //re-render the scroller since child content has changed
+	},
 })

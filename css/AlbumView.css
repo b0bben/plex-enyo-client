@@ -30,3 +30,8 @@ width: 100%;
   width: 120px;
   height: 150px;
 }
+
+.song {
+  border-top: none;
+  color: #666;
+}

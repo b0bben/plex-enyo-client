@@ -10,15 +10,16 @@ enyo.kind({
 	  ]},
 	  {name: "trackContainer", kind: enyo.HFlexBox, components: [
       {name: "cover", kind: enyo.Image, className: "album-cover"},
-      {content: "testing testing"},
-      {name: "trackList", kind: "VirtualList", flex: 1, onSetupRow: "setupRowItems", components: [ 
-        {name:"itemSong", kind: "Item", layoutKind:"HFlexLayout", className:'song', onmousehold: "itemMousehold", onmouserelease: "itemMouserelease", onclick: "onclick_song", ondragstart: "itemDragStart", ondragfinish: "itemDragFinish", ondrag: "onDrag_itemMedia", ondrop: "onDrop_itemMedia", components: [
-      	  {name: "songNumber", content: '1'},
-      	  {name: "songTitle", flex: 2, content: "The way of the fist"}, 
-      	  {name: "songDuration", flex: 1, content: "3:45"}
+      {kind: enyo.VFlexBox, flex: 1,style: "min-height:100%", components: [  
+        {name: "trackList", kind: "VirtualRepeater", flex: 1, onSetupRow: "setupRowItems", components: [ 
+          {name:"itemSong", kind: "Item", layoutKind:"HFlexLayout", className:'song', onmousehold: "itemMousehold", onmouserelease: "itemMouserelease", onclick: "onclick_song", ondragstart: "itemDragStart", ondragfinish: "itemDragFinish", ondrag: "onDrag_itemMedia", ondrop: "onDrop_itemMedia", components: [
+        	  {name: "songNumber", content: '1'},
+        	  {name: "songTitle", flex: 2, content: "The way of the fist"}, 
+        	  {name: "songDuration", flex: 1, content: "3:45"}
+        	]},
       	]},
       ]},
-      
+      {kind: "Sound"},
 	  ]}
 	],
 	create: function() {
@@ -49,8 +50,8 @@ enyo.kind({
 		    else
 		      this.tracks[0] = pmc.Track;
 	
-	      //this.$.trackList.render();
-		    this.$.trackList.refresh();
+	      this.$.trackList.render();
+		    //this.$.trackList.refresh();
 		  }
 		},
 		onclick_song: function(inSender, inEvent) {
