@@ -83,7 +83,9 @@ enyo.kind({
 							var secs = Math.floor(track.duration / 1000);
 							var mins = Math.floor(secs / 60);
 							secs = secs % 60;
-							
+							if (secs <= 9)
+							  secs = "0" + secs; //formating minutes to :00 format
+							  
 							this.$.songNumber.content = track.index;
 							this.$.songNumber.setStyle("width: " + (this.tracks.length+'').length * 0.8 + "em");
 							this.$.songTitle.content = track.title;
