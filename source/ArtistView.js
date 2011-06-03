@@ -1,13 +1,14 @@
 enyo.kind({
 	name: "plex.ArtistView", 
   kind: enyo.Control,
+  className: "enyo-fit",
 	published: {
 		plexMediaObject: undefined,
 	},
 	components: [
-      {kind: "Scroller", flex: 1, style: "min-height: 100%;height:500px", autoHorizontal: false, horizontal: false, components: [ 
+      {kind: "Scroller", flex: 1, style: "min-height: 100%;", autoHorizontal: false, horizontal: false, components: [ 
       {kind: enyo.VFlexBox, components: [      
-        {kind: enyo.HFlexBox, flex: 2, components: [
+        {kind: enyo.HFlexBox, components: [
           {className: "artist-cover", components: [
   				  {name: "thumb", kind: "Image", className: "artist-thumb"},
   				]},
