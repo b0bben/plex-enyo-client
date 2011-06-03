@@ -1,35 +1,37 @@
 enyo.kind({
 	name: "plex.ArtistView", 
-  kind: enyo.VFlexBox,
-  className: "enyo-fit",
+  kind: enyo.Control,
 	published: {
-		plexMediaObject: "",
+		plexMediaObject: undefined,
 	},
 	components: [
-		{kind: enyo.Scroller, flex: 1,components: [
-      {kind: enyo.HFlexBox, width: "100%", flex: 2, components: [
-        {className: "artist-cover", components: [
-				  {name: "thumb", kind: "Image", className: "artist-thumb"},
-				]},
-        {kind: enyo.HFlexBox, className: "artist-title_holder", components: [
-          {name: "title", className: "artist-title"},
+      {kind: "Scroller", flex: 1, style: "min-height: 100%;height:500px", autoHorizontal: false, horizontal: false, components: [ 
+      {kind: enyo.VFlexBox, components: [      
+        {kind: enyo.HFlexBox, flex: 2, components: [
+          {className: "artist-cover", components: [
+  				  {name: "thumb", kind: "Image", className: "artist-thumb"},
+  				]},
+  				{kind: enyo.VFlexBox, components: [
+  				  {kind: enyo.HFlexBox, className: "artist-title_holder", components: [
+  				    {name: "title", className: "artist-title"},
+  				  ]},
+   				  {name: "desc", className: "artist-desc"},
+  				]},
         ]},
-        {name: "desc", className: "artist-desc"},
+        
+        {name: "albumList", kind: "VirtualRepeater", flex: 1, onSetupRow: "getItem", components: [
+          {kind: "Item", layoutKind: "VFlexLayout", className: "item", components: [
+            {name: "cells", kind: enyo.VFlexBox}
+          ]},
+        ]},
       ]},
-      {name: "albumList", kind: "VirtualList", className: "album-list", onSetupRow: "getItem", components: [
-        {name: "cells", kind: "VFlexBox"}
-      ]},
-		]},
-		{kind: "Toolbar", components: [
-	    {kind: "GrabButton"},
     ]}
-
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.albums = [];
 		this.plexReq = new PlexRequest();
 		this.plexMediaObjectChanged();
-		this.albums = [];
 	},
 	plexMediaObjectChanged: function() {
 		if (this.plexMediaObject != undefined) {
@@ -42,14 +44,10 @@ enyo.kind({
 		}
 	},
 	getItem: function(inSender, inIndex) {
-	    if (this.albums.length > 0 && inIndex < this.albums.length) {
-          var album = this.albums[inIndex];
-          if (album != undefined && album.type == "album") {
-            this.$.albumView.setPlexMediaObject(album);
-            return true;
-          }
-	        
-	    }
+    if (inIndex < this.albums.length) {
+    	this.$.albumView.setPlexMediaObject(this.albums[inIndex]);
+    	return true;
+    }
 	},
 	gotAlbums: function(pmc) {
 	  if (pmc.Directory != undefined || pmc.Directory.length > 0) {
@@ -67,10 +65,11 @@ enyo.kind({
 		this.$.cells.destroyControls();
 		this.cells = [];
 		for (var i=0; i<this.albums.length; i++) {
-			var c = this.$.cells.createComponent({kind: "plex.AlbumView", plexMediaObject: this.albums[i], owner:this});
+			var c = this.$.cells.createComponent({kind: "plex.AlbumView", owner:this});
 			this.cells.push(c);
+			this.log("built album: " + this.albums[i].title);
 		}
-		this.$.albumList.refresh();
+		this.$.albumList.render();
 	},
 	
 })

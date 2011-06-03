@@ -15,6 +15,7 @@ enyo.kind({
 				{name: "cells", kind: "HFlexBox",onclick: "cellsClick", style: "background-color: #222;"}
 			]},
 			{kind: "Selection"},
+			{kind: "plex.EmptyToaster", name: "emptyToaster"}
 	],
 	create: function() {
 		this.count = 0;
@@ -125,6 +126,35 @@ enyo.kind({
 		this.$.grid_list.refresh();
 		
 		var pmo = this.getPlexMediaObject(idx);
-		this.owner.showViewForMediaObject(pmo);
+		this.showViewForMediaObject(pmo);
 	},
+	showViewForMediaObject: function(pmo) {
+		  switch(pmo.type) {
+		    case "artist":
+		      this.log("artist chosen");
+		      this.showArtist(pmo);
+		      break;
+		    case "movie":
+		      this.showPreplay(pmo);
+		      break;
+		    case "show":
+		      this.log("show chosen");
+		      break;
+		  }
+		},
+		showArtist: function(pmo) {
+  		this.$.emptyToaster.$.client.destroyControls();
+		  this.$.emptyToaster.$.client.createComponents([{kind: "plex.ArtistView", owner: this, plexMediaObject:pmo}]);
+		  this.$.emptyToaster.open();
+		},
+		showPreplay: function(pmo) {
+		  this.$.right_pane.destroyControls();
+		  this.$.right_pane.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject: pmo}]);
+		  this.$.right_pane.render();
+	
+		  this.$.right_pane.setShowing(true);
+		  this.$.slidingPane.selectViewByName("right_pane");
+	
+	
+		},
 });

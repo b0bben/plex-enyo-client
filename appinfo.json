@@ -1,10 +1,11 @@
 {
 	"id": "com.plexapp.webos-client",
 	"version": "0.1.0",
-	"vendor": "plex",
+	"vendor": "Plex Inc.",
 	"type": "web",
 	"main": "index.html",
 	"title": "Plex client",
-	"icon": "PlexMobile_512x512.png",
+	"icon": "icon.png",
+	"splashicon": "PlexMobile_512x512.png",
 	"uiRevision": 2
 }

@@ -1,5 +1,4 @@
-.album-view {
-}
+
 .album-title-container {
 background-color: black;
 -webkit-box-shadow: #222 0px 0px 5px;
@@ -10,8 +9,6 @@ border-top-right-radius: 7px 7px;
 display: block;
 height: 35px;
 color: #aaa;
-top: 0px;
-left: 0px;
 width: 100%;
 
 }

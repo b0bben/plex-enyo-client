@@ -10,6 +10,7 @@ enyo.depends(
 	"source/ButtonMenu.js",
 	"source/WelcomeView.js",
 	"source/PreplayView.js",
+	"source/EmptyToaster.js",
 	//plex api
 	"api/PlexRequest.js",
 	"api/base64.js",
