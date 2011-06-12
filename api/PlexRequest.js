@@ -24,7 +24,12 @@ enyo.kind({
 		this.log("X-Plex-Access-Time=" + time);
 		this.log("X-Plex-Access-Code=" + url);
 		
+		/* Remote server login stuff
 		
+		  X-Plex-User: name
+		  X-Plex-Pass: SHA1(name + SHA1(pass))
+		
+		*/
 		
 	},
 	dataForUrl: function(plexUrl) {

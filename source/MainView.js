@@ -11,7 +11,16 @@ enyo.kind({
  			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", onSelectView: "viewSelected", components: [
           {kind: "plex.GridView", name: "grid_view"}
 			]}
-		]}		
+		]},
+		
+		//{name: "PlayerControl", kind: 'kindPlayerControl', onClickNext: "onClickNext", onClickPrev: "onClickPrev" , onClickPlayPause: "onClickPlayPause", onSetPlaybackTime:"onSetPlaybackTime", onShuffleClick: "onShuffleClick_PlayModeControls", onRepeatClick: "onRepeatClick_PlayModeControls", onSetVolume: "onSetPlaybackVolume" , onRequestVolume: "onRequestSysVolume", onClickFullScreen: "onClick_FullScreen"},
+		
+		{kind: "AppMenu",
+		    components: [
+		        {caption: "Preferences", onclick: "showPreferences"},
+		    ]
+		}
+								
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -35,5 +44,25 @@ enyo.kind({
 	},
 	viewSelected: function(inSender, inView, inPreviousView) {
 	    inView.setParentMediaContainer(this.selectedSection);
+	},
+	showPreferences: function() {
+		this.$.left_pane.createComponents([{kind: "plex.Preferences", name: "preferences"}]);
+		this.$.left_pane.selectViewByName("preferences");
+	},
+	preferencesReceived: function(inSender, inDefaultUrl) {
+	    this.$.search.setFeedUrl(inDefaultUrl);
+	},
+	preferencesSaved: function(inSender, inFeedUrl) {
+	    this.$.search.setFeedUrl(inFeedUrl);
+	    this.$.left_pane.back();
+	},
+	preferencesCanceled: function(inSender) {
+	    this.$.left_pane.back();
+	},
+	openAppMenuHandler: function() {
+	    this.$.appMenu.open();
+	},
+	closeAppMenuHandler: function() {
+	    this.$.appMenu.close();
 	},
 });

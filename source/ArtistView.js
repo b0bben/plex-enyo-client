@@ -1,11 +1,12 @@
 enyo.kind({
 	name: "plex.ArtistView", 
   kind: enyo.Control,
-  className: "enyo-fit",
+  className: "enyo-fit enyo-bg",
 	published: {
 		plexMediaObject: undefined,
 	},
 	components: [
+		  
       {kind: "Scroller", flex: 1, style: "min-height: 100%;", autoHorizontal: false, horizontal: false, components: [ 
       {kind: enyo.VFlexBox, components: [      
         {kind: enyo.HFlexBox, components: [
@@ -19,12 +20,7 @@ enyo.kind({
    				  {name: "desc", className: "artist-desc"},
   				]},
         ]},
-        
-        {name: "albumList", kind: "VirtualRepeater", flex: 1, onSetupRow: "getItem", components: [
-          {kind: "Item", layoutKind: "VFlexLayout", className: "item", components: [
-            {name: "cells", kind: enyo.VFlexBox}
-          ]},
-        ]},
+			{name: "cells", kind: enyo.VFlexBox, style: "min-height: 100%; height: 100%"},
       ]},
     ]}
 	],
@@ -40,39 +36,42 @@ enyo.kind({
 			this.$.thumb.setSrc(this.plexReq.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.title);
 			this.$.desc.setContent(this.plexMediaObject.summary);
+  		
+  		//get them albums now
 			this.plexReq = new PlexRequest(enyo.bind(this,"gotAlbums"));
 			this.plexReq.dataForUrl(this.plexMediaObject.key);
 		}
 	},
-	getItem: function(inSender, inIndex) {
-    if (inIndex < this.albums.length) {
-    	this.$.albumView.setPlexMediaObject(this.albums[inIndex]);
-    	return true;
-    }
-	},
 	gotAlbums: function(pmc) {
+		//reset the album list
+		this.$.cells.destroyComponents();
+		
 	  if (pmc.Directory != undefined || pmc.Directory.length > 0) {
 	  
 	    if (enyo.isArray(pmc.Directory))
 	      this.albums = pmc.Directory;
       else
         this.albums[0] = pmc.Directory;
-        
-	    this.buildAlbums();
-	    
+      
+      for (var i=0; i < this.albums.length; i++){
+      	var album = this.albums[i];
+      	this.plexReq = new PlexRequest(enyo.bind(this,"gotSongs"));
+      	this.plexReq.dataForUrl(album.key);
+      	this.log("requested songlist for: " + album.title);
+      }
+
+	    this.render();
 	  }
 	},
-	buildAlbums: function() {
-		this.$.cells.destroyControls();
-		this.cells = [];
-		for (var i=0; i<this.albums.length; i++) {
-			var c = this.$.cells.createComponent({kind: "plex.AlbumView", owner:this});
-			this.cells.push(c);
-			this.log("built album: " + this.albums[i].title);
+	buildAlbum: function(pmo) {
+		if (pmo !== undefined && pmo.viewGroup == "track" && !pmo.mixedParents){
+			var c = this.$.cells.createComponent({kind: "plex.AlbumView", plexMediaObject: pmo});
+			this.log("built album: " + pmo.parentTitle);
 		}
-		this.$.albumList.render();
+		
 	},
-	childContentRendered: function() {
-	  this.$.scroller.render(); //re-render the scroller since child content has changed
+	gotSongs: function(pmo) {
+			this.buildAlbum(pmo);
+			this.$.cells.render();
 	},
 })

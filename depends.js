@@ -3,14 +3,15 @@ enyo.depends(
 	"source/MainView.js",
 	"source/GridView.js",
 	"source/SectionsView.js",
-  "source/ArtistView.js",
-  "source/AlbumView.js",
-  "source/SongList.js",
+	"source/ArtistView.js",
+	"source/AlbumView.js",
+	"source/SongList.js",
 	"source/CanonPeekItem.js",
 	"source/ButtonMenu.js",
 	"source/WelcomeView.js",
 	"source/PreplayView.js",
 	"source/EmptyToaster.js",
+	"source/Preferences.js",
 	//plex api
 	"api/PlexRequest.js",
 	"api/base64.js",
@@ -22,6 +23,7 @@ enyo.depends(
 	"css/ArtistView.css",
 	"css/AlbumView.css",
 	"css/SongList.css",
+	"css/EmptyToaster.css",
 	//external modules
 	"external/jkl-parsexml.js"
 );

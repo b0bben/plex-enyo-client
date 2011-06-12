@@ -39,7 +39,7 @@ enyo.kind({
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
-		if (this.plexMediaObject != undefined) {
+		if (this.plexMediaObject !== undefined) {
 			this.log("preplay with: " + this.plexMediaObject.title);
 			this.$.thumb.setSrc(this.plexReq.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.title);
@@ -49,6 +49,7 @@ enyo.kind({
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
 			this.$.backdrop.setSrc(this.plexReq.baseUrl + this.plexMediaObject.art);
+			this.render();
 		}
 	},
 	doClose: function() {

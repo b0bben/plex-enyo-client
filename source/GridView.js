@@ -2,9 +2,8 @@ enyo.kind({
 	name: "plex.GridView",
 	kind: enyo.VFlexBox,
 	className: "enyo-fit",
-	style: "background-color: #222;",
 	published: {
-		parentMediaContainer: "",
+		parentMediaContainer: undefined,
 	},
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
@@ -12,7 +11,7 @@ enyo.kind({
 
 			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
 
-				{name: "cells", kind: "HFlexBox",onclick: "cellsClick", style: "background-color: #222;"}
+				{name: "cells", kind: "HFlexBox",onclick: "cellsClick"}
 			]},
 			{kind: "Selection"},
 			{kind: "plex.EmptyToaster", name: "emptyToaster"}
@@ -39,9 +38,11 @@ enyo.kind({
 		this.$.grid_list.refresh();
 	},
 	parentMediaContainerChanged: function() {
+	  if (this.parentMediaContainer !== undefined) {
 	    this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
 	    this.plexReq.getSectionForKey(this.parentMediaContainer.key);
 	    this.$.grid_header.setContent(this.parentMediaContainer.title);
+	  }
 	},
 	gotMediaContainer: function(pmc) {
 		this.mediaContainer = pmc;
@@ -148,13 +149,8 @@ enyo.kind({
 		  this.$.emptyToaster.open();
 		},
 		showPreplay: function(pmo) {
-		  this.$.right_pane.destroyControls();
-		  this.$.right_pane.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject: pmo}]);
-		  this.$.right_pane.render();
-	
-		  this.$.right_pane.setShowing(true);
-		  this.$.slidingPane.selectViewByName("right_pane");
-	
-	
+      this.$.emptyToaster.$.client.destroyControls();
+      this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo}]);
+      this.$.emptyToaster.open();
 		},
 });

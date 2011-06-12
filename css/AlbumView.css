@@ -10,6 +10,7 @@ display: block;
 height: 35px;
 color: #aaa;
 width: 100%;
+margin: 10px;
 
 }
 
@@ -28,10 +29,17 @@ width: 100%;
   border-top-right-radius: 7px 7px;
   margin: 10px;
   width: 120px;
-  height: 150px;
+  height: 120px;
 }
 
 .song {
   border-top: none;
   color: #666;
+  min-height: 100%;
+  height: 100%;
+}
+.song .song-title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }

@@ -1,4 +1,8 @@
-/* Copyright 2009-2011 Hewlett-Packard Development Company, L.P. All rights reserved. */
+.section-list {
+	background-color: #222;
+	color: white;
+}
+
 .enyo-canonview-header {
 	padding: 10px;
 	background: #ccc;
@@ -14,10 +18,6 @@
 	margin: 10px;
 }
 
-.section-list {
-	background-color: #222;
-	color: gray;
-}
 
 .enyo-item.active {
     /*background:url(../images/bg_navigation_item_active.png) no-repeat 0 0;*/

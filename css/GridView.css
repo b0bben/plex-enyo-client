@@ -1,4 +1,7 @@
-/* Copyright 2009-2011 Hewlett-Packard Development Company, L.P. All rights reserved. */
+.enyo-bg{
+  background-color: #222;
+  /*width: 930px;*/
+}
 .list {
 	background-color: #222;
 }

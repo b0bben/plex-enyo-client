@@ -10,13 +10,17 @@ enyo.kind({
   components: [
   	{name: "shadow", className: "enyo-sliding-view-shadow"},
   	{kind: "VFlexBox", height: "100%", components: [
-  		{name: "client", flex: 1, layoutKind: "VFlexLayout"},
+  		{name: "client", flex: 1, layoutKind: "VFlexLayout", style: "width: 100%"},
   		{kind: "Toolbar", align: "center", components: [
-  			{name: "dragHandle", kind: "GrabButton", onclick: "close"}
+  			{name: "dragHandle", kind: "GrabButton", onclick: "closeMyself"}
   		]}
   	]}
   ],
   create: function() {
  		this.inherited(arguments);
+  },
+  closeMyself: function() {
+    this.log("closing toaster");
+    this.close();
   }
 })

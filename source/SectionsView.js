@@ -20,7 +20,9 @@ enyo.kind({
         }
             ]},
 		{kind: "Selection"},		
-		{kind: "Toolbar"}
+		{kind: "Toolbar", components: [
+		  {kind: "Button", caption: "Show App Menu", onclick: "openAppMenu"},
+		]}
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -63,5 +65,8 @@ enyo.kind({
     mainView.showGridView(inEvent.rowIndex);
     
    this.$.c_section_list.refresh();
+  },
+  openAppMenu: function() {
+      this.owner.$.appMenu.open();
   },
  });
