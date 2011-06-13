@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "plex.MainView",
-	kind: enyo.HFlexBox,
+	kind: enyo.Pane,
 	components: [
 		{kind:enyo.VFlexBox, width:'320px', style:"border-right: 2px solid;", components: [
 			{flex: 1, name: "left_pane", kind: "Pane", components: [
@@ -19,12 +19,13 @@ enyo.kind({
 		    components: [
 		        {caption: "Preferences", onclick: "showPreferences"},
 		    ]
-		}
-								
+		},
+		{name:"prefsView", kind:"plex.PreferencesView", lazy: true, showing: false, onClose:"closeView"},
+		{name: "serverForm", kind: "plex.ServerFormView", onCredentials_Cancel: "backHandler", lazy: true, showing: false},						
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.$.right_pane.selectViewByName("welcome_view");
+		//this.$.right_pane.selectViewByName("welcome_view");
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
 		var plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
@@ -46,13 +47,12 @@ enyo.kind({
 	    inView.setParentMediaContainer(this.selectedSection);
 	},
 	showPreferences: function() {
-		this.$.left_pane.createComponents([{kind: "plex.Preferences", name: "preferences"}]);
-		this.$.left_pane.selectViewByName("preferences");
+		this.selectViewByName("prefsView");
 	},
 	preferencesReceived: function(inSender, inDefaultUrl) {
 	    this.$.search.setFeedUrl(inDefaultUrl);
 	},
-	preferencesSaved: function(inSender, inFeedUrl) {
+	serverFormSaved: function(inSender, inFeedUrl) {
 	    this.$.search.setFeedUrl(inFeedUrl);
 	    this.$.left_pane.back();
 	},
@@ -64,5 +64,8 @@ enyo.kind({
 	},
 	closeAppMenuHandler: function() {
 	    this.$.appMenu.close();
+	},
+	closeView: function(inView) {
+		inView.close();
 	},
 });

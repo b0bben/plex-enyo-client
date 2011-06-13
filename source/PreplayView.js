@@ -28,10 +28,6 @@ enyo.kind({
         {name: "desc", className: "desc"},
       ]},
 		]},
-		{kind: "Toolbar", components: [
-	    {kind: "GrabButton"},
-    ]}
-
 	],
 	create: function() {
 		this.inherited(arguments);

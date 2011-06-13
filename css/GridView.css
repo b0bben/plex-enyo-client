@@ -10,8 +10,7 @@
 	font: normal normal bold 11px/normal Arial, sans-serif; 
 	text-overflow: ellipsis; 
 	white-space: nowrap; 
-	overflow-x: hidden; 
-	overflow-y: hidden; 
+	overflow: hidden; 
 	word-wrap: normal; 
 	width: 125px; 
 	height: 14px;
@@ -20,6 +19,7 @@
 	background-origin: padding-box;
 	color: white;
 	border: none;
+	text-align: center;
 }
 
 .cover-image {
