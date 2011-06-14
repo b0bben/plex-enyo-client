@@ -4,6 +4,7 @@ enyo.kind({
   className: "enyo-fit enyo-bg",
 	published: {
 		plexMediaObject: undefined,
+		server: undefined,
 	},
 	components: [
 		  
@@ -27,19 +28,19 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.albums = [];
-		this.plexReq = new PlexRequest();
+		this.plexReq = "";
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
 		if (this.plexMediaObject != undefined) {
 			this.log("artist with: " + this.plexMediaObject.title);
-			this.$.thumb.setSrc(this.plexReq.baseUrl + this.plexMediaObject.thumb);
+			this.$.thumb.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.title);
 			this.$.desc.setContent(this.plexMediaObject.summary);
   		
   		//get them albums now
 			this.plexReq = new PlexRequest(enyo.bind(this,"gotAlbums"));
-			this.plexReq.dataForUrl(this.plexMediaObject.key);
+			this.plexReq.dataForUrlAsync(this.server,this.plexMediaObject.key);
 		}
 	},
 	gotAlbums: function(pmc) {
@@ -56,7 +57,7 @@ enyo.kind({
       for (var i=0; i < this.albums.length; i++){
       	var album = this.albums[i];
       	this.plexReq = new PlexRequest(enyo.bind(this,"gotSongs"));
-      	this.plexReq.dataForUrl(album.key);
+      	this.plexReq.dataForUrlAsync(this.server,album.key);
       	this.log("requested songlist for: " + album.title);
       }
 
@@ -65,7 +66,7 @@ enyo.kind({
 	},
 	buildAlbum: function(pmo) {
 		if (pmo !== undefined && pmo.viewGroup == "track" && !pmo.mixedParents){
-			var c = this.$.cells.createComponent({kind: "plex.AlbumView", plexMediaObject: pmo});
+			var c = this.$.cells.createComponent({kind: "plex.AlbumView", plexMediaObject: pmo, server: this.server});
 			this.log("built album: " + pmo.parentTitle);
 		}
 		

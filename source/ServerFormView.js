@@ -7,6 +7,9 @@ enyo.kind({
       onSave: "",
       onCancel: ""
 	},
+	published: {
+		server: undefined,
+	},
 	components: [
 		{kind:"Toolbar", className:"enyo-toolbar-light", pack:"center", components: [
 			{kind: "Image", name:"titleIcon"},
@@ -25,10 +28,14 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.serverChanged();
 	},
 	saveForm: function(inSender, inServerDetails) {
 		this.doSave(inServerDetails);
 	},
+	serverChanged: function() {
+		this.$.form.setServer(this.server);
+	}
 });
 
 enyo.kind({
@@ -38,6 +45,9 @@ enyo.kind({
       onReceive: "",
       onSave: "",
       onCancel: ""
+	},
+	published: {
+		server: undefined,
 	},
 	components: [
 		{name: "nameTitle", caption:$L("Server nickname"), kind: "RowGroup", components: [
@@ -56,13 +66,29 @@ enyo.kind({
 			{name: "errorImage", kind: "Image", src: "images/header-warning-icon.png"},
 			{name: "errorMessage", className: "enyo-text-error", flex:1}
 		]},
-		{name:"signInButton", kind: "ActivityButton", caption: $L("Add server"),className:"enyo-button-affirmative accounts-btn", onclick: "addServerTapped"},
-		{name:"removeAccountButton", kind: "ActivityButton", caption: $L("Remove this server") ,className:"enyo-button-negative accounts-btn", onAccountsRemove_Removing: "removingAccount", onAccountsRemove_Done: "doCredentials_Cancel"},
+		{name:"addServerButton", kind: "ActivityButton", caption: $L("Add server"),className:"enyo-button-affirmative accounts-btn", onclick: "addServerTapped"},
+		{name:"removeServerButton", kind: "ActivityButton", caption: $L("Remove this server"), active: false, disabled: true, className:"enyo-button-negative accounts-btn", onAccountsRemove_Removing: "removingAccount", onAccountsRemove_Done: "doCredentials_Cancel"},
 			
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.serverDetails = "";
+		this.serverChanged();
+	},
+	serverChanged: function() {
+		if (this.server !== undefined) {
+			var ui = this.$;
+			ui.servername.setValue(this.server.name);
+			ui.serverurl.setValue(this.server.host);
+			ui.serverport.setValue(this.server.port);
+			
+			if (this.server.username !== undefined) {
+				ui.username.setValue(this.server.username);
+				ui.password.setValue(this.server.password);
+			}
+			
+			removeServerButton.setActive(true);
+		}
 	},
 	addServerTapped: function(inSender, inEvent) {
       var serverName = this.$.servername.getValue();
@@ -72,12 +98,12 @@ enyo.kind({
       var password = this.$.password.getValue();
       
       this.serverDetails = {name:serverName,
-      											url:serverUrl,
-      											port:serverPort,
-      											user:username,
-      											pass:password,
-												include: true};
-      											
+					  		host:serverUrl,
+					  		port:serverPort,
+					  		user:username,
+					  		pass:password,
+					  		include: true};
+  		
 			enyo.setCookie("newPMSServer", enyo.json.stringify(this.serverDetails));
 			this.log("cookie for new server set: " + enyo.json.stringify(this.serverDetails));
 			this.doSave(this.serverDetails);

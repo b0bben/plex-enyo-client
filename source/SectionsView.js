@@ -4,7 +4,7 @@ enyo.kind({
 	className: "enyo-bg",
 	published: {
 		headerContent: "",
-		parentMediaContainer: ""
+		parentMediaContainer: undefined,
 	},
 	events: {
 		onGo: ""
@@ -29,6 +29,7 @@ enyo.kind({
 		this.headerContentChanged();
 		this.parentMediaContainerChanged();
 		this.objCurrNavItem = "";
+		this.listedSections = [];
 		this.selectedRow = -1;
 	},
 	headerContentChanged: function() {
@@ -42,29 +43,36 @@ enyo.kind({
 		
     // check if the row is selected
     // color the row if it is
-    //if (inIndex == this.selectedRow) {
-      this.$.item.addRemoveClass("active", (inIndex == this.selectedRow));
-      //this.$.item.applyStyle('background', 'url(images/list-highlight.png) no-repeat');
-		//}
+    	this.$.item.addRemoveClass("active", (inIndex == this.selectedRow));
+      
+		if (this.parentMediaContainer !== undefined && this.parentMediaContainer.length > 0) {
+	    	for (var i = this.parentMediaContainer.length - 1; i >= 0; i--){
+	    		var mediaObj = this.parentMediaContainer[i]
+				var r = mediaObj.pmo.MediaContainer.Directory[inIndex];
+		    	if (r) {
+		        	this.$.c_section_button.setHeaderContent(r);
 		
-		var pmo = this.getParentMediaContainer();
-	    var r = pmo.Directory[inIndex];
-	    if (r) {
-	        this.$.c_section_button.setHeaderContent(r);
-	        //this.$.description.setContent(r.description);
-	        return true;
-	    }
+		        	//we need the server all the goddamn time, so keep another list so we can act onclick on rows
+					//grid will need to know which server we're talking about
+					var sectionAndServer = {section: r, server: mediaObj.server};
+		        	this.listedSections.push(sectionAndServer);
+					return true;
+		    	}
+
+	    	};
+		}
+		return false;
 	},
 	rowSelected: function(inSender, inEvent) {
-    this.selectedRow = inEvent.rowIndex;
-    //this.$.c_section_list.refresh();
+    	this.selectedRow = inEvent.rowIndex;
+    	//this.$.c_section_list.refresh();
     
-    this.log("The user clicked on item number: " + inEvent.rowIndex);
-    this.log("sender: " + inSender + ", parent: " + inSender.owner.owner);
-    var mainView = inSender.owner.owner;
-    mainView.showGridView(inEvent.rowIndex);
+    	this.log("The user clicked on item number: " + inEvent.rowIndex);
+    	this.log("sender: " + inSender + ", parent: " + inSender.owner.owner);
+    	var mainView = inSender.owner.owner;
+    	mainView.showGridView(this.listedSections[this.selectedRow]);
     
-   this.$.c_section_list.refresh();
+   		this.$.c_section_list.refresh();
   },
   openAppMenu: function() {
       this.owner.$.appMenu.open();

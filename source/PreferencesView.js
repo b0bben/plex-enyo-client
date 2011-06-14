@@ -25,9 +25,9 @@ enyo.kind({
 						{content:$L("All servers set to 'Show' will be available for browsing."), className: "prefs-body-text", style:"margin:none;"},
 						{kind: "RowGroup", caption: $L("Plex Media Servers"), style: "margin-bottom: 10px", components: [
 							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
-								{kind: enyo.Item, onclick: "listItemTap", className: "server-list-item", components: [
-									{kind: "LabeledContainer", name: "serverName", label: "Server nr 1", components: [
-										{kind: "ToggleButton", name: "includeServer", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick",}
+								{kind: enyo.Item, className: "server-list-item", components: [
+									{kind: "LabeledContainer", name: "serverName", onclick: "listItemTap", label: "Server nr 1", components: [
+										{kind: "ToggleButton", name: "includeServer", onclick: "", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick",}
 									]},
 								]}
 							]}
@@ -81,6 +81,7 @@ enyo.kind({
 	},
 	showAddServerForm: function(inSender) {
 		this.$.pane.selectViewByName("serverForm");
+		this.$.serverForm.setServer(undefined);
 	},
 	newServerAdded: function(inSender, inServer) {
 		this.servers.push(inServer);
@@ -102,4 +103,13 @@ enyo.kind({
 			return true;
 		}
 	},
+	listItemTap: function(inSender, inEvent) {
+		selectedRow = inEvent.rowIndex;
+		if (selectedRow < this.servers.length) {
+			var server = this.servers[selectedRow];
+			this.$.pane.selectViewByName("serverForm");
+			this.$.serverForm.setServer(server);
+			
+		}
+	}
 });

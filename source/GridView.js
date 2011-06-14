@@ -4,6 +4,7 @@ enyo.kind({
 	className: "enyo-fit",
 	published: {
 		parentMediaContainer: undefined,
+		server: undefined,
 	},
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
@@ -40,7 +41,8 @@ enyo.kind({
 	parentMediaContainerChanged: function() {
 	  if (this.parentMediaContainer !== undefined) {
 	    this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
-	    this.plexReq.getSectionForKey(this.parentMediaContainer.key);
+		this.server = this.parentMediaContainer.server;
+	    this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
 	    this.$.grid_header.setContent(this.parentMediaContainer.title);
 	  }
 	},
@@ -107,7 +109,7 @@ enyo.kind({
 				  var pmo = this.getPlexMediaObject(idx);
 					this.log("idx: " + idx);
 
-					var path = this.plexReq.baseUrl + pmo.thumb;
+					var path = this.parentMediaContainer.server.baseUrl + pmo.thumb;
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
 				} else {
@@ -145,12 +147,12 @@ enyo.kind({
 		},
 		showArtist: function(pmo) {
   		this.$.emptyToaster.$.client.destroyControls();
-		  this.$.emptyToaster.$.client.createComponents([{kind: "plex.ArtistView", owner: this, plexMediaObject:pmo}]);
+		  this.$.emptyToaster.$.client.createComponents([{kind: "plex.ArtistView", owner: this, plexMediaObject:pmo, server: this.server}]);
 		  this.$.emptyToaster.open();
 		},
 		showPreplay: function(pmo) {
       this.$.emptyToaster.$.client.destroyControls();
-      this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo}]);
+      this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server}]);
       this.$.emptyToaster.open();
 		},
 });

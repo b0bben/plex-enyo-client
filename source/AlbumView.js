@@ -3,6 +3,7 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 	published: {
 		plexMediaObject: undefined,
+		server: undefined,
 	},
 	components: [
 	  {name: "album-title-holder", className: "album-title-container", components: [
@@ -33,7 +34,7 @@ enyo.kind({
 		if (this.plexMediaObject !== undefined && this.plexMediaObject.viewGroup == "track") {
 			//set the general info for the album
 			this.log("albumview with: " + this.plexMediaObject.parentTitle);
-			this.$.cover.setSrc(this.plexReq.baseUrl + this.plexMediaObject.thumb);
+			this.$.cover.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.parentTitle);
 			
 			//construct the track listing
@@ -59,11 +60,11 @@ enyo.kind({
 		onclick_song: function(inSender, inEvent) {
 		  var songItem = this.tracks[inEvent.rowIndex];
 		  if (songItem !== undefined && !this.playing) {
-		    this.$.sound.setSrc(this.plexReq.getFullUrlForPlexUrl(songItem.Media.Part.key));
+		    this.$.sound.setSrc(this.plexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
 		    this.$.sound.play();
 		    this.playing = true;
 		  }
-		  else if (this.$.sound.audio.playbackrate > 0) {
+		  else if (this.$.sound.audio.playbackRate > 0 || this.playing) {
 		    this.$.sound.audio.pause();
 		    this.playing = false;
 		  }

@@ -4,6 +4,7 @@ enyo.kind({
   className: "enyo-fit",
 	published: {
 		plexMediaObject: "",
+		server: undefined,
 	},
 	components: [
 	  {name: "backdrop", kind: "Image", className: "background-art"},
@@ -37,14 +38,14 @@ enyo.kind({
 	plexMediaObjectChanged: function() {
 		if (this.plexMediaObject !== undefined) {
 			this.log("preplay with: " + this.plexMediaObject.title);
-			this.$.thumb.setSrc(this.plexReq.baseUrl + this.plexMediaObject.thumb);
+			this.$.thumb.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.title);
 			this.$.year.setContent(this.plexMediaObject.year);
 			this.$.tagline.setContent(this.plexMediaObject.tagline);		
 			this.$.desc.setContent(this.plexMediaObject.summary);
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
-			this.$.backdrop.setSrc(this.plexReq.baseUrl + this.plexMediaObject.art);
+			this.$.backdrop.setSrc(this.server.baseUrl + this.plexMediaObject.art);
 			this.render();
 		}
 	},
