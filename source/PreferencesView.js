@@ -14,7 +14,7 @@ enyo.kind({
 	},
 	components: [
 		{kind: enyo.Pane, flex: 1, components: [
-			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onCancel: "backHandler", lazy: true, showing: false},
+			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onDelete: "serverRemoved",onCancel: "backHandler", lazy: true, showing: false},
 			{name: "mainPrefs", kind: enyo.Control, layoutKind: "VFlexLayout", components:[
 				{name: "header", kind: "PageHeader", className: "preferences-header", pack: "center", components: [
 					{kind: "Image", src: "images/PlexIcon.png", className: "preferences-header-image"},
@@ -90,6 +90,13 @@ enyo.kind({
 		
 		this.loadPrefs(); //force refresh of settings
 	},
+	serverRemoved: function(inSender, inServerIndex) {
+		this.servers.remove(inServerIndex);
+		this.savePrefs();
+		this.$.pane.back();
+		
+		this.loadPrefs(); //force refresh of settings
+	},
 	backHandler: function(inSender) {
 		this.$.pane.back();
 	},
@@ -113,3 +120,9 @@ enyo.kind({
 		}
 	}
 });
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};

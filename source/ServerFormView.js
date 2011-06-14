@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "enyo.VFlexBox",
   className: "basic-back",
 	events: {
-      onReceive: "",
+      onDelete: "",
       onSave: "",
       onCancel: ""
 	},
@@ -18,7 +18,7 @@ enyo.kind({
 		{className:"accounts-header-shadow"},
 		{kind: "Scroller", flex: 1, components: [
 			{kind: "Control", className:"enyo-preferences-box", components: [
-				{kind: "plex.ServerForm", name: "form", onSave: "saveForm"},
+				{kind: "plex.ServerForm", name: "form", onSave: "saveServer", onDelete: "deleteServer"},
 			]}
 		]},
 		{className:"accounts-footer-shadow"},
@@ -30,8 +30,11 @@ enyo.kind({
 		this.inherited(arguments);
 		this.serverChanged();
 	},
-	saveForm: function(inSender, inServerDetails) {
+	saveServer: function(inSender, inServerDetails) {
 		this.doSave(inServerDetails);
+	},
+	deleteServer: function(inSender, inServerIndex) {
+		this.doDelete(inServerIndex);
 	},
 	serverChanged: function() {
 		this.$.form.setServer(this.server);
@@ -42,7 +45,7 @@ enyo.kind({
 	name: "plex.ServerForm",
 	kind: enyo.Control,
 	events: {
-      onReceive: "",
+      onDelete: "",
       onSave: "",
       onCancel: ""
 	},
@@ -51,23 +54,26 @@ enyo.kind({
 	},
 	components: [
 		{name: "nameTitle", caption:$L("Server nickname"), kind: "RowGroup", components: [
-			{kind: "Input", name: "servername", hint: $L("Server nickname"), spellcheck: false, autocorrect:false},
+			{kind: "Input", name: "servername", hint: $L("Give this server a friendly name"), spellcheck: false, autocorrect:false},
 		]},
 		
 		{name: "serverTitle", caption:"Server details", kind: "RowGroup", components: [
-			{kind: "Input", name: "serverurl", hint: $L("Server URL address"), spellcheck: false, autocorrect:false, autoCapitalize: "lowercase", inputType:"url"},
+			{kind: "Input", name: "serverurl", hint: $L("Type your server URL address"), spellcheck: false, autocorrect:false, autoCapitalize: "lowercase", inputType:"url"},
 			{kind: "Input", name: "serverport", value: "32400", spellcheck: false, autocorrect:false, autoCapitalize: "lowercase"}
 		]},
+		
 		{name: "loginTitle", caption: "Login details", kind: "RowGroup", components: [
 			{kind: "Input", name: "username", hint: $L("Type your username"), changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"},
 			{kind: "PasswordInput", name: "password", hint: $L("Type your password"),changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"}
 		]},
+		{content:$L('Login details are only needed when the server is outside your network.'), className: "prefs-body-text", style:"margin-bottom:8px"},
+		
 		{name: "errorBox", kind: "enyo.HFlexBox", className:"error-box", align:"center", showing:false, components: [
 			{name: "errorImage", kind: "Image", src: "images/header-warning-icon.png"},
 			{name: "errorMessage", className: "enyo-text-error", flex:1}
 		]},
 		{name:"addServerButton", kind: "ActivityButton", caption: $L("Add server"),className:"enyo-button-affirmative accounts-btn", onclick: "addServerTapped"},
-		{name:"removeServerButton", kind: "ActivityButton", caption: $L("Remove this server"), active: false, disabled: true, className:"enyo-button-negative accounts-btn", onAccountsRemove_Removing: "removingAccount", onAccountsRemove_Done: "doCredentials_Cancel"},
+		{name:"removeServerButton", kind: "ActivityButton", caption: $L("Remove this server"), active: false, className:"enyo-button-negative accounts-btn", onclick: "removeServerTapped"},
 			
 	],
 	create: function() {
@@ -87,8 +93,11 @@ enyo.kind({
 				ui.password.setValue(this.server.password);
 			}
 			
-			removeServerButton.setActive(true);
+			this.$.removeServerButton.setDisabled(false);
+		} else {
+			this.$.removeServerButton.setDisabled(true);
 		}
+		
 	},
 	addServerTapped: function(inSender, inEvent) {
       var serverName = this.$.servername.getValue();
@@ -107,5 +116,18 @@ enyo.kind({
 			enyo.setCookie("newPMSServer", enyo.json.stringify(this.serverDetails));
 			this.log("cookie for new server set: " + enyo.json.stringify(this.serverDetails));
 			this.doSave(this.serverDetails);
-  },
+	},
+	removeServerTapped: function(inSender, inEvent) {
+		var prefCookie = enyo.getCookie("prefs");
+		
+		if (prefCookie !== undefined) {
+			var serverList = enyo.json.parse(prefCookie);
+			for (var i = serverList.length - 1; i >= 0; i--){
+				var serverAsJson = serverList[i];
+				if (serverAsJson.name == this.server.name && serverAsJson.host == this.server.host && serverAsJson.port == this.server.port){
+					this.doDelete(i);
+				}	
+			};
+		}
+	}
 });

@@ -36,6 +36,7 @@ enyo.kind({
 		//this.$.header.setContent(this.headerContent);
 	},
 	parentMediaContainerChanged: function() {
+		this.render();
 		this.$.c_section_list.refresh();
 	},
 	setupRowItems: function(inSender, inIndex) {
@@ -48,6 +49,10 @@ enyo.kind({
 		if (this.parentMediaContainer !== undefined && this.parentMediaContainer.length > 0) {
 	    	for (var i = this.parentMediaContainer.length - 1; i >= 0; i--){
 	    		var mediaObj = this.parentMediaContainer[i]
+				if (mediaObj === undefined || mediaObj.pmo === undefined || mediaObj.pmo.MediaContainer === undefined){
+					this.log("not real data in mediaObj, bailing out");
+					return false;
+				}
 				var r = mediaObj.pmo.MediaContainer.Directory[inIndex];
 		    	if (r) {
 		        	this.$.c_section_button.setHeaderContent(r);

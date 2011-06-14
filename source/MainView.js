@@ -19,7 +19,7 @@ enyo.kind({
 
 				{kind: "AppMenu",
 				    components: [
-				        {caption: "Preferences", onclick: "showPreferences"},
+				        {caption: "Preferences & servers", onclick: "showPreferences"},
 				    ]
 				},
 
@@ -32,8 +32,8 @@ enyo.kind({
 		this.$.pane.selectViewByName("mainBrowsingView");
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
-		var plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
-		plexReq.librarySections();
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
+		this.plexReq.librarySections();
 		
 	},
 	gotSections: function(plexMediaContainer) {
@@ -41,8 +41,9 @@ enyo.kind({
 		//this.$.left_pane.createComponents([{kind: "plex.SectionsView", name: "view_sections", parentMediaContainer: plexMediaContainer,headerContent: plexMediaContainer.title1, flex:1, owner:this}]);
 		this.log("fyllde på sektioner");
 		this.$.left_pane.render();
-		this.$.left_pane.selectViewByName("view_sections");
 		this.$.view_sections.setParentMediaContainer(this.rootMediaContainer);
+		this.$.left_pane.selectViewByName("view_sections");
+		//enyo.scrim.hide();
 	},
 	showGridView: function(section) {
 		this.selectedSection = section;
@@ -72,5 +73,10 @@ enyo.kind({
 	},
 	closePrefsView: function(inView) {
 		this.$.pane.back();
+		//enyo.scrim.show();
+		//refresh sections after being in prefs
+		this.plexReq.loadServerListFromCookie();
+		this.plexReq.librarySections();
+		
 	},
 });

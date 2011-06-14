@@ -35,6 +35,7 @@ enyo.kind({
 		
 		if (prefCookie !== undefined) {
 			var prefs = enyo.json.parse(prefCookie);
+			this.servers = [];
 			for (var i = prefs.length - 1; i >= 0; i--){
 				var serverAsJson = prefs[i];
 				var plexServer = new PlexServer(serverAsJson.name,serverAsJson.host,serverAsJson.port,serverAsJson.username,serverAsJson.password,serverAsJson.include);
