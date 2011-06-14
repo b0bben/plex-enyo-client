@@ -15,16 +15,19 @@ enyo.kind({
 		{className:"accounts-header-shadow"},
 		{kind: "Scroller", flex: 1, components: [
 			{kind: "Control", className:"enyo-preferences-box", components: [
-				{kind: "plex.ServerForm", name: "form", onSave: "doSave", onCancel: "doCancel"},
+				{kind: "plex.ServerForm", name: "form", onSave: "saveForm"},
 			]}
 		]},
 		{className:"accounts-footer-shadow"},
 		{kind:"Toolbar", className:"enyo-toolbar-light", components:[
-			{kind: "Button", label: $L("Cancel"), className:"accounts-toolbar-btn", onclick: "doCredentials_Cancel"}
+			{kind: "Button", label: $L("Cancel"), className:"accounts-toolbar-btn", onclick: "doCancel"}
 		]},
 	],
 	create: function() {
 		this.inherited(arguments);
+	},
+	saveForm: function(inSender, inServerDetails) {
+		this.doSave(inServerDetails);
 	},
 });
 
@@ -72,7 +75,8 @@ enyo.kind({
       											url:serverUrl,
       											port:serverPort,
       											user:username,
-      											pass:password};
+      											pass:password,
+												include: true};
       											
 			enyo.setCookie("newPMSServer", enyo.json.stringify(this.serverDetails));
 			this.log("cookie for new server set: " + enyo.json.stringify(this.serverDetails));

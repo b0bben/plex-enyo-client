@@ -7,7 +7,7 @@
 	<key>ESProjectWindowState</key>
 	<dict>
 		<key>ContentSize</key>
-		<string>{1280, 649}</string>
+		<string>{1280, 638}</string>
 		<key>ProjectURL</key>
 		<string>file://localhost/Users/bob/dev/projects/plex-enyo/plex-enyo.esproj/</string>
 		<key>StateType</key>
@@ -150,6 +150,6 @@
 		</array>
 	</dict>
 	<key>com.macrabbit.Espresso.WorkspaceTabs.DisclosureCollapsed</key>
-	<true/>
+	<false/>
 </dict>
 </plist>

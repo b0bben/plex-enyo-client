@@ -47,22 +47,22 @@ enyo.kind({
 	gotMediaContainer: function(pmc) {
 		this.mediaContainer = pmc;
     
-    switch (this.getMediaType()) {
-      case "movie":
-        this.count = this.mediaContainer.Video.length;
-        break;
-      case "artist":
-      case "show":
-        this.count = this.mediaContainer.Directory.length;
-        break;
-      default:
-        this.count = 0;
-        break;
-    }
+    	switch (this.getMediaType()) {
+	      case "movie":
+	        this.count = this.mediaContainer.Video.length;
+	        break;
+	      case "artist":
+	      case "show":
+	        this.count = this.mediaContainer.Directory.length;
+	        break;
+	      default:
+	        this.count = 0;
+	        break;
+	    }
       
 		
 		this.buildCells();
-		//this.$.grid_list.render();
+		this.$.grid_list.render();
 		this.$.grid_list.refresh();
 		
 	},

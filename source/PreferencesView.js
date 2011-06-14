@@ -13,98 +13,93 @@ enyo.kind({
 		onClose: ""
 	},
 	components: [
-			{name: "header", kind: "PageHeader", className: "preferences-header", pack: "center", components: [
-				{kind: "Image", src: "images/header-icon-prefs.png", className: "preferences-header-image"},
-				{content: $L("Preferences")}
-			]},
-			{kind: "Scroller", flex: 1, components: [
-				{kind: "Control", className: "enyo-preferences-box", components: [
-					{kind: "RowGroup", caption: $L("Plex Media Servers"), style: "margin-bottom: 10px", components: [
-						{kind: "LabeledContainer", caption: $L("Block Popups"), components: [
-							{kind: "ToggleButton", name: "blockPopups", onChange: "togglePreferenceClick", preference: "blockPopups", type: "Browser"}
+		{kind: enyo.Pane, flex: 1, components: [
+			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onCancel: "backHandler", lazy: true, showing: false},
+			{name: "mainPrefs", kind: enyo.Control, layoutKind: "VFlexLayout", components:[
+				{name: "header", kind: "PageHeader", className: "preferences-header", pack: "center", components: [
+					{kind: "Image", src: "images/PlexIcon.png", className: "preferences-header-image"},
+					{content: $L("Preferences")}
+				]},
+				{kind: "Scroller", flex: 1, components: [
+					{kind: "Control", className: "enyo-preferences-box", components: [
+						{content:$L("All servers set to 'Show' will be available for browsing."), className: "prefs-body-text", style:"margin:none;"},
+						{kind: "RowGroup", caption: $L("Plex Media Servers"), style: "margin-bottom: 10px", components: [
+							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
+								{kind: enyo.Item, onclick: "listItemTap", className: "server-list-item", components: [
+									{kind: "LabeledContainer", name: "serverName", label: "Server nr 1", components: [
+										{kind: "ToggleButton", name: "includeServer", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick",}
+									]},
+								]}
+							]}
 						]},
-						{kind: "LabeledContainer", caption: $L("Accept Cookies"), components: [
-							{kind: "ToggleButton", name: "acceptCookies", onChange: "togglePreferenceClick", preference: "acceptCookies", type: "Browser"}
+						{kind: "Button", caption: $L("Add new server ..."), onclick: "showAddServerForm"},
+						/*
+						{kind: "RowGroup", caption: $L("Autofill"), components: [
+							{kind: "LabeledContainer", caption: $L("Names and Passwords"), components: [
+								{kind: "ToggleButton", name: "rememberPasswords", onChange: "togglePreferenceClick", preference: "rememberPasswords"}
+							]}
 						]},
-						{kind: "LabeledContainer", caption: $L("Enable JavaScript"), components: [
-							{kind: "ToggleButton", name: "enableJavascript", onChange: "togglePreferenceClick", preference: "enableJavascript", type: "Browser"}
+						{kind: "Button", caption: $L("Clear Autofill Information"), onclick: "", dialog: ""},
+						*/
+						{kind: "RowGroup", caption: $L("Video quality"), components: [
+							{kind: "ListSelector", name: "videoQuality", value: 1, onChange: "videoQualityChange", items: [
+								{caption: $L("8 Mbps, 1080p"), value: 1},
+								{caption: $L("4 Mbps, 720p"), value: 1},
+								{caption: $L("3 Mbps, 720p"), value: 1},
+								{caption: $L("2 Mbps, 720p"), value: 1},
+								{caption: $L("1.5 Mbps, 480p"), value: 1},
+								{caption: $L("720 kbps, 320p"), value: 1},
+							]}
 						]},
-						{kind: "LabeledContainer", caption: $L("Enable Flash"), components: [
-							{kind: "ToggleButton", name: "flashplugins", onChange: "togglePreferenceClick", preference: "flashplugins", type: "System"}
-						]},
-						{kind: "LabeledContainer", caption: $L("Autoload Flash"), components: [
-							{kind: "ToggleButton", name: "click2play", onChange: "togglePreferenceClick", preference: "click2play", type: "System", inverted: true}
-						]}
-					]},
-					{kind: "Button", caption: $L("Add new server"), onclick: "showAddServerForm"},
-					{kind: "Button", caption: $L("Clear History"), onclick: "promptButtonClick", dialog: "clearHistoryPrompt"},
-					{kind: "Button", caption: $L("Clear Cookies"), onclick: "promptButtonClick", dialog: "clearCookiesPrompt"},
-					{kind: "Button", caption: $L("Clear Cache"), onclick: "promptButtonClick", dialog: "clearCachePrompt"},
-					/*
-					{kind: "RowGroup", caption: $L("Autofill"), components: [
-						{kind: "LabeledContainer", caption: $L("Names and Passwords"), components: [
-							{kind: "ToggleButton", name: "rememberPasswords", onChange: "togglePreferenceClick", preference: "rememberPasswords"}
-						]}
-					]},
-					{kind: "Button", caption: $L("Clear Autofill Information"), onclick: "", dialog: ""},
-					*/
+						{content:$L('Higher quality settings provide better looking video, but require more network bandwith.'), className: "prefs-body-text", style:"margin-bottom:8px"},
 					]}
 				]},
-		
-			{kind: "Toolbar", pack: "center", className: "enyo-toolbar-light", components: [
+				{kind: "Toolbar", pack: "center", className: "enyo-toolbar-light", components: [
 		 	   	{kind: "Button", caption: $L("Done"), onclick: "doClose", className: "enyo-preference-button enyo-button-affirmative"}
-			]},
+				]},
+			]}
+		]},			
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.servers = [];
+		this.loadPrefs();
+		
+		this.$.pane.selectViewByName("mainPrefs");
 	},
-	browserPreferencesChanged: function() {
-		this.log();
-		this.updatePreferences(this.browserPreferences);
-	},
-	systemPreferencesChanged: function() {
-		this.log();
-		this.updatePreferences(this.systemPreferences);
-	},
-	searchPreferencesChanged: function() {
-		var items = [];
-		for (var i=0,s;s=this.searchPreferences[i];i++) {
-			items.push({caption: s.displayName, value: s.id});
-			this.$.searchPreference.setItems(items);
+	loadPrefs: function() {
+		var prefCookie = enyo.getCookie("prefs");
+		
+		if (prefCookie !== undefined) {
+			var prefs = enyo.json.parse(prefCookie);
+			this.servers = prefs;
+			this.$.serverList.render();
 		}
 	},
-	defaultSearchChanged: function() {
-		this.$.searchPreference.setValue(this.defaultSearch);
-	},
-	updatePreferences: function(inPreferences) {
-		for (key in inPreferences) {
-			var value = inPreferences[key];
-			if (this.$[key] !== undefined) {
-				if (this.$[key].inverted) {
-					this.$[key].setState(!value);
-				} else {
-					this.$[key].setState(value);
-				}
-			}
-		}
-	},
-	togglePreferenceClick: function(inSender, inState) {
-		if (inSender.inverted) {
-			this.fireChange(inSender.preference, inSender.type, !inState);
-		} else {
-			this.fireChange(inSender.preference, inSender.type, inState);
-		}
+	savePrefs: function() {
+		enyo.setCookie("prefs", enyo.json.stringify(this.servers));
 	},
 	showAddServerForm: function(inSender) {
-		this.owner.selectViewByName("serverForm");
+		this.$.pane.selectViewByName("serverForm");
 	},
-	completePrompt: function(inSender) {
-		this.fireChange(inSender.preference);
+	newServerAdded: function(inSender, inServer) {
+		this.servers.push(inServer);
+		this.savePrefs();
+		this.$.pane.back();
+		
+		this.loadPrefs(); //force refresh of settings
 	},
-	searchPreferenceChange: function(inSender, inValue) {
-		this.fireChange("defaultSearch", "Search", inSender.getValue());
+	backHandler: function(inSender) {
+		this.$.pane.back();
 	},
-	fireChange: function(inPreference, inType, inValue) {
-		this.doPreferenceChanged(inPreference, inType, inValue);
-	}
+	listSetupRow: function(inSender, inIndex) {
+		this.log("listar servers");
+		
+    // check if the row is selected
+		if (this.servers !== undefined && inIndex < this.servers.length) {
+			this.$.serverName.setLabel(this.servers[inIndex].name);
+			this.$.includeServer.setState(this.servers[inIndex].include)
+			return true;
+		}
+	},
 });

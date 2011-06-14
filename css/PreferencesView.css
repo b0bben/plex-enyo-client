@@ -11,9 +11,34 @@
 
 .preferences-header-image {
 	padding-right: 10px;
+	height: 35px;
+	width: 24px;
 }
 
 .enyo-preferences-box .enyo-button,
 .preference-prompt .enyo-button {
 	margin: 6px 3px;
+}
+
+div:first-child > .server-list-item {
+	border-top:none;
+}
+div:last-child > .server-list-item {
+	border-bottom:none;
+}
+
+/* Footnote text */
+.prefs-body-text {
+	font-size:16px;
+	color:#666;
+	margin:0 5px;
+}
+.enyo-group + .prefs-body-text {
+	margin-top:-7px;
+}
+.prefs-body-text + .enyo-button {
+	margin-top:20px;
+}
+.prefs-body-text + .enyo-group {
+	margin-top:19px;
 }
