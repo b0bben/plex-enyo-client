@@ -21,7 +21,7 @@ enyo.kind({
             ]},
 		{kind: "Selection"},		
 		{kind: "Toolbar", components: [
-		  {kind: "Button", caption: "Show App Menu", onclick: "openAppMenu"},
+		  {kind: "Button", caption: "Show App Menu", onclick: "openAppMenu", showing: false},
 		]}
 	],
 	create: function() {

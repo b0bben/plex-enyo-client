@@ -8,7 +8,7 @@ enyo.kind({
 	},
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
-		{kind: "PageHeader", name: "grid_header", style: '-webkit-box-align: center !important',pack: 'center',content: "bob", className: "enyo-header-dark"},
+		{kind: "PageHeader", name: "grid_header", style: '-webkit-box-align: center !important',pack: 'center',content: "Welcome to Plex", className: "enyo-header-dark"},
 
 			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
 
