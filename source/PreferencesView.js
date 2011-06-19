@@ -14,6 +14,10 @@ enyo.kind({
 	},
 	components: [
 		{kind: enyo.Pane, flex: 1, components: [
+			{name: "browserBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
+				method: "browse", subscribe: true, onSuccess: "gotBrowsed", onFailure: "genericFailure"},
+			{name: "resolveeBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
+					method: "resolve", subscribe: true, onSuccess: "gotResolved", onFailure: "genericFailure"},
 			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onDelete: "serverRemoved",onCancel: "backHandler", lazy: true, showing: false},
 			{name: "mainPrefs", kind: enyo.Control, layoutKind: "VFlexLayout", components:[
 				{name: "header", kind: "PageHeader", className: "preferences-header", pack: "center", components: [
@@ -52,7 +56,8 @@ enyo.kind({
 							]}
 						]},
 						{content:$L('Higher quality settings provide better looking video, but require more network bandwith.'), className: "prefs-body-text", style:"margin-bottom:8px"},
-					]}
+					]},
+					{name: "console", kind: "HtmlContent", style: "font-size: 10pt; background-color: white;"},
 				]},
 				{kind: "Toolbar", pack: "center", className: "enyo-toolbar-light", components: [
 		 	   	{kind: "Button", caption: $L("Done"), onclick: "doClose", className: "enyo-preference-button enyo-button-affirmative"}
@@ -64,8 +69,18 @@ enyo.kind({
 		this.inherited(arguments);
 		this.servers = [];
 		this.loadPrefs();
-		
+		this.$.browserBonjour.call({"regType":"_webos._tcp", "domainName":"local."});
 		this.$.pane.selectViewByName("mainPrefs");
+	},
+	gotBrowsed: function(inSender, inResponse) {
+		this.log("success: BROWSE: " + JSON.stringify(inResponse));
+		this.$.console.addContent("> " + JSON.stringify(inResponse) + "<br/>");
+		inResponse.result.forEach(function(bonjourServer) {
+			this.$.console.addContent(">>> " + JSON.stringify(bonjourServer) + "<br/>");
+		});
+	},
+	genericFailure: function(inSender, inResponse) {
+		this.log("failure: " + JSON.stringify(inResponse));
 	},
 	loadPrefs: function() {
 		var prefCookie = enyo.getCookie("prefs");
@@ -82,6 +97,7 @@ enyo.kind({
 	showAddServerForm: function(inSender) {
 		this.$.pane.selectViewByName("serverForm");
 		this.$.serverForm.setServer(undefined);
+		this.$.serverForm.setShowing(true);
 	},
 	newServerAdded: function(inSender, inServer) {
 		this.servers.push(inServer);

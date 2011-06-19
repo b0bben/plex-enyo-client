@@ -6,7 +6,8 @@ enyo.kind({
 	align: "center",
 	published: {
 		headerContent: "",
-		menuList: []
+		menuList: [],
+		server: "",
 	},
 	components: [
 		{name: "sectionImage", kind: "Image", width: "36px",heigth: "36px"},
@@ -14,8 +15,13 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.serverChanged();
 		this.headerContentChanged();
 		this.menuListChanged();
+	},
+	serverChanged: function() {
+		this.log("serverChanged");
+		//this.$.serverName.setContent("(" + this.server.name +")")
 	},
 	menuListChanged: function() {
 		this.log("menuListChanged");

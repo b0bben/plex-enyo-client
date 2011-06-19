@@ -13,73 +13,47 @@ enyo.kind({
 		{name: "header", kind: "Header",style: '-webkit-box-align: center !important',pack: 'center', className: "enyo-header-dark", components: [
 			{kind: "Image", src: "images/PlexTextLogo.png", style: "padding: none;"}
 		]},
-		{name: "c_section_list", kind: "VirtualList",flex: 1, className: "section-list",onSetupRow: "setupRowItems", components: [
-        {kind: "Item", layoutKind: "VFlexLayout", style: "border-top:none;",onclick: "rowSelected",Xonmousedown: "rowSelected", components: [
-             {name: "c_section_button",kind: "plex.ButtonMenu"}
-            ]
-        }
-            ]},
+		{kind: enyo.Scroller, flex: 1, components: [
+			{name: "serverList",kind: "VirtualList",flex: 1, height: "100%", onSetupRow: "setupServerItems", components: [
+				 {name: "cells", kind: "VFlexBox"}
+			]}
+		]},
+				
 		{kind: "Selection"},		
 		{kind: "Toolbar", components: [
-		  {kind: "Button", caption: "Show App Menu", onclick: "openAppMenu", showing: false},
+		  {kind: "Button", caption: "Show App Menu", onclick: "openAppMenu", showing: true},
 		]}
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.listedServers = [];
+		this.sections = [];
 		this.headerContentChanged();
 		this.parentMediaContainerChanged();
 		this.objCurrNavItem = "";
-		this.listedSections = [];
 		this.selectedRow = -1;
+		this.$.cells.destroyComponents();
 	},
 	headerContentChanged: function() {
 		//this.$.header.setContent(this.headerContent);
 	},
 	parentMediaContainerChanged: function() {
-		this.render();
-		this.$.c_section_list.refresh();
+		//this.render();
+		this.$.cells.destroyComponents();
+		this.$.serverList.refresh();
 	},
-	setupRowItems: function(inSender, inIndex) {
-		this.log("ritar sektioner");
-		
-    // check if the row is selected
-    // color the row if it is
-    	this.$.item.addRemoveClass("active", (inIndex == this.selectedRow));
-      
-		if (this.parentMediaContainer !== undefined && this.parentMediaContainer.length > 0) {
-	    	for (var i = this.parentMediaContainer.length - 1; i >= 0; i--){
-	    		var mediaObj = this.parentMediaContainer[i]
-				if (mediaObj === undefined || mediaObj.pmo === undefined || mediaObj.pmo.MediaContainer === undefined){
-					this.log("not real data in mediaObj, bailing out");
-					return false;
-				}
-				var r = mediaObj.pmo.MediaContainer.Directory[inIndex];
-		    	if (r) {
-		        	this.$.c_section_button.setHeaderContent(r);
-		
-		        	//we need the server all the goddamn time, so keep another list so we can act onclick on rows
-					//grid will need to know which server we're talking about
-					var sectionAndServer = {section: r, server: mediaObj.server};
-		        	this.listedSections.push(sectionAndServer);
+	setupServerItems: function(inSender, inIndex) {
+		if (this.parentMediaContainer !== undefined && this.parentMediaContainer.length >= inIndex) {
+				var mediaObj = this.parentMediaContainer[inIndex];
+				if (mediaObj !== undefined) {
+					this.log("creating server " + mediaObj.server.name);
+					this.$.cells.createComponent({kind: "plex.ServerSection", mediaServer: mediaObj, caption: mediaObj.server.name});
 					return true;
-		    	}
-
-	    	};
+				}
 		}
 		return false;
 	},
-	rowSelected: function(inSender, inEvent) {
-    	this.selectedRow = inEvent.rowIndex;
-    	//this.$.c_section_list.refresh();
-    
-    	this.log("The user clicked on item number: " + inEvent.rowIndex);
-    	this.log("sender: " + inSender + ", parent: " + inSender.owner.owner);
-    	var mainView = inSender.owner.owner;
-    	mainView.showGridView(this.listedSections[this.selectedRow]);
-    
-   		this.$.c_section_list.refresh();
-  },
-  openAppMenu: function() {
+	openAppMenu: function() {
       this.owner.$.appMenu.open();
   },
  });

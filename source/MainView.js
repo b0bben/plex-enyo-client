@@ -19,7 +19,7 @@ enyo.kind({
 
 				{kind: "AppMenu",
 				    components: [
-				        {caption: "Preferences & servers", onclick: "showPreferences"},
+				        {caption: "Preferences & Servers", onclick: "showPreferences"},
 				    ]
 				},
 
@@ -75,6 +75,7 @@ enyo.kind({
 		this.$.pane.back();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
 		this.plexReq.loadServerListFromCookie();
 		this.plexReq.librarySections();
 		

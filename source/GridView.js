@@ -12,7 +12,7 @@ enyo.kind({
 
 			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
 
-				{name: "cells", kind: "HFlexBox",onclick: "cellsClick"}
+				{name: "cells", kind: "HFlexBox"}
 			]},
 			{kind: "Selection"},
 			{kind: "plex.EmptyToaster", name: "emptyToaster"}
@@ -23,19 +23,13 @@ enyo.kind({
 		this.plexReq = new PlexRequest();
 		this.inherited(arguments);
 		this.parentMediaContainerChanged();
-		this.$.grid_list.refresh();
 	},
 	rendered: function() {
 		this.inherited(arguments);
 		this.buildCells();
-		this.$.grid_list.refresh();
 	},
 	resizeHandler: function() {
 		this.buildCells();
-		this.$.grid_list.refresh();
-	},
-	loadData: function(inSender) {
-		this.count = 100;
 		this.$.grid_list.refresh();
 	},
 	parentMediaContainerChanged: function() {
@@ -64,7 +58,7 @@ enyo.kind({
       
 		
 		this.buildCells();
-		this.$.grid_list.render();
+		this.$.selection.clear();
 		this.$.grid_list.refresh();
 		
 	},
@@ -93,9 +87,9 @@ enyo.kind({
 		this.$.cells.destroyControls();
 		this.cells = [];
 		for (var i=0; i<this.cellCount; i++) {
-			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;", owner: this, idx: i, onclick: "cellClick"});
+			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", idx: i, onclick: "cellClick", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;", owner: this});
 			c.createComponent({kind: "Image", className: "cover-image"});
-			c.createComponent({kind: "Item", name: "cover_label", className: "cover-label"});
+			c.createComponent({name: "cover_label", className: "cover-label"});
 			this.cells.push(c);
 		}
 		this.$.grid_list.refresh();
@@ -122,7 +116,8 @@ enyo.kind({
 			}
 			return true;
 		}
-	},	
+		return false;
+	},
 	cellClick: function(inSender, inEvent, inRowIndex) {
 		var idx = inEvent.rowIndex * this.cellCount + inSender.idx;
 		this.$.selection.select(idx);
@@ -145,14 +140,14 @@ enyo.kind({
 		      break;
 		  }
 		},
-		showArtist: function(pmo) {
+	showArtist: function(pmo) {
   		this.$.emptyToaster.$.client.destroyControls();
 		  this.$.emptyToaster.$.client.createComponents([{kind: "plex.ArtistView", owner: this, plexMediaObject:pmo, server: this.server}]);
 		  this.$.emptyToaster.open();
-		},
-		showPreplay: function(pmo) {
+	},
+	showPreplay: function(pmo) {
       this.$.emptyToaster.$.client.destroyControls();
       this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server}]);
       this.$.emptyToaster.open();
-		},
+	},
 });

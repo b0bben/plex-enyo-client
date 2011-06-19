@@ -95,6 +95,13 @@ enyo.kind({
 			
 			this.$.removeServerButton.setDisabled(false);
 		} else {
+			var ui = this.$;
+			ui.servername.setValue("");
+			ui.serverurl.setValue("");
+			ui.serverport.setValue("");
+			ui.username.setValue("");
+			ui.password.setValue("");
+
 			this.$.removeServerButton.setDisabled(true);
 		}
 		
