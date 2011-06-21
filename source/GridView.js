@@ -37,7 +37,7 @@ enyo.kind({
 	    this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
 		this.server = this.parentMediaContainer.server;
 	    this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
-	    this.$.grid_header.setContent(this.parentMediaContainer.title);
+	    this.$.grid_header.setContent(this.parentMediaContainer.section.title);
 	  }
 	},
 	gotMediaContainer: function(pmc) {

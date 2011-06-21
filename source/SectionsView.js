@@ -7,7 +7,7 @@ enyo.kind({
 		parentMediaContainer: undefined,
 	},
 	events: {
-		onGo: ""
+		onSelectedSection: ""
 	},
 	components: [
 		{name: "header", kind: "Header",style: '-webkit-box-align: center !important',pack: 'center', className: "enyo-header-dark", components: [
@@ -47,13 +47,24 @@ enyo.kind({
 				var mediaObj = this.parentMediaContainer[inIndex];
 				if (mediaObj !== undefined) {
 					this.log("creating server " + mediaObj.server.name);
-					this.$.cells.createComponent({kind: "plex.ServerSection", mediaServer: mediaObj, caption: mediaObj.server.name});
+					this.$.cells.createComponent({kind: "plex.ServerSection", onRowSelected: "sectionRowSelected", mediaServer: mediaObj, caption: mediaObj.server.name, owner: this});
 					return true;
 				}
 		}
 		return false;
 	},
+	sectionRowSelected: function(inSender, inSection, inServer) {
+		this.log("section selected: " + inServer.name + "->" + inSection.title);
+		var pmo = {"server": inServer, "section": inSection};
+		this.doSelectedSection(pmo);
+	},
 	openAppMenu: function() {
       this.owner.$.appMenu.open();
-  },
+	},
+	resizeHandler: function(inSender, inEvent) {
+		this.render();
+		this.$.cells.destroyComponents();
+		this.$.serverList.refresh();
+		
+	}
  });

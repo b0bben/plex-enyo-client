@@ -5,6 +5,9 @@ enyo.kind({
 		mediaServer: undefined,
 		showCaption: false,
 	},
+	events: {
+		onRowSelected: "",
+	},
 	components: [
 		{name: "sectionList", kind: "VirtualRepeater",flex: 1, className: "section-list",onSetupRow: "setupSectionRowItems", components: [
 			{name: "sectionItem", kind: enyo.Item, layoutKind: "VFlexLayout", style: "border-top:none;",onclick: "sectionRowSelected",Xonmousedown: "sectionRowSelected", components: [
@@ -47,13 +50,8 @@ enyo.kind({
 	},
 	sectionRowSelected: function(inSender, inEvent) {
     	this.selectedRow = inEvent.rowIndex;
-    	//this.$.sectionList.render();
-    
-    	this.log("The user clicked on item number: " + inEvent.rowIndex);
-    	this.log("sender: " + inSender + ", parent: " + inSender.owner.owner);
-    	var mainView = inSender.owner.owner;
-    	mainView.showGridView(this.listedSections[this.selectedRow]);
-    
-   		//this.$.sectionList.render();
-  },
+    	//send both the server and the section that was chosen upstreams, this will eventually end up in the grid
+    	this.doRowSelected(this.sections[this.selectedRow], this.mediaServer.server);
+		this.$.sectionList.render();
+	}
 });

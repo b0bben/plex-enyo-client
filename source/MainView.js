@@ -6,7 +6,7 @@ enyo.kind({
 			{name: "mainBrowsingView", kind: enyo.Control, layoutKind: "HFlexLayout", components:[
 				{kind:enyo.VFlexBox, width:'320px', height: "100%", style:"border-right: 2px solid;", components: [
 					{flex: 1, name: "left_pane", kind: "Pane", components: [
-						{kind: "plex.SectionsView", name: "view_sections",flex:1}
+						{kind: "plex.SectionsView", name: "view_sections",flex:1, onSelectedSection: "showGridView"},
 					]}
 				]},
 				{kind:enyo.VFlexBox, flex:1, components: [
@@ -45,8 +45,8 @@ enyo.kind({
 		this.$.left_pane.selectViewByName("view_sections");
 		//enyo.scrim.hide();
 	},
-	showGridView: function(section) {
-		this.selectedSection = section;
+	showGridView: function(inSender, inSection) {
+		this.selectedSection = inSection; //actually both the section AND the server it belongs to
     	this.$.right_pane.selectViewByName("grid_view");
 	},
 	viewSelected: function(inSender, inView, inPreviousView) {
