@@ -88,7 +88,8 @@ enyo.kind({
 		this.cells = [];
 		for (var i=0; i<this.cellCount; i++) {
 			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", idx: i, onclick: "cellClick", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;", owner: this});
-			c.createComponent({kind: "Image", className: "cover-image"});
+			var imgDiv = c.createComponent({name: "coverDiv", className: "cover-shadow"});
+			imgDiv.createComponent({kind: "Image", name: "coverImg", className: "cover-image"});
 			c.createComponent({name: "cover_label", className: "cover-label"});
 			this.cells.push(c);
 		}
@@ -110,7 +111,7 @@ enyo.kind({
 					path = "images/BlankPoster.png";
 				}
 				//coverart img and properties
-				c.$.image.setSrc(path);
+				c.$.coverDiv.$.coverImg.setSrc(path);
 				//label below cover art
 				c.$.cover_label.setContent(lbl);
 			}
