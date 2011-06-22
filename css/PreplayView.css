@@ -1,9 +1,8 @@
 .enyo-bg{
   background-color: #D8D8D8;
-  /*width: 930px;*/
 }
 
-.background-art {
+.backdrop-img {
   opacity: 0.3;
   height: 100%;
   width: 100%;
@@ -13,7 +12,6 @@
   top: 0px;
   visibility: visible;
   z-index: 0;
-  opacity: 30%;
 }
 .cover {
   height: 281px;
@@ -63,6 +61,7 @@
   width: 506px;
   word-wrap: normal;
   z-index: 200;
+	color: white;
 }
 
 .title_holder .year {
@@ -77,6 +76,7 @@
   width: 58px;
   word-wrap: normal;
   z-index: 200;
+  color: white;
 }
 
 .tagline {
@@ -91,6 +91,7 @@
    width: 422px;
    word-wrap: normal;
    z-index: 200;
+   color: white;
 }
 
 .desc {
@@ -106,6 +107,7 @@
   left: 240px;
   top: 110px;
   position: absolute;
+  color: white;
 }
 
 .rating_holder {

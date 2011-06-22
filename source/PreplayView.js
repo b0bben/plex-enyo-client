@@ -7,14 +7,16 @@ enyo.kind({
 		server: undefined,
 	},
 	components: [
-	  {name: "backdrop", kind: "Image", className: "background-art"},
+		{name: "backdrop", className: "backdrop", components: [
+			{name: "backdropImg", kind: "Image", className: "backdrop-img"},
+		]},
 		{className: "enyo-sliding-view-shadow"},
 		{kind: enyo.VFlexBox, height: "92%",name:"details",components: [
-      {kind: enyo.HFlexBox, width: "100%", flex: 2, components: [
-        {className: "cover", components: [
+      		{kind: enyo.HFlexBox, width: "100%", flex: 2, components: [
+        		{className: "cover", components: [
 				  {name: "thumb", kind: "Image", className: "thumb"},
 				]},
-        {kind: enyo.HFlexBox, className: "title_holder", components: [
+        		{kind: enyo.HFlexBox, className: "title_holder", components: [
           {name: "title", className: "title"},
           {name: "year", className: "year"},
           {kind: enyo.HFlexBox, className:"rating_holder", components: [
@@ -45,7 +47,7 @@ enyo.kind({
 			this.$.desc.setContent(this.plexMediaObject.summary);
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
-			this.$.backdrop.setSrc(this.server.baseUrl + this.plexMediaObject.art);
+			this.$.backdropImg.setSrc(this.server.baseUrl + this.plexMediaObject.art);
 			this.render();
 		}
 	},
