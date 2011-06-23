@@ -59,7 +59,7 @@ enyo.kind({
 		
 		{name: "serverTitle", caption:"Server details", kind: "RowGroup", components: [
 			{kind: "Input", name: "serverurl", hint: $L("Type your server URL address"), spellcheck: false, autocorrect:false, autoCapitalize: "lowercase", inputType:"url"},
-			{kind: "Input", name: "serverport", value: "32400", spellcheck: false, autocorrect:false, autoCapitalize: "lowercase"}
+			{kind: "Input", name: "serverport", hint: $L("Type your port number"), value: "32400", spellcheck: false, autocorrect:false, autoCapitalize: "lowercase"}
 		]},
 		
 		{name: "loginTitle", caption: "Login details", kind: "RowGroup", components: [
@@ -98,7 +98,7 @@ enyo.kind({
 			var ui = this.$;
 			ui.servername.setValue("");
 			ui.serverurl.setValue("");
-			ui.serverport.setValue("");
+			ui.serverport.setValue("32400");
 			ui.username.setValue("");
 			ui.password.setValue("");
 
