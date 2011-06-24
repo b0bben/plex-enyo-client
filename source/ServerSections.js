@@ -1,6 +1,7 @@
 enyo.kind({	
 	name: "plex.ServerSection",
 	kind: enyo.DividerDrawer,
+	captionClassName: 'library-navigation-item library-navigation-section-divider',
 	published: {
 		mediaServer: undefined,
 		showCaption: false,

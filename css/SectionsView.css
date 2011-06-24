@@ -26,3 +26,69 @@
 #mainView_view_sections_header_client {
 	padding: 5px 5px 5px 5px;
 }
+
+.enyo-divider-caption {
+	color: #fff;
+	font-size: 25px;
+	font-weight:normal;
+}
+
+.enyo-collapsible-arrow {
+	height: 24px;
+	overflow:hidden;
+	background: url(../images/menuitem-arrow.png) 0 -20px no-repeat;
+
+}
+
+.enyo-button-switched.enyo-collapsible-arrow {
+	height: 24px;
+	overflow:hidden;
+	background: url(../images/menuitem-arrow.png) no-repeat;
+}
+
+.library-navigation-panel {
+	background-image: url(../images/album_background_tile.png);
+}
+
+.library-navigation-item {
+	background-image: url(../images/divider_separator_line.png); 
+	background-repeat: repeat-x;
+	background-position: bottom;
+	font-size: 18px;
+	font-weight:normal !important;
+	color: #b2b2b2;
+	height: 60px;
+	line-height: 43px;
+	padding:8px 0 0px 4px;
+}
+
+.library-navigation-list-pane {
+	position: relative;
+	overflow: hidden;
+}
+
+.library-navigation-list-item {
+	position: relative;
+}
+
+.library-navigation-caption {
+	overflow:hidden;
+	text-overflow:ellipsis;
+	white-space: nowrap;
+}
+
+.library-navigation-section-divider {
+	padding: 0 0 0 5px;
+	height: 35px;
+	font-size:18px;
+	color:#fff;
+	line-height: 35px;  /* same as the height: gives vertically-centered text */
+}
+
+.library-navigation-section-divider, .library-navigation-panel div .enyo-drawer div .library-navigation-list-item:last-child {
+	background-image:none;
+}
+
+.library-navigation-section-divider .enyo-divider-right-cap, .library-navigation-section-divider .enyo-divider-left-cap {
+	-webkit-border-image: url(../images/list-header-divider.png) 0 0 repeat repeat;
+}
