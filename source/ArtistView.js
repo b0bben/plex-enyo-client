@@ -37,6 +37,15 @@ enyo.kind({
 			this.$.thumb.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.title);
 			this.$.desc.setContent(this.plexMediaObject.summary);
+			
+			if (this.plexMediaObject.type === "show") {
+				this.$.thumb.applyStyle("width", "150px");
+				this.$.thumb.applyStyle("height", "200px");
+			}
+			else if (this.plexMediaObject.type === "artist") {
+				this.$.thumb.applyStyle("width", "200px");
+				this.$.thumb.applyStyle("height", "200px");
+			}
   		
   		//get them albums now
 			this.plexReq = new PlexRequest(enyo.bind(this,"gotAlbums"));
@@ -65,7 +74,7 @@ enyo.kind({
 	  }
 	},
 	buildAlbum: function(pmo) {
-		if (pmo !== undefined && pmo.viewGroup == "track" && !pmo.mixedParents){
+		if (pmo !== undefined && !pmo.mixedParents && (pmo.viewGroup == "track" || pmo.viewGroup == "episode")){
 			var c = this.$.cells.createComponent({kind: "plex.AlbumView", plexMediaObject: pmo, server: this.server});
 			this.log("built album: " + pmo.parentTitle);
 		}

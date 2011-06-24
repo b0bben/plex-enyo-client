@@ -138,6 +138,7 @@ enyo.kind({
 		      break;
 		    case "show":
 		      this.log("show chosen");
+			  this.showArtist(pmo);
 		      break;
 		  }
 		},

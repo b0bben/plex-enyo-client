@@ -1,42 +1,62 @@
 
 .album-title-container {
-background-color: black;
--webkit-box-shadow: #222 0px 0px 5px;
-border-bottom-left-radius: 7px 7px;
-border-bottom-right-radius: 7px 7px;
-border-top-left-radius: 7px 7px;
-border-top-right-radius: 7px 7px;
-display: block;
-height: 35px;
-color: #aaa;
-width: 100%;
-margin: 10px;
+	background-color: black;
+	-webkit-box-shadow: #222 0px 0px 5px;
+	border-bottom-left-radius: 7px 7px;
+	border-bottom-right-radius: 7px 7px;
+	border-top-left-radius: 7px 7px;
+	border-top-right-radius: 7px 7px;
+	display: block;
+	height: 35px;
+	color: #aaa;
+	width: 100%;
+	margin: 10px;
 
 }
 
 .album-title-container .album-title {
-  font: normal normal normal 18px/normal Arial, sans-serif;
-  height: 35px; 
-  line-height: 35px; 
-  padding-left: 20px;
+	font: normal normal normal 18px/normal Arial, sans-serif;
+	height: 35px; 
+	line-height: 35px; 
+	padding-left: 20px;
 }
 
 .album-cover {
-  -webkit-box-shadow: black 0px 0px 40px;
-  border-bottom-left-radius: 7px 7px;
-  border-bottom-right-radius: 7px 7px;
-  border-top-left-radius: 7px 7px;
-  border-top-right-radius: 7px 7px;
-  margin: 10px;
-  width: 120px;
-  height: 120px;
+	-webkit-box-shadow: black 0px 0px 40px;
+	border-bottom-left-radius: 7px 7px;
+	border-bottom-right-radius: 7px 7px;
+	border-top-left-radius: 7px 7px;
+	border-top-right-radius: 7px 7px;
+	margin: 10px;
+}
+
+.album-cover-shows {
+	-webkit-box-shadow: black 0px 0px 40px;
+	border-bottom-left-radius: 7px 7px;
+	border-bottom-right-radius: 7px 7px;
+	border-top-left-radius: 7px 7px;
+	border-top-right-radius: 7px 7px;
+	margin: 10px;
+	width: 136px;
+	height: 200px;
+}
+
+.album-cover-album {
+	-webkit-box-shadow: black 0px 0px 40px;
+	border-bottom-left-radius: 7px 7px;
+	border-bottom-right-radius: 7px 7px;
+	border-top-left-radius: 7px 7px;
+	border-top-right-radius: 7px 7px;
+	margin: 10px;
+	width: 120px;
+	height: 120px;
 }
 
 .song {
-  border-top: none;
-  color: #666;
-  min-height: 100%;
-  height: 100%;
+	border-top: none;
+	color: #666;
+	min-height: 100%;
+	height: 100%;
 }
 .song .song-title {
 	overflow: hidden;

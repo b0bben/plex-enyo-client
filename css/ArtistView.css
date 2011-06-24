@@ -4,11 +4,9 @@
 }
 
 .artist-cover {
-  height: 150px;
   overflow: visible;
   margin: 20px;
   visibility: visible;
-  width: 200px;
   z-index: 0;
 }
 
@@ -19,8 +17,6 @@
   border-top-left-radius: 7px 7px;
   border-top-right-radius: 7px 7px;
   visibility: visible;
-  width: 194px;
-  height: 150px;
 }
 
 .artist-title_holder {

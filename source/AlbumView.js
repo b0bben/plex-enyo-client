@@ -10,7 +10,7 @@ enyo.kind({
 	    {name: "title", className: "album-title"}
 	  ]},
 	  {name: "trackContainer", kind: enyo.HFlexBox, components: [
-      {name: "cover", kind: enyo.Image, className: "album-cover"},
+      {name: "cover", kind: enyo.Image},
       {kind: enyo.VFlexBox, flex: 1,style: "min-height:100%", components: [  
         {name: "trackList", kind: "VirtualRepeater", onSetupRow: "setupRowItems", components: [ 
           {name:"itemSong", kind: "Item", layoutKind:"HFlexLayout", className:'song', onmousehold: "itemMousehold", onmouserelease: "itemMouserelease", onclick: "onclick_song", ondragstart: "itemDragStart", ondragfinish: "itemDragFinish", ondrag: "onDrag_itemMedia", ondrop: "onDrop_itemMedia", components: [
@@ -31,14 +31,28 @@ enyo.kind({
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
-		if (this.plexMediaObject !== undefined && this.plexMediaObject.viewGroup == "track") {
+		if (this.plexMediaObject !== undefined && (this.plexMediaObject.viewGroup == "track" || this.plexMediaObject.viewGroup == "episode")) {
 			//set the general info for the album
 			this.log("albumview with: " + this.plexMediaObject.parentTitle);
 			this.$.cover.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
-			this.$.title.setContent(this.plexMediaObject.parentTitle);
+			this.$.cover.addRemoveClass("album-cover-shows",this.plexMediaObject.viewGroup === "episode");
+			this.$.cover.addRemoveClass("album-cover-album",this.plexMediaObject.viewGroup === "track");
 			
-			//construct the track listing
-			this.createTrackList(this.plexMediaObject);
+			if (this.plexMediaObject.viewGroup === "episode")
+				this.$.title.setContent(this.plexMediaObject.title2);
+			else if (this.plexMediaObject.viewGroup === "track")
+				this.$.title.setContent(this.plexMediaObject.parentTitle);
+
+
+			
+			if (this.plexMediaObject.viewGroup === "track") {
+				//construct the track listing
+				this.createTrackList(this.plexMediaObject);				
+			}
+			else if (this.plexMediaObject.viewGroup === "episode") {
+				//construct the track listing
+				this.createEpisodeList(this.plexMediaObject);
+			}
 			//gogogogogo!
 			//this.render();
 			this.$.trackList.render();
@@ -46,6 +60,16 @@ enyo.kind({
 	},
 	tracksChanged: function() {
 		this.$.trackList.render();
+	},
+	createEpisodeList: function(pmc) {
+		  if (pmc.Video !== undefined || pmc.Video.length > 0) {
+		    this.log();
+		    
+		    if (enyo.isArray(pmc.Video))
+		      this.tracks = pmc.Video;
+		    else
+		      this.tracks[0] = pmc.Video;
+		  }
 	},
 	createTrackList: function(pmc) {
 		  if (pmc.Track !== undefined || pmc.Track.length > 0) {
