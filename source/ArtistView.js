@@ -54,7 +54,7 @@ enyo.kind({
 	},
 	gotAlbums: function(pmc) {
 		//reset the album list
-		this.$.cells.destroyComponents();
+		this.$.cells.destroyControls();
 		
 	  if (pmc.Directory != undefined || pmc.Directory.length > 0) {
 	  

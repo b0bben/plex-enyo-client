@@ -134,6 +134,9 @@ enyo.kind({
 			this.$.serverForm.setServer(server);
 			
 		}
+	},
+	togglePreferenceClick: function(inSender, inState) {
+	    this.log("Toggled to state" + inState + " for server:"+inSender);
 	}
 });
 // Array Remove - By John Resig (MIT Licensed)

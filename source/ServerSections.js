@@ -29,7 +29,7 @@ enyo.kind({
 				var r = this.mediaServer.pmo.MediaContainer.Directory[j];
 				this.sections.push(r);
 			};
-			this.$.sectionList.render();
+			//this.$.sectionList.render();
 		}
 	},
 	showCaptionChanged: function() {
@@ -43,7 +43,7 @@ enyo.kind({
       	if (section) {        	
 			this.$.sectionButton.setHeaderContent(section);
 				
-			this.log("ritar sektion: " + section.title);
+			//this.log("ritar sektion: " + section.title);
 			return true;
 		}
 

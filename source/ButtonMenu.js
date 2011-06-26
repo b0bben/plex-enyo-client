@@ -20,14 +20,14 @@ enyo.kind({
 		this.menuListChanged();
 	},
 	serverChanged: function() {
-		this.log("serverChanged");
+		//this.log("serverChanged");
 		//this.$.serverName.setContent("(" + this.server.name +")")
 	},
 	menuListChanged: function() {
-		this.log("menuListChanged");
+		//this.log("menuListChanged");
 	},
 	headerContentChanged: function() {
-		this.log("headerContentChanged");
+		//this.log("headerContentChanged");
 		this.$.sectionName.setContent(this.headerContent.title);
 		switch(this.headerContent.type)
 		{

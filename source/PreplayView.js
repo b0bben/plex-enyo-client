@@ -29,8 +29,19 @@ enyo.kind({
         ]},
         {name: "tagline", className: "tagline"},
         {name: "desc", className: "desc"},
+		{kind: "Video", src: "http://www.w3schools.com/html5/movie.mp4"}
       ]},
 		]},
+		{kind: "Toolbar", align: "center", components: [
+  			{name: "dragHandle", kind: "GrabButton", onclick: "closeMyself"},
+			{ name: 'playButton', 
+				kind: 'Button', 
+				className: 'photos button', 
+				caption: ' ', 
+				onclick: 'clickPlay', 
+				components: [{kind: 'Image', src:'images/icn-slideshow.png' }]
+			}
+  		]}
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -45,6 +56,7 @@ enyo.kind({
 			this.$.year.setContent(this.plexMediaObject.year);
 			this.$.tagline.setContent(this.plexMediaObject.tagline);		
 			this.$.desc.setContent(this.plexMediaObject.summary);
+			this.$.video.setSrc(this.server.baseUrl + this.plexMediaObject.Media.Part.key);
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
 			this.$.backdropImg.setSrc(this.server.baseUrl + this.plexMediaObject.art);
@@ -53,5 +65,10 @@ enyo.kind({
 	},
 	doClose: function() {
 		this.close();
+	},
+	clickPlay: function() {
+		//var video = this.createComponent({kind: "Video", src: "http://www.w3schools.com/html5/movie.mp4"});
+		//this.$.video.node.webkitEnterFullscreen();
+		this.$.video.play();
 	}
 })

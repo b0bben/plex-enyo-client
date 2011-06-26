@@ -108,7 +108,7 @@ enyo.kind({
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
 				} else {
-					path = "images/BlankPoster.png";
+					path = "images/shadow.png";
 				}
 				//coverart img and properties
 				c.$.coverDiv.$.coverImg.setSrc(path);

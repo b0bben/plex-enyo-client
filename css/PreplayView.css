@@ -177,3 +177,39 @@
   z-index: 0;
 }
 
+.photos.enyo-button {
+	height: 28px;
+	line-height: 28px;
+	min-width: 120px;
+	/* OVER WRITING PRINTDIALOG CSS * /
+	border-width: 0 5px !important;
+	/* font-size:18px !important; * /
+	height:33px !important;
+	min-width: 40px !important;
+	padding: 0 5px !important;
+	line-height:33px !important;
+	color: #fff !important;
+	/* text-shadow: #6c6f71 1px 1px; */
+	/* -webkit-border-image: url(../images/button_border_image.png) 0 5 33 5 repeat repeat !important; */
+}
+.PictureModeTopControls .photos.enyo-button,
+.enyo-toolbar .photos.enyo-button {
+	-webkit-border-image:none;
+	min-width: 40px;
+	height: 32px;
+}
+
+.button {
+	overflow:hidden;
+	padding: 0;
+	background-color:transparent;
+}
+
+.button.enyo-button-down img {
+	margin-top: -32px;
+}
+
+.button img {
+	padding-top: 0;
+	margin-top: 0px;
+}

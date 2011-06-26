@@ -39,7 +39,10 @@ enyo.kind({
 			for (var i = prefs.length - 1; i >= 0; i--){
 				var serverAsJson = prefs[i];
 				var plexServer = new PlexServer(serverAsJson.name,serverAsJson.host,serverAsJson.port,serverAsJson.username,serverAsJson.password,serverAsJson.include);
-				this.servers.push(plexServer);
+				if (plexServer.include){
+					this.servers.push(plexServer);
+				}
+				
 			};
 			//this.log("loaded " + this.servers.length);
 		}

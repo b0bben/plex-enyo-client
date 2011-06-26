@@ -14,9 +14,9 @@ enyo.kind({
 			{kind: "Image", src: "images/PlexTextLogo.png", style: "padding: none;"}
 		]},
 		{kind: enyo.Scroller, flex: 1, components: [
-			{name: "serverList",kind: "VirtualList",flex: 1, height: "100%", onSetupRow: "setupServerItems", components: [
+			{name: "serverList",kind: "VirtualRepeater",flex: 1, height: "100%", onSetupRow: "setupServerItems", components: [
 				 {name: "cells", kind: "VFlexBox"}
-			]}
+			]},
 		]},
 				
 		{kind: "Selection"},		
@@ -32,15 +32,15 @@ enyo.kind({
 		this.parentMediaContainerChanged();
 		this.objCurrNavItem = "";
 		this.selectedRow = -1;
-		this.$.cells.destroyComponents();
+		this.$.cells.destroyControls();
 	},
 	headerContentChanged: function() {
 		//this.$.header.setContent(this.headerContent);
 	},
 	parentMediaContainerChanged: function() {
 		//this.render();
-		this.$.cells.destroyComponents();
-		this.$.serverList.refresh();
+		this.$.cells.destroyControls();
+		this.$.serverList.render();
 	},
 	setupServerItems: function(inSender, inIndex) {
 		if (this.parentMediaContainer !== undefined && this.parentMediaContainer.length >= inIndex) {
@@ -62,9 +62,8 @@ enyo.kind({
       this.owner.$.appMenu.open();
 	},
 	resizeHandler: function(inSender, inEvent) {
-		this.render();
-		this.$.cells.destroyComponents();
-		this.$.serverList.refresh();
+		this.$.cells.destroyControls();
+		this.$.serverList.render();
 		
 	}
  });

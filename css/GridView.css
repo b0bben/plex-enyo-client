@@ -24,8 +24,8 @@
 .cover-shadow{
 	width:100px;
 	height:149px;	
-	border-image:url(../images/shadow.png) 10 round round;
-	-webkit-border-image:url(../images/shadow.png) 10 round round;
+	border-image:url(../images/plexShadow.png) 10 round round;
+	-webkit-border-image:url(../images/plexShadow.png) 10 round round;
 	border-width:10px;
 	
 }
