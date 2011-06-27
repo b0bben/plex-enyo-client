@@ -3,6 +3,9 @@
 	color: white;
 }
 
+.enyo-header-inner {
+	padding: 0px !important;
+}
 .enyo-canonview-header {
 	padding: 10px;
 	background: #ccc;

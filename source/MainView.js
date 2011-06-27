@@ -11,7 +11,8 @@ enyo.kind({
 				]},
 				{kind:enyo.VFlexBox, flex:1, components: [
 		 			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", onSelectView: "viewSelected", components: [
-						{kind: "plex.GridView", name: "grid_view"}
+						{kind: "plex.GridView", name: "grid_view"},
+						{kind: "plex.WelcomeView", name: "welcomeView"}
 					]}
 				]},
 
@@ -40,6 +41,9 @@ enyo.kind({
 		this.rootMediaContainer = plexMediaContainer;
 		//this.$.left_pane.createComponents([{kind: "plex.SectionsView", name: "view_sections", parentMediaContainer: plexMediaContainer,headerContent: plexMediaContainer.title1, flex:1, owner:this}]);
 		this.log("fyllde på sektioner");
+		if (this.rootMediaContainer.length < 1) {
+			this.$.right_pane.selectViewByName("welcomeView");
+		}
 		this.$.left_pane.render();
 		this.$.sectionsView.setParentMediaContainer(this.rootMediaContainer);
 		this.$.left_pane.selectViewByName("sectionsView");

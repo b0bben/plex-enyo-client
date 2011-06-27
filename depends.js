@@ -27,6 +27,7 @@ enyo.depends(
 	"css/SongList.css",
 	"css/EmptyToaster.css",
 	"css/PreferencesView.css",
+	"css/WelcomeView.css",
 	//external modules
 	"external/jkl-parsexml.js"
 );

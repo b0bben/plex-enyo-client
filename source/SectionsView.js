@@ -10,8 +10,8 @@ enyo.kind({
 		onSelectedSection: ""
 	},
 	components: [
-		{name: "header", kind: "Header",style: '-webkit-box-align: center !important',pack: 'center', className: "enyo-header-dark", components: [
-			{kind: "Image", src: "images/PlexTextLogo.png", style: "padding: none;"}
+		{name: "header", kind: "Header",style: '-webkit-box-align: center !important;',pack: 'center', className: "enyo-header-dark", components: [
+			{kind: "Image", src: "images/PlexTextLogo.png", style: "padding: 0px !important;"}
 		]},
 		{kind: enyo.Scroller, flex: 1, components: [
 			{name: "serverList",kind: "VirtualRepeater",flex: 1, height: "100%", onSetupRow: "setupServerItems", components: [
@@ -47,7 +47,10 @@ enyo.kind({
 				var mediaObj = this.parentMediaContainer[inIndex];
 				if (mediaObj !== undefined) {
 					this.log("creating server " + mediaObj.server.name);
-					this.$.cells.createComponent({kind: "plex.ServerSection", onRowSelected: "sectionRowSelected", mediaServer: mediaObj, caption: mediaObj.server.name, owner: this});
+					this.$.cells.createComponent({kind: "plex.ServerSection", onRowSelected: "sectionRowSelected", 
+																				mediaServer: mediaObj, 
+																				caption: this.parentMediaContainer.length == 1 ? "" : mediaObj.server.name, 
+																				owner: this});
 					return true;
 				}
 		}

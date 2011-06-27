@@ -15,7 +15,7 @@ enyo.kind({
 				{name: "cells", kind: "HFlexBox"}
 			]},
 			{kind: "Selection"},
-			{kind: "plex.EmptyToaster", name: "emptyToaster"}
+			{kind: "plex.EmptyToaster", name: "emptyToaster"},
 	],
 	create: function() {
 		this.count = 0;
@@ -107,13 +107,15 @@ enyo.kind({
 					var path = this.parentMediaContainer.server.baseUrl + pmo.thumb;
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
+					//coverart img and properties
+					c.$.coverDiv.$.coverImg.setSrc(path);
+					//label below cover art
+					c.$.cover_label.setContent(lbl);
 				} else {
-					path = "images/shadow.png";
+					return false;
+					//c.destroyControls();
 				}
-				//coverart img and properties
-				c.$.coverDiv.$.coverImg.setSrc(path);
-				//label below cover art
-				c.$.cover_label.setContent(lbl);
+
 			}
 			return true;
 		}

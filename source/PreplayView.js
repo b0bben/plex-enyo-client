@@ -29,7 +29,7 @@ enyo.kind({
         ]},
         {name: "tagline", className: "tagline"},
         {name: "desc", className: "desc"},
-		{kind: "Video", src: "http://www.w3schools.com/html5/movie.mp4"}
+		//{kind: "Video", src: "http://www.w3schools.com/html5/movie.mp4"}
       ]},
 		]},
 		{kind: "Toolbar", align: "center", components: [
@@ -56,7 +56,7 @@ enyo.kind({
 			this.$.year.setContent(this.plexMediaObject.year);
 			this.$.tagline.setContent(this.plexMediaObject.tagline);		
 			this.$.desc.setContent(this.plexMediaObject.summary);
-			this.$.video.setSrc(this.server.baseUrl + this.plexMediaObject.Media.Part.key);
+			//this.$.video.setSrc(this.server.baseUrl + this.plexMediaObject.Media.Part.key);
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
 			this.$.backdropImg.setSrc(this.server.baseUrl + this.plexMediaObject.art);

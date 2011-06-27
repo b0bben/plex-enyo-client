@@ -57,9 +57,8 @@ enyo.kind({
 			{kind: "Input", name: "servername", hint: $L("Give this server a friendly name"), spellcheck: false, autocorrect:false},
 		]},
 		
-		{name: "serverTitle", caption:"Server details", kind: "RowGroup", components: [
+		{name: "serverTitle", caption:"Server location", kind: "RowGroup", components: [
 			{kind: "Input", name: "serverurl", hint: $L("Type your server URL address"), spellcheck: false, autocorrect:false, autoCapitalize: "lowercase", inputType:"url"},
-			{kind: "Input", name: "serverport", hint: $L("Type your port number"), value: "32400", spellcheck: false, autocorrect:false, autoCapitalize: "lowercase"}
 		]},
 		
 		{name: "loginTitle", caption: "Login details", kind: "RowGroup", components: [
@@ -86,7 +85,6 @@ enyo.kind({
 			var ui = this.$;
 			ui.servername.setValue(this.server.name);
 			ui.serverurl.setValue(this.server.host);
-			ui.serverport.setValue(this.server.port);
 			
 			if (this.server.username !== undefined) {
 				ui.username.setValue(this.server.username);
@@ -98,7 +96,6 @@ enyo.kind({
 			var ui = this.$;
 			ui.servername.setValue("");
 			ui.serverurl.setValue("");
-			ui.serverport.setValue("32400");
 			ui.username.setValue("");
 			ui.password.setValue("");
 
@@ -109,19 +106,18 @@ enyo.kind({
 	addServerTapped: function(inSender, inEvent) {
       var serverName = this.$.servername.getValue();
       var serverUrl = this.$.serverurl.getValue();
-      var serverPort = this.$.serverport.getValue();
       var username = this.$.username.getValue();
       var password = this.$.password.getValue();
       
       this.serverDetails = {name:serverName,
 					  		host:serverUrl,
-					  		port:serverPort,
+					  		port:32400, //always 32400
 					  		user:username,
 					  		pass:password,
 					  		include: true};
   		
-			enyo.setCookie("newPMSServer", enyo.json.stringify(this.serverDetails));
-			this.log("cookie for new server set: " + enyo.json.stringify(this.serverDetails));
+			//enyo.setCookie("newPMSServer", enyo.json.stringify(this.serverDetails));
+			//this.log("cookie for new server set: " + enyo.json.stringify(this.serverDetails));
 			this.doSave(this.serverDetails);
 	},
 	removeServerTapped: function(inSender, inEvent) {
