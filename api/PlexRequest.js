@@ -122,6 +122,10 @@ enyo.kind({
 		this.dataForUrlAsync(server,url);
 		
 	},
+	getFiltersForSectionAndKey: function(server,key) {
+		var url = "/library/sections/" + key;
+		this.dataForUrlAsync(server,url);
+	},
 	getFullUrlForPlexUrl: function(server,url) {
 	  return server.baseUrl + url;
 	}

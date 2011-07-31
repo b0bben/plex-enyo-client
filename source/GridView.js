@@ -8,17 +8,24 @@ enyo.kind({
 	},
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
-		{kind: "PageHeader", name: "grid_header", style: '-webkit-box-align: center !important',pack: 'center',content: "Welcome to Plex", className: "enyo-header-dark"},
+		{kind: "Header",className: "enyo-header-dark", components: [
+			{kind: enyo.Spacer},
+			{name: "grid_header", content: "Welcome to Plex", style: '-webkit-box-align: center !important',pack: 'center'},
+			{kind: enyo.Spacer},
+			{kind: "ToolButton", caption: "Filter", onclick: "sectionFilterClick"},
+			{kind: "Menu", name: "filterMenu", defaultKind: "MenuCheckItem"},
+		]},
 
-			{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
+		{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
 
-				{name: "cells", kind: "HFlexBox"}
-			]},
-			{kind: "Selection"},
-			{kind: "plex.EmptyToaster", name: "emptyToaster"},
+			{name: "cells", kind: "HFlexBox"}
+		]},
+		{kind: "Selection"},
+		{kind: "plex.EmptyToaster", name: "emptyToaster"},
 	],
 	create: function() {
 		this.count = 0;
+		this.filterLevel = "";
 		this.mediaContainer="";
 		this.plexReq = new PlexRequest();
 		this.inherited(arguments);
@@ -32,17 +39,53 @@ enyo.kind({
 		this.buildCells();
 		this.$.grid_list.refresh();
 	},
+	sectionFilterClick: function(inSender) {
+		console.log(inSender.id);
+		this.$.filterMenu.openAroundControl(inSender);
+	},
+	reloadSectionWithFilterLevel: function(level) {
+  	if (this.parentMediaContainer !== undefined) {
+  	//get the section details
+  	  this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
+  	this.server = this.parentMediaContainer.server;
+  	  this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
+  	}
+	},
 	parentMediaContainerChanged: function() {
 	  if (this.parentMediaContainer !== undefined) {
+		//get the section details
 	    this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
 		this.server = this.parentMediaContainer.server;
-	    this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
-	    this.$.grid_header.setContent(this.parentMediaContainer.section.title);
+  this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
+	    
+		//get different filtering options for this section
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotFiltersForSection"));
+		this.plexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
+    
+	  
+		this.$.grid_header.setContent(this.parentMediaContainer.section.title);
 	  }
+	},
+	gotFiltersForSection: function(pmc) {
+		for (var i=0; i < pmc.Directory.length; i++) {
+			var filter = pmc.Directory[i];
+			
+			this.$.filterMenu.createComponent({kind: enyo.MenuItem, caption: filter.title, value: filter.key, owner: this});
+		};
+		this.$.toolButton.setCaption(pmc.Directory[0].title);
+		
+		//this.$.filterMenu.
+	},
+	menuItemClick: function(inSender) {
+	  console.log(inSender);
+	  this.$.toolButton.setCaption(inSender.caption);
+	  this.filterLevel = inSender.value;
+	  this.reloadSectionWithFilterLevel(this.filterLevel);
+	  
 	},
 	gotMediaContainer: function(pmc) {
 		this.mediaContainer = pmc;
-    
+		
     	switch (this.getMediaType()) {
 	      case "movie":
 	        this.count = this.mediaContainer.Video.length;
@@ -102,7 +145,7 @@ enyo.kind({
 			for (var i=0, c; c=this.cells[i]; i++, idx++) {
 				if (idx < this.count) {
 				  var pmo = this.getPlexMediaObject(idx);
-					this.log("idx: " + idx);
+					//this.log("idx: " + idx);
 
 					var path = this.parentMediaContainer.server.baseUrl + pmo.thumb;
 					var lbl = pmo.title;
