@@ -154,6 +154,7 @@ enyo.kind({
 					c.$.coverDiv.$.coverImg.setSrc(path);
 					//label below cover art
 					c.$.cover_label.setContent(lbl);
+					return true;
 				} else {
 					return false;
 					//c.destroyControls();

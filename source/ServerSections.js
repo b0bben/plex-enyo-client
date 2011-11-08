@@ -25,6 +25,7 @@ enyo.kind({
 	},
 	mediaServerChanged: function() {
 		if (this.mediaServer !== undefined) {
+      this.log("creating serversection " + this.mediaServer.server.name);
 			for (var j = this.mediaServer.pmo.MediaContainer.Directory.length - 1; j >= 0; j--){
 				var r = this.mediaServer.pmo.MediaContainer.Directory[j];
 				this.sections.push(r);

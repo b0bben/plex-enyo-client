@@ -16,7 +16,7 @@ enyo.kind({
 		{kind: enyo.Pane, flex: 1, components: [
 			{name: "browserBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
 				method: "browse", subscribe: true, onSuccess: "gotBrowsed", onFailure: "genericFailure"},
-			{name: "resolveeBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
+			{name: "resolverBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
 					method: "resolve", subscribe: true, onSuccess: "gotResolved", onFailure: "genericFailure"},
 			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onDelete: "serverRemoved",onCancel: "backHandler", lazy: true, showing: false},
 			{name: "mainPrefs", kind: enyo.Control, layoutKind: "VFlexLayout", components:[
@@ -67,32 +67,58 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.plexReq = new PlexRequest();
 		this.servers = [];
 		this.loadPrefs();
-		this.$.browserBonjour.call({"regType":"_webos._tcp", "domainName":"local."});
+		this.$.browserBonjour.call({"regType":"_plexmediasvr._tcp", "domainName":"local."});
 		this.$.pane.selectViewByName("mainPrefs");
 	},
 	gotBrowsed: function(inSender, inResponse) {
-		this.log("success: BROWSE: " + JSON.stringify(inResponse));
-		this.$.console.addContent("> " + JSON.stringify(inResponse) + "<br/>");
-		inResponse.result.forEach(function(bonjourServer) {
-			this.$.console.addContent(">>> " + JSON.stringify(bonjourServer) + "<br/>");
-		});
+	  if (inResponse.returnValue) {
+	    //just a msg that it went well, skip it
+	    return;
+	  }
+		this.$.console.addContent("BROWSE> " + JSON.stringify(inResponse.instanceName) + "<br/>");
+
+    //we've found something, let's resolve this to get some details about the machine
+		this.$.resolverBonjour.call({"regType":inResponse.regType, "domainName":inResponse.domainName,
+		                            "instanceName":inResponse.instanceName, "subscribe": true});
+	},
+	gotResolved: function(inSender, inResponse) {
+  	if (inResponse.returnValue) {
+	    //just a msg that it went well, skip it
+  	  return;
+  	}
+	
+		this.$.console.addContent("RESOLVE>: " + JSON.stringify(inResponse)+ "<br/>");
+
+    //add found server to server list
+    var serverName = inResponse.targetName;
+    var serverUrl = "http://" + inResponse.IPv4Address; //no http included when found via bonjour
+    
+    var foundServer = {name:serverName,
+    		  		host:serverUrl, 
+    		  		port:32400, //always 32400
+    		  		user:null,
+    		  		pass:null,
+    		  		include: true};
+    
+    var existingServer = this.plexReq.serverForUrl(serverUrl);
+    if (!existingServer) {
+      this.servers.push(foundServer);
+      this.savePrefs();
+      this.$.serverList.render();; //force-refresh list
+    }
 	},
 	genericFailure: function(inSender, inResponse) {
 		this.log("failure: " + JSON.stringify(inResponse));
 	},
 	loadPrefs: function() {
-		var prefCookie = enyo.getCookie("prefs");
-		
-		if (prefCookie !== undefined) {
-			var prefs = enyo.json.parse(prefCookie);
-			this.servers = prefs;
+			this.servers = this.plexReq.servers;
 			this.$.serverList.render();
-		}
 	},
 	savePrefs: function() {
-		enyo.setCookie("prefs", enyo.json.stringify(this.servers));
+		this.plexReq.savePrefs();
 	},
 	showAddServerForm: function(inSender) {
 		this.$.pane.selectViewByName("serverForm");
@@ -137,7 +163,8 @@ enyo.kind({
 	},
 	togglePreferenceClick: function(inSender, inState) {
 	    this.log("Toggled to state" + inState + " for server:"+inSender);
-	}
+	},
+	
 });
 // Array Remove - By John Resig (MIT Licensed)
 Array.prototype.remove = function(from, to) {
@@ -145,3 +172,4 @@ Array.prototype.remove = function(from, to) {
   this.length = from < 0 ? this.length + from : from;
   return this.push.apply(this, rest);
 };
+

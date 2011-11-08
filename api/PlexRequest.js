@@ -39,13 +39,23 @@ enyo.kind({
 			for (var i = prefs.length - 1; i >= 0; i--){
 				var serverAsJson = prefs[i];
 				var plexServer = new PlexServer(serverAsJson.name,serverAsJson.host,serverAsJson.port,serverAsJson.username,serverAsJson.password,serverAsJson.include);
-				if (plexServer.include){
+
 					this.servers.push(plexServer);
-				}
 				
 			};
 			//this.log("loaded " + this.servers.length);
 		}
+	},
+	savePrefs: function() {
+	  enyo.setCookie("prefs", enyo.json.stringify(this.servers));
+	},
+	serverForUrl: function(serverUrl) {
+	  this.loadServerListFromCookie(); //refresh list of servers incase we've added some without saving
+	  for (var i = 0; i < this.servers.length; i++) {
+	    if (this.servers[i].host == serverUrl)
+	      return this.servers[i];
+	  }
+	  return null;
 	},
 	urlWithTranscoding: function(plexUrl) {
 		var publicKey = "KQMIY6GATPC63AIMC4R2";

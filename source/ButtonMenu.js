@@ -16,7 +16,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.serverChanged();
-		this.headerContentChanged();
+		//this.headerContentChanged();
 		this.menuListChanged();
 	},
 	serverChanged: function() {

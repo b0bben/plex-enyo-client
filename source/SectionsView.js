@@ -19,42 +19,39 @@ enyo.kind({
 			]},
 		]},
 				
-		{kind: "Selection"},		
-		{kind: "Toolbar", components: [
-		  {kind: "Button", caption: "Show App Menu", onclick: "openAppMenu", showing: true},
-		]}
+		{kind: "Selection"},
+		/*{kind: "Button", onclick: "openAppMenu", caption: "appmenu"},*/
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.listedServers = [];
 		this.sections = [];
 		this.headerContentChanged();
-		this.parentMediaContainerChanged();
+		this.$.cells.destroyControls();
+		//this.parentMediaContainerChanged();
 		this.objCurrNavItem = "";
 		this.selectedRow = -1;
-		this.$.cells.destroyControls();
 	},
 	headerContentChanged: function() {
 		//this.$.header.setContent(this.headerContent);
 	},
 	parentMediaContainerChanged: function() {
 		//this.render();
-		this.$.cells.destroyControls();
-		this.$.serverList.render();
+		//this.$.cells.destroyControls();
+		//this.$.serverList.render();
 	},
 	setupServerItems: function(inSender, inIndex) {
-		if (this.parentMediaContainer !== undefined && this.parentMediaContainer.length >= inIndex) {
 				var mediaObj = this.parentMediaContainer[inIndex];
 				if (mediaObj !== undefined) {
 					this.log("creating server " + mediaObj.server.name);
-					this.$.cells.createComponent({kind: "plex.ServerSection", onRowSelected: "sectionRowSelected", 
+					this.$.cells.createComponents([{kind: "plex.ServerSection", onRowSelected: "sectionRowSelected", 
 																				mediaServer: mediaObj, 
 																				caption: this.parentMediaContainer.length == 1 ? "" : mediaObj.server.name, 
-																				owner: this});
+																				owner: this}]);
+          this.log("created");
 					return true;
 				}
-		}
-		return false;
+				return false;
 	},
 	sectionRowSelected: function(inSender, inSection, inServer) {
 		this.log("section selected: " + inServer.name + "->" + inSection.title);
@@ -64,9 +61,4 @@ enyo.kind({
 	openAppMenu: function() {
       this.owner.$.appMenu.open();
 	},
-	resizeHandler: function(inSender, inEvent) {
-		this.$.cells.destroyControls();
-		this.$.serverList.render();
-		
-	}
  });

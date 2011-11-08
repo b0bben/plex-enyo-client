@@ -14,6 +14,8 @@ enyo.depends(
 	"source/PreferencesView.js",
 	"source/ServerFormView.js",
 	"source/ServerSections.js",
+	"source/PlexViewVideo.js",
+	"source/MessageDialog.js",	
 	//plex api
 	"api/PlexRequest.js",
 	"api/base64.js",
@@ -28,6 +30,8 @@ enyo.depends(
 	"css/EmptyToaster.css",
 	"css/PreferencesView.css",
 	"css/WelcomeView.css",
+	"css/VideoControl.css",
+	"css/MessageDialog.css",
 	//external modules
 	"external/jkl-parsexml.js"
 );

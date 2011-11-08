@@ -77,6 +77,7 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotNothing"));
 		this.serverDetails = "";
 		this.serverChanged();
 	},
@@ -91,6 +92,7 @@ enyo.kind({
 				ui.password.setValue(this.server.password);
 			}
 			
+      this.$.addServerButton.setCaption($L("Update server"));			
 			this.$.removeServerButton.setDisabled(false);
 		} else {
 			var ui = this.$;
@@ -109,16 +111,25 @@ enyo.kind({
       var username = this.$.username.getValue();
       var password = this.$.password.getValue();
       
-      this.serverDetails = {name:serverName,
-					  		host:serverUrl,
-					  		port:32400, //always 32400
-					  		user:username,
-					  		pass:password,
-					  		include: true};
-  		
-			//enyo.setCookie("newPMSServer", enyo.json.stringify(this.serverDetails));
-			//this.log("cookie for new server set: " + enyo.json.stringify(this.serverDetails));
-			this.doSave(this.serverDetails);
+      var existingServer = this.plexReq.serverForUrl(serverUrl);
+      if (existingServer != null) {
+
+        existingServer.name = serverName;
+        existingServer.username = username;
+        existingServer.password = password;
+        
+        this.plexReq.savePrefs();
+        this.owner.owner.$.pane.back();
+      } else {    
+        this.serverDetails = {name:serverName,
+        		  		host:serverUrl,
+        		  		port:32400, //always 32400
+        		  		user:username,
+        		  		pass:password,
+        		  		include: true};
+        
+        this.doSave(this.serverDetails);
+      }
 	},
 	removeServerTapped: function(inSender, inEvent) {
 		var prefCookie = enyo.getCookie("prefs");
@@ -132,5 +143,8 @@ enyo.kind({
 				}	
 			};
 		}
-	}
+	},
+	gotNothing: function() {
+	//placeholder
+	},
 });

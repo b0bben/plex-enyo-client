@@ -40,14 +40,16 @@ enyo.kind({
 	gotSections: function(plexMediaContainer) {
 		this.rootMediaContainer = plexMediaContainer;
 		//this.$.left_pane.createComponents([{kind: "plex.SectionsView", name: "view_sections", parentMediaContainer: plexMediaContainer,headerContent: plexMediaContainer.title1, flex:1, owner:this}]);
-		this.log("fyllde på sektioner");
+		this.log("got sections for " + this.rootMediaContainer.length + " servers");
 		if (this.rootMediaContainer.length < 1) {
 			this.$.right_pane.selectViewByName("welcomeView");
 		}
+	
 		this.$.left_pane.render();
 		this.$.sectionsView.setParentMediaContainer(this.rootMediaContainer);
 		this.$.left_pane.selectViewByName("sectionsView");
 		//enyo.scrim.hide();
+	
 	},
 	showGridView: function(inSender, inSection) {
 		this.selectedSection = inSection; //actually both the section AND the server it belongs to
