@@ -125,17 +125,20 @@ enyo.kind({
 	},
 	buildCells: function() {
 		var bounds = this.$.grid_list.getBounds();
+		this.log(bounds.width);
 		this.cellCount = Math.floor(bounds.width / 175);
 		this.log(this.cellCount);
 		this.$.cells.destroyControls();
 		this.cells = [];
-		for (var i=0; i<this.cellCount; i++) {
+		var numberOfGridItems = this.cellCount > this.count ? this.count : this.cellCount;
+		for (var i=0; i<numberOfGridItems; i++) {
 			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", idx: i, onclick: "cellClick", pack: "center", align: "center", style: "padding: 8px;width: 175px;height: 220px;", owner: this});
 			var imgDiv = c.createComponent({name: "coverDiv", className: "cover-shadow"});
 			imgDiv.createComponent({kind: "Image", name: "coverImg", className: "cover-image"});
 			c.createComponent({name: "cover_label", className: "cover-label"});
 			this.cells.push(c);
 		}
+		this.log("cells: " + this.cells.length);
 		this.$.grid_list.refresh();
 	},
 	listSetupRow: function(inSender, inIndex) {
@@ -154,10 +157,10 @@ enyo.kind({
 					c.$.coverDiv.$.coverImg.setSrc(path);
 					//label below cover art
 					c.$.cover_label.setContent(lbl);
-					return true;
+					//this.log("returning cover");
 				} else {
-					return false;
-					//c.destroyControls();
+				  //this.log("NOT returning cover");
+					//return false;
 				}
 
 			}
