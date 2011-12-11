@@ -25,28 +25,24 @@ enyo.kind({
                 {name: "pgRating", kind: "Image"},        
               ]},//title,pgrating
               {kind: enyo.HFlexBox, components: [
-                {name: "released", className: "info_text", content: "Released 2009-11-11", style: "margin-right},
+                {name: "released", className: "info_text", content: "Released 2009-11-11"},
+                {content: "-", style: "margin-left: 5px; margin-right: 5px; color: #888;"},
                 {name: "runtime", className: "info_text", content: "118 minutes"},
+                {content: "-", style: "margin-left: 5px; margin-right: 5px; color: #888;"},
                 {name: "category", className: "info_text", content: "Sci-fi"},
               ]}, //released, runtime, category
               {name: "desc", className: "desc"},  
               {kind: enyo.HFlexBox, components: [
                 {content: "Director: ", className: "details-header"},
-                {content: "David Bowie", className: "info_text"},
-                {content: "Angelina Jolie", className: "info_text"},
-                {content: "Mr. Dobalina", className: "info_text"},
+                {name: "directors"},
               ]},              
               {kind: enyo.HFlexBox, components: [
                 {content: "Writer: ", className: "details-header"},
-                {content: "David Bowie", className: "info_text"},
-                {content: "Angelina Jolie", className: "info_text"},
-                {content: "Mr. Dobalina", className: "info_text"},
+                {name: "writers"},
               ]},
               {kind: enyo.HFlexBox, components: [
                 {content: "Cast: ", className: "details-header"},
-                {content: "David Bowie", className: "info_text"},
-                {content: "Angelina Jolie", className: "info_text"},
-                {content: "Mr. Dobalina", className: "info_text"},
+                {name: "cast"},
               ]},
               {kind: enyo.VFlexBox, components: [
                 {kind: enyo.HFlexBox, className:"rating_holder", components: [
@@ -68,9 +64,10 @@ enyo.kind({
 		      {kind: 'Image', src:'images/icn-slideshow.png' }
 		  ]},
   	]},
-  	{kind: "Toaster", name: "videoToast", style: "top: 0px;width: 1024px;height: 768px",flyInFrom: "right", components: [ 
-  	  
-  	]},
+  /*	{kind: "Toaster", name: "videoToast", style: "top: 0px;width: 1024px;height: 768px",flyInFrom: "right", components: [ 
+  	  {name: "videoPlayer", kind: "PlexViewVideo", flex:1},
+  	]},*/
+  	{name: "videoPlayer", kind: "PlexViewVideo", flex:1, style: "top: 0px;width: 1024px;height: 768px", lazy: true, showing: false},
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -84,7 +81,27 @@ enyo.kind({
 			this.$.thumb.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
 			this.$.title.setContent(this.plexMediaObject.title);
 			this.$.released.setContent(this.plexMediaObject.year);
+
+      //duration
+			if (this.plexMediaObject.Media !== undefined)
+			  this.$.runtime.setContent(this.plexMediaObject.Media.duration / 3600);
+			else {
+			  this.$.runtime.setContent("");
+			}
 			//this.$.tagline.setContent(this.plexMediaObject.tagline);
+
+			//collect directors
+			var directors = this.collectTags(this.plexMediaObject.Director);
+		  this.$.directors.createComponent({content: directors, className: "info_text"});
+
+			//collect writers		  
+		  var writers = this.collectTags(this.plexMediaObject.Writer);
+		  this.$.writers.createComponent({content: writers, className: "info_text"});
+
+			//collect cast
+      var cast = this.collectTags(this.plexMediaObject.Role);
+      this.$.cast.createComponent({content: cast, className: "info_text"});
+		  
 			this.$.category.setContent("Sci-fi");
 			this.$.runtime.setContent("118 minutes");
 			this.$.desc.setContent(this.plexMediaObject.summary);
@@ -92,8 +109,26 @@ enyo.kind({
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
 			this.$.backdropImg.setSrc(this.server.baseUrl + this.plexMediaObject.art);
+
+			//finally render the shit out of this...
 			this.render();
 		}
+	},
+	transcoderUrlForVideoObject: function() {
+	  var transcodingUrl = this.plexReq.transcodeUrlForVideoUrl(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key);
+	  this.log(transcodingUrl);
+	  return transcodingUrl;
+	},
+	collectTags: function (tagContainer) {
+	  var tags = "";
+	  if (tagContainer !== undefined) {
+  	  for (var i = 0; i < tagContainer.length; i++) {
+    	  if (tags !== "")
+    	    tags += ", ";
+    	  tags += tagContainer[i].tag;
+    	}
+  	}
+  	return tags;
 	},
 	doClose: function() {
 		this.close();
@@ -102,9 +137,14 @@ enyo.kind({
 
 	},
 	clickPlay: function() {
-    this.$.videoToast.open();
-    var video = this.createComponent({kind: "PlexViewVideo", pmo: this.plexMediaObject});
-    video.playVideo();
+    //this.$.videoToast.open();
+    //var video = this.$.createComponent({kind: "PlexViewVideo", pmo: this.plexMediaObject});
+    var videoSrc = this.transcoderUrlForVideoObject();
+    this.$.videoPlayer.setShowing(true);
+    this.$.videoPlayer.setVideoSrc(videoSrc);
+    this.$.videoPlayer.setPmo(this.plexMediaObject);
+    this.$.videoPlayer.autoStartOnLoad();
+    this.$.videoPlayer.setFullScreen(true);
         //this.$.videoView.setVisible(true);
 		//this.$.videoView.playVideo();
 		//video.playVideo();

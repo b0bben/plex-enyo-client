@@ -13,13 +13,15 @@ enyo.kind({
 })
 enyo.kind({
   name: "PlexRequest",
-	  constructor: function(callback) {
-		this.callback = callback;
-		var self = this;
-		this.servers = [];
-		this.plex_access_key = "";
-		this.loadServerListFromCookie();
-	  },
+  kind: enyo.Component,
+  constructor: function(callback) {
+  this.inherited(arguments);
+	this.callback = callback;
+	var self = this;
+	this.servers = [];
+	this.plex_access_key = "";
+	this.loadServerListFromCookie();
+  },
 	loadServerListFromCookie: function() {
 		/*
 		*	Server list cookie will be array of servers like this:
@@ -57,21 +59,55 @@ enyo.kind({
 	  }
 	  return null;
 	},
-	urlWithTranscoding: function(plexUrl) {
+	transcodeUrlForVideoUrl: function(pmo, server, videoUrl) {
+	  //Step 1: general transcoding URL + server URL
+	  var transcodingUrl = "/video/:/transcode/segmented/start.m3u8";
+	  var fakeUrl = "http://localhost:32400"
+	  //Step 2: transcoding url + url to video object
+	  var targetUrl = transcodingUrl + "?url=" + encodeURIComponent(fakeUrl + videoUrl);
+	  //Step 3: add subtitle size
+	  targetUrl += "&subtitleSize=" + 100 //TODO: get from settings
+	  //Step 4: add audioboost
+	  targetUrl += "&audioBoost=" + 100 //TODO: get from settings
+	  //step 5: rating key
+	  targetUrl += "&ratingKey=" + pmo.ratingKey;
+	  //step 6: identifier
+	  targetUrl += "&identifier=" + "com.plexapp.plugins.library"; //TODO: get from somewhere...
+	  //step 7: quality
+	  targetUrl += "&quality=" + 5; //TODO: get from settings
+	  //step 8: key
+	  targetUrl += "&key=" + encodeURIComponent(fakeUrl + pmo.key);
+	  targetUrl += "&session=" + 1111;//enyo.fetchDeviceInfo().serialNumber;
+	  //step 9: 3G flag
+	  targetUrl += "&3g=0" //no 3G on teh touchpad
+	  
+	  //there's no step 9! 
+	  targetUrl += this.authWithUrl(targetUrl);
+	  
+	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:3};audioDecoders=mp3,aac{bitrate:160000}");
+	  
+	  return server.baseUrl + targetUrl;
+	  
+	},
+	authWithUrl: function(plexUrl) {
 		var publicKey = "KQMIY6GATPC63AIMC4R2";
 		var privateKey = decode64("k3U6GLkZOoNIoSgjDshPErvqMIFdE0xMTx8kgsrhnC0=");
 		var time = Math.round(new Date().getTime() / 1000);
 		
 		var url = plexUrl+"@"+time;
-		this.log("encoding url: " + url);
+		console.log("encoding url: " + url);
 		HMAC_SHA256_init(privateKey);
 		HMAC_SHA256_write(url);
 		var mac = HMAC_SHA256_finalize();
 		url = encode64(array_to_string(mac));
+		console.log("access code before encoding: " + url);
+		url = encodeURIComponent(url);
 		
-		this.log("X-Plex-Access-Key=" + publicKey);
-		this.log("X-Plex-Access-Time=" + time);
-		this.log("X-Plex-Access-Code=" + url);
+		console.log("X-Plex-Access-Key=" + publicKey);
+		console.log("X-Plex-Access-Time=" + time);
+		console.log("X-Plex-Access-Code=" + url);
+		
+
 		
 		/* Remote server login stuff
 		
@@ -80,6 +116,14 @@ enyo.kind({
 		
 		*/
 		
+		    return "&X-Plex-Access-Key=" + publicKey + "&X-Plex-Access-Time=" + time + "&X-Plex-Access-Code=" + url;
+		
+	},
+	loginSuccess: function(inSender, inResponse, inRequest) {
+	    console.log("LOGIN SUCCESS: " + inResponse);
+	},
+	loginFailure: function(inSender, inResponse, inRequest) {
+	    console.log("LOGIN FAIL: " + inResponse);
 	},
 	dataForUrlAsync: function(server,plexUrl) {
 		if (server !== undefined && plexUrl !== undefined) { 

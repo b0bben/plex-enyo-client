@@ -191,7 +191,7 @@ enyo.kind({
 
 enyo.kind({
     name: "PlexViewVideo",
-    kind: 'enyo.ViewImage',
+    kind: 'enyo.ImageView',
     components: [
         { name: "video", kind: "enyo.Video", className: "video-default", showControls: "" },
         { name: "headerBar", kind: "HFlexBox", className: "vid-header-bar show-vid-header-bar",
@@ -247,6 +247,7 @@ enyo.kind({
     ],
     published: {
       pmo: undefined,
+      videoSrc: undefined,
     },
     
     className: "video-view",
@@ -257,7 +258,7 @@ enyo.kind({
     showControlsGroup: undefined,
     hideControlsGroup: undefined,
     defaultHideControlTimeout: 6000,
-    viewSizeCode: 1,       // 1:FIT, 2:FILL  (a class scoped property)
+    viewSizeCode: 2,       // 1:FIT, 2:FILL  (a class scoped property)
     playedStates: { },
     IS_NOT_LOADED: 1,
     IS_LOADING: 2,
@@ -278,13 +279,16 @@ enyo.kind({
         this.loadState = this.IS_NOT_LOADED;
 		    this.seekedEventObservers = {};
 		    this.pmoChanged();
-		    //this.setFullScreen();
+		    this.videoSrcChanged();
+		    this.setFullScreen();
 		},
 	  setFullScreen: function (boolFullScreen) {
 		  if (window.PalmSystem) {
 			  window.PalmSystem.enableFullScreenMode(boolFullScreen);
 		  }
-	  },	    
+	  },
+	 videoSrcChanged: function() {
+	 },   
    pmoChanged: function() {
      if (this.pmo !== undefined) {
         this.playTimeMeta = {               // the meta data helping the updateSeeker() to animate
@@ -324,11 +328,11 @@ enyo.kind({
 
         // disable the secondary scroller from scrolling on video.  This does not impact to the
         // scrolling by the Carousel.  DFISH-28100
-        this.$.scroller.setAutoHorizontal(false);
+        /*this.$.scroller.setAutoHorizontal(false);
         this.$.scroller.setAutoVertical(false);
         this.$.scroller.setHorizontal(false);
         this.$.scroller.setVertical(false);
-
+*/
         var thisInst = this;
         var handlers = this.windowEventHandlers = {
             blur: function (ev) {
@@ -482,8 +486,7 @@ enyo.kind({
                 thisInst.onVideoError();
             }
         };
-        var videoSrc = "http://saturnus.mine.nu:32400/video/:/transcode/segmented/start.m3u8?url=http%3A%2F%2Fsaturnus.mine.nu%3A32400%2Flibrary%2Fparts%2F3395%2Ffile.avi&ratingKey=3492&identifier=com.plexapp.plugins.library&key=http%3A%2F%2Fsaturnus.mine.nu%3A32400%2Flibrary%2Fmetadata%2F3492&session=a83b42e021f2c7f9d3876c8797f6c0b1ede47d8c&quality=5&3g=0";
-
+        
         var containerEl = this.owner.hasNode();//.parentNode; //hasNode() should never return null in this case
         var left = 0;
         //var node = this.$.video.node = document.createElement("video");
@@ -501,7 +504,7 @@ enyo.kind({
         this.vidDomId = "vid"+this.vidDomId;
         node.setAttribute("id", this.vidDomId);
 
-        node.setAttribute("src", videoSrc);
+        node.setAttribute("src", this.videoSrc);
         this.loadState = this.IS_LOADING;
         //containerEl.removeChild(this.$.image.node);
         containerEl.appendChild(node);
@@ -1159,6 +1162,8 @@ enyo.kind({
             case this.IS_NOT_LOADED:
                 this.isAutoStart = true;
                 this.initVideo(doVideoPlay);
+                //this.initVideo();
+                doVideoPlay();
                 break;
             case this.IS_LOADEDING:
                 this.isAutoStart = true;
