@@ -26,6 +26,7 @@ enyo.kind({
 
 			]},
 			{name:"prefsView", kind:"plex.PreferencesView", lazy: true, showing: false, onClose:"closePrefsView"},
+			{name: "videoPlayer", kind: "PlexViewVideo", flex:1, lazy: true, showing: false},
 		]}
 	],
 	create: function() {
@@ -85,5 +86,13 @@ enyo.kind({
 		this.plexReq.loadServerListFromCookie();
 		this.plexReq.librarySections();
 		
+	},
+	startVideoPlayer: function(src, pmo) {
+	  this.$.pane.selectViewByName("videoPlayer");
+	  //src = "http://devimages.apple.com/iphone/samples/bipbopall.html";
+    this.$.videoPlayer.setVideoSrc(src);
+    this.$.videoPlayer.setPmo(pmo);
+    
+    this.$.videoPlayer.autoStartOnLoad();
 	},
 });

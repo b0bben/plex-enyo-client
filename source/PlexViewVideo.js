@@ -293,7 +293,7 @@ enyo.kind({
      if (this.pmo !== undefined) {
         this.playTimeMeta = {               // the meta data helping the updateSeeker() to animate
             isMonitorInProgress: false,
-            tDuration: this.pmo.duration / 60,
+            tDuration: (this.pmo.duration / 1000) / 60,
             tLastSeeked: 0,
             tScrubberLastUpdate: 0
         };
@@ -376,7 +376,7 @@ enyo.kind({
      * It updates the controlbar reflecting the last played time, if there's any.
      */
     updateControlbarToLastPlayTime: function () {
-        var duration = this.pmo.duration;
+        var duration = (this.pmo.duration / 1000);
         var timeRemain = duration;
         var timePlayed = this.pmo.viewOffset;
         if (undefined != timePlayed && timePlayed > 0 && timePlayed < duration) {
@@ -507,7 +507,7 @@ enyo.kind({
         node.setAttribute("src", this.videoSrc);
         this.loadState = this.IS_LOADING;
         //containerEl.removeChild(this.$.image.node);
-        containerEl.appendChild(node);
+        //containerEl.appendChild(node);
     },
 
     lockWindowOrientation: function () {
@@ -593,10 +593,10 @@ enyo.kind({
                         if (dx > 100 || dy > 100) {
                             if (this.isPlaying) {
                                 this.pauseVideo();
-                                this.hideControlsGroup && this.hideControlsGroup.cancel();
+                                this.hideControlbars();
                             }
                             if (!this.isControlBarShown) {
-                                this.showControlsGroup && this.showControlsGroup.execute();
+                                this.showControlbars();
                             }
                         } else if (dx > 3 || dy > 3) {
                             this.stopEvent(ev);
@@ -768,7 +768,7 @@ enyo.kind({
         this.adjustVideoSize();
 
         if (this.loadState == this.IS_LOADED) { return; }
-        this.$.image.node && this.adjustPosterSize();
+        //this.$.image.node && this.adjustPosterSize();
     },
 
     adjustPosterSize: function () {
@@ -800,7 +800,7 @@ enyo.kind({
                           width: cBar.offsetWidth, height: cBar.offsetHeight
                         }
         };
-//console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+cBar.offsetLeft+", t:"+cBar.offsetTop+", w:"+cBar.offsetWidth+", h:"+cBar.offsetHeight);
+        console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+cBar.offsetLeft+", t:"+cBar.offsetTop+", w:"+cBar.offsetWidth+", h:"+cBar.offsetHeight);
     },
 
     onVideoLoad: function (ev) {
@@ -813,7 +813,7 @@ enyo.kind({
 //console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onVideoLoad(): "'+this.dbEntry.path+'" w:'+node.videoWidth+', h:'+node.videoHeight);
 
         var duration = node.duration;
-        duration = (undefined != duration && !isNaN(duration)) ? duration : this.pmo.duration;
+        duration = (undefined != duration && !isNaN(duration)) ? duration : (this.pmo.duration / 1000);
         this.duration = duration;
         this.playTimeMeta.tDuration = duration;
 
@@ -874,7 +874,7 @@ enyo.kind({
      *                 percentage of how far into the total video duration to seek to.
      */
     updateTimeTallies: function (newPos) {
-        var duration = this.pmo.duration;
+        var duration = (this.pmo.duration / 1000);
         var timeToSeek = duration*(newPos/100);
         this.updateTimePlayedTally(timeToSeek);
         this.updateTimeRemainTally(duration - timeToSeek);
@@ -982,7 +982,10 @@ enyo.kind({
         if (this.isPlaying) {
             if (this.isControlBarShown) {
                 this.startMonitor();
-                this.hideControlsGroup.schedule(this.defaultHideControlTimeout);
+                var thisInst = this;
+                setTimeout(function () {
+                    thisInst.hideControlbars();
+                }, this.defaultHideControlTimeout);
             }
         }
     },
@@ -1054,7 +1057,7 @@ enyo.kind({
         this.hideControlsGroup && this.hideControlsGroup.schedule(this.defaultHideControlTimeout);
         this.stopEvent(ev);
 
-        var duration = this.pmo.duration;
+        var duration = (this.pmo.duration / 1000);
         var seekToTime = duration*(pos/100);
         this.updateSeeker((seekToTime/duration)*100);
         this.updateTimePlayedTally(seekToTime);
@@ -1087,7 +1090,7 @@ enyo.kind({
         if (this.loadState == this.IS_LOADED && this.$.video && this.$.video.node) {
             this.requestVideoSeek(newPos);
         } else {
-            this.timeSeekToBeforeLoaded = this.pmo.duration*(newPos/100);
+            this.timeSeekToBeforeLoaded = (this.pmo.duration / 1000)*(newPos/100);
             this.recordVideoState();
         }
     },
@@ -1127,6 +1130,7 @@ enyo.kind({
         if (!this.$.video) { return; }
 
         this.showVideoControlBar(true);
+        this.adjustSize();
         this.playVideo();
     },
 
@@ -1260,6 +1264,7 @@ enyo.kind({
     },
 
     adjustVideoSizeDesktopMode: function () {
+        console.log();
         var vpNode, width, height, containerWidth, containerHeight;
         if (!this.$.video || !this.$.video.node) {
             containerWidth = window.innerWidth;
@@ -1291,6 +1296,7 @@ enyo.kind({
     },
 
     adjustVideoSizeDeviceMode: function () {
+        console.log();
         var vpNode, width, height, containerWidth, containerHeight;
         if (!this.$.video || !this.$.video.node) {
             containerWidth = window.innerWidth;
@@ -1484,7 +1490,7 @@ enyo.kind({
             }
         } else {
             tPassed = this.pmo.viewOffset;
-            if (undefined == tPassed || tPassed < 0 || tPassed >= this.pmo.duration) { tPassed = 0.0; }
+            if (undefined == tPassed || tPassed < 0 || tPassed >= (this.pmo.duration / 1000)) { tPassed = 0.0; }
         }
         this.$.timePlayed && this.$.timePlayed.setContent(this.secondsToTimeString(tPassed));
     },
@@ -1494,7 +1500,7 @@ enyo.kind({
      *                   the time remain to play.
      */
     updateTimeRemainTally: function (newValue) {
-        var tPassed = 0, tRemain = this.pmo.duration;
+        var tPassed = 0, tRemain = (this.pmo.duration / 1000);
         if (newValue !== undefined) {
             tRemain = newValue;
         } else if (this.loadState == this.IS_LOADED) {
@@ -1502,7 +1508,7 @@ enyo.kind({
             tRemain = tRemain - tPassed;
         } else {
             tPassed = this.pmo.viewOffset;
-            if (undefined != tPassed && tPassed >= 0 && tPassed < this.pmo.duration) {
+            if (undefined != tPassed && tPassed >= 0 && tPassed < (this.pmo.duration / 1000)) {
                 tRemain = tRemain - tPassed;
             }
         }
@@ -1523,7 +1529,7 @@ enyo.kind({
         } else if (this.loadState != this.IS_LOADED || !this.$.video || !this.$.video.node) {
             lastPlayTime = this.pmo.viewOffset;
             if (undefined == lastPlayTime) { return; }
-            percentage = lastPlayTime/this.pmo.duration*100;
+            percentage = lastPlayTime/(this.pmo.duration / 1000)*100;
         } else {
             // takes the numbers from node, falls back onto dbEntry if needed
             node = this.$.video.node;
@@ -1638,7 +1644,7 @@ enyo.kind({
         if (this.loadState != this.IS_LOADED || !this.$.video || !this.$.video.node) {
             if (undefined != this.timeSeekToBeforeLoaded &&
                 this.timeSeekToBeforeLoaded >= 0 &&
-                this.timeSeekToBeforeLoaded < this.pmo.duration) {
+                this.timeSeekToBeforeLoaded < (this.pmo.duration / 1000)) {
                 if (!state) { this.ctor.prototype.playedStates[pictId] = state = {}; }
                 state.lastPlayTime = this.timeSeekToBeforeLoaded;
                 this.persistVideoState(pictId, state);
