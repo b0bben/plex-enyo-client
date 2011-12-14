@@ -171,7 +171,7 @@ enyo.kind({
 	cellClick: function(inSender, inEvent, inRowIndex) {
 		var idx = inEvent.rowIndex * this.cellCount + inSender.idx;
 		this.$.selection.select(idx);
-		this.$.grid_list.refresh();
+		//this.$.grid_list.refresh();
 		
 		var pmo = this.getPlexMediaObject(idx);
 		this.showViewForMediaObject(pmo);

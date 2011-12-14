@@ -36,7 +36,7 @@ enyo.kind({
 		//this.$.header.setContent(this.headerContent);
 	},
 	parentMediaContainerChanged: function() {
-		//this.render();
+		this.render();
 		//this.$.cells.destroyControls();
 		//this.$.serverList.render();
 	},

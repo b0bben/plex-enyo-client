@@ -3,7 +3,7 @@ enyo.kind({
     kind: enyo.Control,
     rendered: function () {
         this.inherited(arguments);
-//console.log('****@@@@@@><@@@@@@**** vidslide  VideoControlbarControl.rendered(): on "'+this.owner.dbEntry.path+'"');
+        console.log('****@@@@@@><@@@@@@**** vidslide  VideoControlbarControl.rendered():');
         var dispWidth, left;
         if (window.innerWidth < 667) {
             dispWidth = window.innerWidth - 20;
@@ -191,7 +191,7 @@ enyo.kind({
 
 enyo.kind({
     name: "PlexViewVideo",
-    kind: 'enyo.ImageView',
+    kind: 'enyo.ViewImage',
     components: [
         { name: "video", kind: "enyo.Video", className: "video-default", showControls: "" },
         { name: "headerBar", kind: "HFlexBox", className: "vid-header-bar show-vid-header-bar",
@@ -232,7 +232,7 @@ enyo.kind({
           ]
         },
         */
-        { name: "dispService", kind: "PalmService", service: "palm://com.palm.display/control/",
+        { name: "dispService", kind: "PalmService", service: "palm://com.palm.display/control",
             onFailure: "displayRequestFailureHandler"
         },
         { name: "headsetService", kind: "PalmService", service: "palm://com.palm.keys/headset/",
@@ -241,9 +241,6 @@ enyo.kind({
         },
         { name: "mediaserver", kind: "PalmService", onFailure: "mediaserverRequestFailHandler" },
         { name: "msgDialog", kind: "MessageDialog" },
-        { name: "videoDbService", kind: "PalmService", service: "palm://com.palm.db/", method: "merge",
-              onSuccess: "videoDbUpdateAckSuccessHandler", onFailure: "videoDbUpdateAckFailureHandler"
-        }
     ],
     published: {
       pmo: undefined,
@@ -277,30 +274,10 @@ enyo.kind({
         this.video = undefined;
         this.isCarded = false;
         this.loadState = this.IS_NOT_LOADED;
-		    this.seekedEventObservers = {};
-		    this.pmoChanged();
-		    this.videoSrcChanged();
-		    this.setFullScreen();
-		},
-	  setFullScreen: function (boolFullScreen) {
-		  if (window.PalmSystem) {
-			  window.PalmSystem.enableFullScreenMode(boolFullScreen);
-		  }
-	  },
-	 videoSrcChanged: function() {
-	 },   
-   pmoChanged: function() {
-     if (this.pmo !== undefined) {
-        this.playTimeMeta = {               // the meta data helping the updateSeeker() to animate
-            isMonitorInProgress: false,
-            tDuration: (this.pmo.duration / 1000) / 60,
-            tLastSeeked: 0,
-            tScrubberLastUpdate: 0
-        };
-        var lastPlayTimeRecorded = this.pmo.viewOffset;
-        if (undefined != lastPlayTimeRecorded && !isNaN(lastPlayTimeRecorded)) {
-            this.playTimeMeta.tLastSeeked = lastPlayTimeRecorded;
-        }
+	    this.seekedEventObservers = {};
+	    this.pmoChanged();
+	    this.videoSrcChanged();
+	    this.setFullScreen();
 
         if (window.PalmSystem) {
             this.adjustVideoSize = this.adjustVideoSizeDeviceMode;
@@ -318,13 +295,13 @@ enyo.kind({
 
         this.dblclickHandler = null; // HACK - this would eliminate the extra click event dispatch
 
-        var basename = this.pmo.title;
-        this.$.videoTitle.setContent(enyo.string.escapeHtml(basename));
+        
+        
 
-        this.updateControlbarToLastPlayTime();
+        
 
-        this.discoverControlbarsGroup();
-        this.joinShowHideControlsGroups();
+        //this.discoverControlbarsGroup();
+        //this.joinShowHideControlsGroups();
 
         // disable the secondary scroller from scrolling on video.  This does not impact to the
         // scrolling by the Carousel.  DFISH-28100
@@ -349,8 +326,36 @@ enyo.kind({
         for (type in handlers) if (handlers.hasOwnProperty(type)) {
             window.addEventListener(type, handlers[type], false);
         }
-      }
       
+	},
+	setFullScreen: function (boolFullScreen) {
+		  if (window.PalmSystem) {
+              enyo.setFullScreen(true);
+              console.log("enabled fullscreen-mode");
+		  }
+	  },
+	videoSrcChanged: function() {
+	 },   
+    pmoChanged: function() {
+       if (this.pmo !== undefined) {
+        this.playTimeMeta = {               // the meta data helping the updateSeeker() to animate
+            isMonitorInProgress: false,
+            tDuration: (this.pmo.duration / 1000) / 60,
+            tLastSeeked: 0,
+            tScrubberLastUpdate: 0
+        };
+        var lastPlayTimeRecorded = this.pmo.viewOffset;
+        if (undefined != lastPlayTimeRecorded && !isNaN(lastPlayTimeRecorded)) {
+            this.playTimeMeta.tLastSeeked = lastPlayTimeRecorded;
+        }
+
+
+
+        var basename = this.pmo.title;
+        this.$.videoTitle.setContent(enyo.string.escapeHtml(basename));
+
+        this.updateControlbarToLastPlayTime();
+    }
 //console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.create(): instance='+this.instanceId+' on "'+this.dbEntry.path+'"');
     },
 
@@ -388,23 +393,6 @@ enyo.kind({
         this.updateSeeker((timePlayed/duration)*100);
         this.updateTimePlayedTally(timePlayed);
         this.updateTimeRemainTally(timeRemain);
-    },
-
-    /**
-     * This method gets the showControlsGroup/hideControlsGroup instances from the PictureMode.
-     * It takes an intrinsic approach to discover the PictureMode instance via the owners' chain
-     * and then to get the show/hide controls groups.  This intrinsic approach is not very OOP,
-     * but it appears more effective and reliable comparing to having the DbImageView to push
-     * them down on each video instance (which is cumbersome and error-prone.)
-     */
-    discoverControlbarsGroup: function () {
-        var pictMode = this.owner;      // expecting it to be the Carousel
-        while (pictMode && pictMode.name != "pictureMode") {
-            pictMode = pictMode.owner;  // should iterate no more than twice
-        }                               // the 1st=DbImageView, the 2nd=PictureMode (both have the ref.)
-        if (!pictMode) { return; }
-        this.showControlsGroup = pictMode.getShowControlsGroup();
-        this.hideControlsGroup = pictMode.getHideControlsGroup();
     },
 
     getMediaType: function () {
@@ -462,15 +450,8 @@ enyo.kind({
                 thisInst.updateTimePlayedTally();
                 thisInst.updateTimeRemainTally();
                 thisInst.updateSeeker();
-                thisInst.showControlsGroup.schedule(100);
-                // or, to show only the video controlbar and not both, then use...
-                // setTimeout(function() { thisInst.showVideoControlBar(); }, 100);
-
-                // DFISH-28625 cancel the control bar hiding after the playback finishes to the end.
-                // The canceled hiding is scheduled by the showing of control bar from the PictureMode.
-                setTimeout(function () {
-                    thisInst.hideControlsGroup && thisInst.hideControlsGroup.cancel();
-                }, 1000);
+                // show the controlbars again once the playback is done
+                setTimeout(function() { thisInst.showControlbars(); }, 100);
             },
             pause: function (ev) {
 //console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.pause(): pause ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.dbEntry.path+'", node.paused='+thisInst.$.video.node.paused);
@@ -487,7 +468,7 @@ enyo.kind({
             }
         };
         
-        var containerEl = this.owner.hasNode();//.parentNode; //hasNode() should never return null in this case
+        var containerEl = this.$.image.hasNode().parentNode;//this.owner.hasNode();//.parentNode; //hasNode() should never return null in this case
         var left = 0;
         //var node = this.$.video.node = document.createElement("video");
         var node = this.$.video.hasNode();
@@ -506,8 +487,8 @@ enyo.kind({
 
         node.setAttribute("src", this.videoSrc);
         this.loadState = this.IS_LOADING;
-        //containerEl.removeChild(this.$.image.node);
-        //containerEl.appendChild(node);
+        containerEl.removeChild(this.$.image.node);
+        containerEl.appendChild(node);
     },
 
     lockWindowOrientation: function () {
@@ -548,9 +529,8 @@ enyo.kind({
         this.$.seeker.resize();
 
         this.updateControlbarToLastPlayTime();
-        this.hideControlsGroup && this.hideControlsGroup.cancel();
         if (!this.isControlBarShown) {
-            this.showControlsGroup && this.showControlsGroup.execute();
+            this.showControlbars();
         }
     },
 
@@ -561,9 +541,9 @@ enyo.kind({
         }
 
         if (!this.isControlBarShown) {
-            this.showControlsGroup && this.showControlsGroup.execute();
+            this.showControlbars();
         } else {
-            this.hideControlsGroup && this.hideControlsGroup.execute();
+            this.hideControlbars();
         }
 
         //this.inherited(arguments);
@@ -634,7 +614,8 @@ enyo.kind({
                     delete this.dragSession;
                     if (this.isPlaying && this.isControlBarShown) {
                         //this.startMonitor();
-                        this.hideControlsGroup && this.hideControlsGroup.schedule(this.defaultHideControlTimeout);
+                        var thisInst = this;
+                        setTimeout(function() {thisInst.hideControlbars()}, this.defaultHideControlTimeout);
                     }
                     break;
                 default:
@@ -713,7 +694,7 @@ enyo.kind({
     adjustSize: function () {
         if (window.PalmSystem) {
             // enyo or LunaSysMgr does not update PalmSystem.windowOrientation, so it is useless
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.adjustSize(): windowOrientation = "'+window.PalmSystem.windowOrientation+'"');
+            console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.adjustSize(): windowOrientation = "'+window.PalmSystem.windowOrientation+'"');
         }
 
         var dispWidth = window.innerWidth - 20;
@@ -724,6 +705,7 @@ enyo.kind({
                 if (ctrlbar.node) {
                     ctrlbar.node.style.left = "0px";
                     ctrlbar.node.style.width = dispWidth+"px";
+                    console.log("ctrlbar.width: " + dispWidth);
                 }
                 seeker.removeClass("seeker-wide");
                 seeker.addClass("seeker-narrow");
@@ -732,6 +714,7 @@ enyo.kind({
                 if (ctrlbar.node) {
                     ctrlbar.node.style.left = (Math.floor((window.innerWidth-667)/2))+"px";
                     ctrlbar.node.style.width = "647px";
+                    console.log("ctrlbar.width: " + ctrlbar.node.style.width);
                 }
                 if (seeker.node) { seeker.node.style.width = "430px"; }
                 seeker.removeClass("seeker-narrow");
@@ -753,11 +736,11 @@ enyo.kind({
                     containerNode = nearestAncestor.node;
                     aspectRatio = this.bufferImage.width/this.bufferImage.height;
                     if (aspectRatio >= 1.0) {   // landscape
-                        this.bufferImage.width = containerNode.clientWidth;
-                        this.bufferImage.height = Math.floor(this.bufferImage.width/aspectRatio);
+                        this.bufferImage.width = 400;//containerNode.clientWidth;
+                        this.bufferImage.height = 300;//Math.floor(this.bufferImage.width/aspectRatio);
                     } else {                    // portrait
-                        this.bufferImage.height = containerNode.clientHeight;
-                        this.bufferImage.width = Math.floor(this.bufferImage.height*aspectRatio);
+                        this.bufferImage.height = 150;//containerNode.clientHeight;
+                        this.bufferImage.width = 100;//Math.floor(this.bufferImage.height*aspectRatio);
                     }
                 }
             }
@@ -801,6 +784,7 @@ enyo.kind({
                         }
         };
         console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+cBar.offsetLeft+", t:"+cBar.offsetTop+", w:"+cBar.offsetWidth+", h:"+cBar.offsetHeight);
+        console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+hBar.offsetLeft+", t:"+hBar.offsetTop+", w:"+hBar.offsetWidth+", h:"+hBar.offsetHeight);
     },
 
     onVideoLoad: function (ev) {
@@ -1147,12 +1131,12 @@ enyo.kind({
                 thisInst.isPlaying = true;
             }
 
-            thisInst.getDisplayState();
-            thisInst.lockWindowOrientation();
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.playVideo(): instanceId='+thisInst.instanceId+' ('+thisInst.mediadService+'), REQ to play "'+thisInst.dbEntry.path+'"...');
+            //thisInst.getDisplayState();
+            //thisInst.lockWindowOrientation();
+            console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.playVideo(): instanceId='+thisInst.instanceId+' ('+thisInst.mediadService+'), REQ to play "'+thisInst.pmo.title+'"...');
             thisInst.$.video.node.play();
-            if (thisInst.isControlBarShown) { thisInst.startMonitor(); }
-            thisInst.requestVideoFillFitMode();  // effective only when the video is being played
+            if (thisInst.isControlBarShown) { console.log("control bar shown, start monitor"); thisInst.startMonitor(); }
+            //thisInst.requestVideoFillFitMode();  // effective only when the video is being played
             window.PalmSystem && window.PalmSystem.setWindowProperties({ blockScreenTimeout: true });
         };
 
@@ -1167,7 +1151,7 @@ enyo.kind({
                 this.isAutoStart = true;
                 this.initVideo(doVideoPlay);
                 //this.initVideo();
-                doVideoPlay();
+                //doVideoPlay();
                 break;
             case this.IS_LOADEDING:
                 this.isAutoStart = true;
@@ -1396,12 +1380,13 @@ enyo.kind({
                switch from mediaserver async call
                to setting mediad extension attribute via HTML video node
                so that WebKit gets notified sooner.
+            */
             serviceParam = { service: this.mediadService, method: "setFitMode" };
             requestParam = this.viewSizeCode == 2 ? { args: [ "VIDEO_FILL" ] } : { args: [ "VIDEO_FIT" ] };
             this.$.mediaserver.call(requestParam, serviceParam);
-            */
-            this.$.video.node.setAttribute("x-palm-media-extended-fitmode",
-                                           this.viewSizeCode == 2 ? "VIDEO_FILL" : "VIDEO_FIT");
+            
+            //this.$.video.node.setAttribute("x-palm-media-extended-fitmode",
+            //                               this.viewSizeCode == 2 ? "VIDEO_FILL" : "VIDEO_FIT");
         }
     },
 
