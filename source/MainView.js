@@ -90,7 +90,7 @@ enyo.kind({
 	startVideoPlayer: function(src, pmo) {
 	  this.$.pane.selectViewByName("videoPlayer");
 	  //src = "http://devimages.apple.com/iphone/samples/bipbopall.html";
-    
+    //src = "/media/internal/movies/Robotar.m4v";
     this.$.videoPlayer.setVideoSrc(src);
     this.$.videoPlayer.setPmo(pmo);
     this.$.videoPlayer.autoStartOnLoad();

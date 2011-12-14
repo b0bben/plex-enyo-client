@@ -474,7 +474,7 @@ enyo.kind({
         var node = this.$.video.hasNode();
         //node.setAttribute("poster", this.bufferImage.src);
         node.setAttribute("x-palm-media-audio-class", "media");
-        node.setAttribute("x-palm-media-extended-overlay-playback", "true");
+        //node.setAttribute("x-palm-media-extended-overlay-playback", "true");
         node.style = "left:"+left+"px;";
         var type;
         for (type in handlers) if (handlers.hasOwnProperty(type)) {
@@ -1131,12 +1131,12 @@ enyo.kind({
                 thisInst.isPlaying = true;
             }
 
-            //thisInst.getDisplayState();
-            //thisInst.lockWindowOrientation();
+            thisInst.getDisplayState();
+            thisInst.lockWindowOrientation();
             console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.playVideo(): instanceId='+thisInst.instanceId+' ('+thisInst.mediadService+'), REQ to play "'+thisInst.pmo.title+'"...');
             thisInst.$.video.node.play();
             if (thisInst.isControlBarShown) { console.log("control bar shown, start monitor"); thisInst.startMonitor(); }
-            //thisInst.requestVideoFillFitMode();  // effective only when the video is being played
+            thisInst.requestVideoFillFitMode();  // effective only when the video is being played
             window.PalmSystem && window.PalmSystem.setWindowProperties({ blockScreenTimeout: true });
         };
 
