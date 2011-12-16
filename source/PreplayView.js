@@ -141,6 +141,6 @@ enyo.kind({
 	clickPlay: function() {
     var videoSrc = this.transcoderUrlForVideoObject();
 
-    this.owner.owner.startVideoPlayer(videoSrc,this.plexMediaObject);
+    this.owner.owner.startVideoPlayer(videoSrc,this.plexMediaObject, this.server);
   }
 })

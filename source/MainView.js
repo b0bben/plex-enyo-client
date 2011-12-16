@@ -87,12 +87,13 @@ enyo.kind({
 		this.plexReq.librarySections();
 		
 	},
-	startVideoPlayer: function(src, pmo) {
+	startVideoPlayer: function(src, pmo, server) {
 	  this.$.pane.selectViewByName("videoPlayer");
 	  //src = "http://devimages.apple.com/iphone/samples/bipbopall.html";
     //src = "/media/internal/movies/Robotar.m4v";
     this.$.videoPlayer.setVideoSrc(src);
     this.$.videoPlayer.setPmo(pmo);
+    this.$.videoPlayer.setServer(server);
     this.$.videoPlayer.autoStartOnLoad();
     
 	},

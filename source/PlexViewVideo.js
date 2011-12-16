@@ -196,6 +196,7 @@ enyo.kind({
         { name: "video", kind: "enyo.Video", className: "video-default", showControls: "" },
         { name: "headerBar", kind: "HFlexBox", className: "vid-header-bar show-vid-header-bar",
           components: [
+            {kind: "Button", name: "backButton", onclick: "onBackClicked", className: "enyo-button-dark", caption: "Back", style: "font-size: 14px; padding-top: 0px;"},
               { name: "videoTitle", className: "vid-title", flex: 1 }
           ]
         },
@@ -245,8 +246,8 @@ enyo.kind({
     published: {
       pmo: undefined,
       videoSrc: undefined,
-    },
-    
+      server: undefined,
+    },  
     className: "video-view",
     // currently only local videos are supported
     type: "local",
@@ -260,6 +261,7 @@ enyo.kind({
     IS_NOT_LOADED: 1,
     IS_LOADING: 2,
     IS_LOADED: 3,
+    duration: 0,
     create: function () {
         this.inherited(arguments);
         this.instanceId = new Date().getTime();
@@ -338,13 +340,15 @@ enyo.kind({
 	 },   
     pmoChanged: function() {
        if (this.pmo !== undefined) {
+        this.duration = (this.pmo.duration / 1000);
+        this.viewOffset = (this.pmo.viewOffset / 1000);
         this.playTimeMeta = {               // the meta data helping the updateSeeker() to animate
             isMonitorInProgress: false,
-            tDuration: (this.pmo.duration / 1000) / 60,
+            tDuration: this.duration,
             tLastSeeked: 0,
             tScrubberLastUpdate: 0
         };
-        var lastPlayTimeRecorded = this.pmo.viewOffset;
+        var lastPlayTimeRecorded = this.viewOffset;
         if (undefined != lastPlayTimeRecorded && !isNaN(lastPlayTimeRecorded)) {
             this.playTimeMeta.tLastSeeked = lastPlayTimeRecorded;
         }
@@ -358,32 +362,13 @@ enyo.kind({
     }
 //console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.create(): instance='+this.instanceId+' on "'+this.dbEntry.path+'"');
     },
-
-    /**
-     * @param pictId - It is the pictId to which to get its last play time recorded.
-     *
-     * @return It returns the last play time recorded for the pictId, if there's any.  Otherwise,
-     *         it returns undefined.
-     */
-    getLastPlayTimeRecorded: function (pictId) {
-        var lastPlayTimeRecorded = undefined;
-        var playedStates = this.playedStates;
-        var state = playedStates[pictId];
-        if (state && undefined != state.lastPlayTime) {
-            lastPlayTimeRecorded = state.lastPlayTime;
-        } else if (undefined != this.dbEntry.lastPlayTime) {
-            lastPlayTimeRecorded = this.dbEntry.lastPlayTime;
-        }
-        return lastPlayTimeRecorded;
-    },
-
     /**
      * It updates the controlbar reflecting the last played time, if there's any.
      */
     updateControlbarToLastPlayTime: function () {
-        var duration = (this.pmo.duration / 1000);
+        var duration = this.duration;
         var timeRemain = duration;
-        var timePlayed = this.pmo.viewOffset;
+        var timePlayed = this.viewOffset;
         if (undefined != timePlayed && timePlayed > 0 && timePlayed < duration) {
             timeRemain = duration - timePlayed;
         } else {
@@ -475,7 +460,7 @@ enyo.kind({
         //node.setAttribute("poster", this.bufferImage.src);
         node.setAttribute("x-palm-media-audio-class", "media");
         //node.setAttribute("x-palm-media-extended-overlay-playback", "true");
-        node.style = "left:"+left+"px;";
+        node.style = "left:"+left+"px;background: #000;";
         var type;
         for (type in handlers) if (handlers.hasOwnProperty(type)) {
             node.addEventListener(type, handlers[type], false);
@@ -512,7 +497,7 @@ enyo.kind({
         this.setInFocus(false);
         this.unlockWindowOrientation();
         this.pauseVideo();
-        this.showControlsGroup && this.showControlsGroup.execute();
+        this.showControlbars();
         this.stopMonitor();
         this.recordVideoState();
         //this.inherited(arguments);
@@ -796,10 +781,10 @@ enyo.kind({
         this.aspectRatio = this.nativeWidth/this.nativeHeight;
 //console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onVideoLoad(): "'+this.dbEntry.path+'" w:'+node.videoWidth+', h:'+node.videoHeight);
 
-        var duration = node.duration;
-        duration = (undefined != duration && !isNaN(duration)) ? duration : (this.pmo.duration / 1000);
-        this.duration = duration;
-        this.playTimeMeta.tDuration = duration;
+        var _duration = node.duration;
+        _duration = (undefined != _duration && !isNaN(_duration)) ? _duration : this.duration;
+        //this.duration = duration;
+        this.playTimeMeta.tDuration = _duration;
 
         this.mediadService = node.getAttribute("x-palm-media-control");
 
@@ -858,7 +843,7 @@ enyo.kind({
      *                 percentage of how far into the total video duration to seek to.
      */
     updateTimeTallies: function (newPos) {
-        var duration = (this.pmo.duration / 1000);
+        var duration = this.duration;
         var timeToSeek = duration*(newPos/100);
         this.updateTimePlayedTally(timeToSeek);
         this.updateTimeRemainTally(duration - timeToSeek);
@@ -878,14 +863,14 @@ enyo.kind({
         //if (this.lastSeekToRequested == timeSeekTo) { return; }  // b/c mediaserver ignores the same seek req
 
         if (this.videoSeekingRequestPending) {
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.requestVideoSeek(newPos="+newPos+"): PENDING seek to: "+newPos/100*this.$.video.node.duration);
+            console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.requestVideoSeek(newPos="+newPos+"): PENDING seek to: "+newPos/100*this.$.video.node.duration);
             this.seekToPosition = newPos;
             return;
         }
 
         //delete this.seekToPosition;
         try {
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.requestVideoSeek(newPos="+newPos+"): seek REQ to: T("+timeSeekTo+")");
+            console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.requestVideoSeek(newPos="+newPos+"): seek REQ to: T("+timeSeekTo+")");
             this.videoSeekingRequestPending = true;
             node.currentTime = timeSeekTo;
             this.lastSeekToRequested = timeSeekTo;
@@ -895,7 +880,7 @@ enyo.kind({
                 this.secondSeekRequestAttemptId = setTimeout(function () {
                     thisInst.secondSeekRequestAttempt();
                 }, 3400);
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.requestVideoSeek(): scheduled a 2nd attempt on T("+this.lastSeekToRequested+")");
+                console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.requestVideoSeek(): scheduled a 2nd attempt on T("+this.lastSeekToRequested+")");
             }
 
             if (this.isPlaying) {
@@ -925,7 +910,7 @@ enyo.kind({
                 this.seekRequestRetryCount = 1;
             } else if (this.seekRequestRetryCount >= 3) {
                 shouldRetry = false;
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.secondSeekRequestAttempt(): stop retry to newPos="+pos2ndAttempt+" after "+this.seekRequestRetryCount+" attempts");
+                console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.secondSeekRequestAttempt(): stop retry to newPos="+pos2ndAttempt+" after "+this.seekRequestRetryCount+" attempts");
             } else {
                 this.seekRequestRetryCount++;
             }
@@ -935,7 +920,7 @@ enyo.kind({
 
         delete this.videoSeekingRequestPending;
         if (undefined != pos2ndAttempt && shouldRetry) {
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.secondSeekRequestAttempt(): 2nd attempt newPos="+pos2ndAttempt+"...");
+            console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.secondSeekRequestAttempt(): 2nd attempt newPos="+pos2ndAttempt+"...");
             this.requestVideoSeek(pos2ndAttempt);
         }
     },
@@ -1027,7 +1012,7 @@ enyo.kind({
      *                 slider rail.
      */
     onSeeking: function (inSender, newPos) {
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeking(newPos="+newPos+"): scrubber drag...");
+        console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeking(newPos="+newPos+"): scrubber drag...");
         this.hideControlsGroup && this.hideControlsGroup.cancel();
         this.isScrubberSeeking = true;
 
@@ -1041,7 +1026,7 @@ enyo.kind({
         this.hideControlsGroup && this.hideControlsGroup.schedule(this.defaultHideControlTimeout);
         this.stopEvent(ev);
 
-        var duration = (this.pmo.duration / 1000);
+        var duration = this.duration;
         var seekToTime = duration*(pos/100);
         this.updateSeeker((seekToTime/duration)*100);
         this.updateTimePlayedTally(seekToTime);
@@ -1060,12 +1045,12 @@ enyo.kind({
      */
     onSeeked: function (inSender, newPos) {
         if (undefined != this.lastOnSeekedPosition && this.lastOnSeekedPosition == newPos && newPos > 0) {
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeked(newPos="+newPos+"): mis-fire, ignore...");
+            console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeked(newPos="+newPos+"): mis-fire, ignore...");
              // some times enyo.ProgressSlider may publish duplicate newPos
              return;
         }
         this.lastOnSeekedPosition = newPos;
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeked(newPos="+newPos+"): scrubber mouseup...");
+        console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeked(newPos="+newPos+"): scrubber mouseup...");
 
         delete this.isScrubberSeeking;
 
@@ -1074,7 +1059,7 @@ enyo.kind({
         if (this.loadState == this.IS_LOADED && this.$.video && this.$.video.node) {
             this.requestVideoSeek(newPos);
         } else {
-            this.timeSeekToBeforeLoaded = (this.pmo.duration / 1000)*(newPos/100);
+            this.timeSeekToBeforeLoaded = this.duration*(newPos/100);
             this.recordVideoState();
         }
     },
@@ -1420,7 +1405,7 @@ enyo.kind({
         if (node && undefined != node.currentTime && !isNaN(node.currentTime)) {
             currentTime = node.currentTime;
         } else {
-            currentTime = this.pmo.viewOffset;
+            currentTime = this.viewOffset;
             if (undefined == currentTime || isNaN(currentTime)) { currentTime = 0; }
         }
 
@@ -1474,8 +1459,8 @@ enyo.kind({
                 tPassed = this.$.video.node.currentTime;
             }
         } else {
-            tPassed = this.pmo.viewOffset;
-            if (undefined == tPassed || tPassed < 0 || tPassed >= (this.pmo.duration / 1000)) { tPassed = 0.0; }
+            tPassed = this.viewOffset;
+            if (undefined == tPassed || tPassed < 0 || tPassed >= this.duration) { tPassed = 0.0; }
         }
         this.$.timePlayed && this.$.timePlayed.setContent(this.secondsToTimeString(tPassed));
     },
@@ -1485,15 +1470,15 @@ enyo.kind({
      *                   the time remain to play.
      */
     updateTimeRemainTally: function (newValue) {
-        var tPassed = 0, tRemain = (this.pmo.duration / 1000);
+        var tPassed = 0, tRemain = this.duration;
         if (newValue !== undefined) {
             tRemain = newValue;
         } else if (this.loadState == this.IS_LOADED) {
             tPassed = this.$.video.node.currentTime;
             tRemain = tRemain - tPassed;
         } else {
-            tPassed = this.pmo.viewOffset;
-            if (undefined != tPassed && tPassed >= 0 && tPassed < (this.pmo.duration / 1000)) {
+            tPassed = this.viewOffset;
+            if (undefined != tPassed && tPassed >= 0 && tPassed < this.duration) {
                 tRemain = tRemain - tPassed;
             }
         }
@@ -1512,9 +1497,9 @@ enyo.kind({
                 tMeta.tScrubberLastUpdate = now;
             }
         } else if (this.loadState != this.IS_LOADED || !this.$.video || !this.$.video.node) {
-            lastPlayTime = this.pmo.viewOffset;
+            lastPlayTime = this.viewOffset;
             if (undefined == lastPlayTime) { return; }
-            percentage = lastPlayTime/(this.pmo.duration / 1000)*100;
+            percentage = lastPlayTime/this.duration*100;
         } else {
             // takes the numbers from node, falls back onto dbEntry if needed
             node = this.$.video.node;
@@ -1594,7 +1579,7 @@ enyo.kind({
     adjustPlayStartTime: function () {
         if (!this.$.video || !this.$.video.node) { return; }
         var node = this.$.video.node;
-        var lastPlayTime = this.pmo.viewOffset;
+        var lastPlayTime = this.viewOffset;
         if (!lastPlayTime) { return; }
         if (lastPlayTime >= node.duration) { return; }
 
@@ -1621,6 +1606,7 @@ enyo.kind({
     },
 
     recordVideoState: function () {
+        console.log();
         //TODO: post progress to PMS
         /*var pictId = this.dbEntry._id;
         var playedStates = this.playedStates;
@@ -1629,7 +1615,7 @@ enyo.kind({
         if (this.loadState != this.IS_LOADED || !this.$.video || !this.$.video.node) {
             if (undefined != this.timeSeekToBeforeLoaded &&
                 this.timeSeekToBeforeLoaded >= 0 &&
-                this.timeSeekToBeforeLoaded < (this.pmo.duration / 1000)) {
+                this.timeSeekToBeforeLoaded < this.duration) {
                 if (!state) { this.ctor.prototype.playedStates[pictId] = state = {}; }
                 state.lastPlayTime = this.timeSeekToBeforeLoaded;
                 this.persistVideoState(pictId, state);
@@ -1667,19 +1653,37 @@ enyo.kind({
     videoDbUpdateAckFailureHandler: function (videoDbService, resp, req) {
         // expect resp = {returnValue:true, count:0}
     },
-
+    onBackClicked: function () {
+        this.owner.$.pane.back();  //owner is mainview, and since this is activated with a pane, a .back() is enough
+        this.onLeaveView();
+    },
     onLeaveView: function () {
-        this.onSwipeOutHandler();
+        console.log("leaving view, stopping playback and destroying");
+        //stop playback and such
+        this.setInFocus(false);
+        this.unlockWindowOrientation();
+        this.pauseVideo();
+        this.showControlbars();
+        this.stopMonitor();
+        this.recordVideoState();
+        //tell pms it should stop transcoding
+        this.stopTranscoder();
+
+        //final step, destroy it all!
         this.destroy();
     },
-
+    stopTranscoder: function() {
+        var plexReq = new PlexRequest();
+        plexReq.stopTranscoder(this.server);
+        console.log("stopped transcoder");
+    },
     pauseAndShowControls: function () {
         if (this.isPlaying || (this.loadState == this.IS_LOADING && this.isAutoStart)) {
             this.pauseVideo();
         }
-        this.hideControlsGroup && this.hideControlsGroup.cancel();
+        var thisInst = this;
         if (!this.isControlBarShown) {
-            this.showControlsGroup && this.showControlsGroup.execute();
+            this.showControlbars();
         }
     },
 
@@ -1714,25 +1718,8 @@ enyo.kind({
         this.destroy();
     },
 
-    joinShowHideControlsGroups: function () {
-        if (this.showControlsGroup && !this.showControlsGroupTaskId) { this.registerToShowControlsGroup(); }
-        if (this.hideControlsGroup && !this.hideControlsGroupTaskId) { this.registerToHideControlsGroup(); }
-    },
-
-    departFromShowHideControlsGroups: function () {
-        if (this.showControlsGroup && this.showControlsGroupTaskId) {
-            this.showControlsGroup.removeTask(this.showControlsGroupTaskId);
-        }
-        delete this.showControlsGroupTaskId;
-
-        if (this.hideControlsGroup && this.hideControlsGroupTaskId) {
-            this.hideControlsGroup.removeTask(this.hideControlsGroupTaskId);
-        }
-        delete this.hideControlsGroupTaskId;
-    },
-
     destroy: function () {
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.destroy(): instance='+this.instanceId+', loadState='+this.loadState+' on "'+this.dbEntry.path+'"');
+        console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.destroy(): instance='+this.instanceId+', loadState='+this.loadState+' on "'+this.pmo.title+'"');
         var type;
         var node = this.$.video.node;
         var handlers = this.videoInstanceEventHandlers;
@@ -1762,7 +1749,6 @@ enyo.kind({
             }
             delete this.$.video.node;
         }
-        this.departFromShowHideControlsGroups();
         this.inherited(arguments);
         this.unlockWindowOrientation();
         if (this.barsDim) { delete this.barsDim; }

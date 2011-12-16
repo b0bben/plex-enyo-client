@@ -74,7 +74,7 @@ enyo.kind({
 	  //step 6: identifier
 	  targetUrl += "&identifier=" + "com.plexapp.plugins.library"; //TODO: get from somewhere...
 	  //step 7: quality
-	  targetUrl += "&quality=" + 8; //TODO: get from settings
+	  targetUrl += "&quality=" + 6; //TODO: get from settings
 	  //step 8: key
 	  targetUrl += "&key=" + encodeURIComponent(fakeUrl + pmo.key);
 	  targetUrl += "&session=" + 1111;//enyo.fetchDeviceInfo().serialNumber;
@@ -84,7 +84,7 @@ enyo.kind({
 	  //there's no step 9! 
 	  targetUrl += this.authWithUrl(targetUrl);
 	  
-	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=aac{bitrate:160000}");
+	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=mp3,aac{bitrate:160000}");
 	  
 	  return server.baseUrl + targetUrl;
 	  
@@ -182,5 +182,12 @@ enyo.kind({
 	},
 	getFullUrlForPlexUrl: function(server,url) {
 	  return server.baseUrl + url;
+	},
+	stopTranscoder: function(server) {
+		if (server.hasOwnProperty("baseUrl")) {
+			var url = "/video/:/transcode/segmented/stop";
+			var response = this.dataForUrlSync(server,url);
+			console.log("stopped transcoder, resp: " + response);
+		}
 	}
 });
