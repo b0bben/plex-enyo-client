@@ -18,7 +18,7 @@ enyo.kind({
 
 		{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
 
-			{name: "cells", kind: "HFlexBox"}
+			{name: "cells", kind: "HFlexBox", pack: "start"}
 		]},
 		{kind: "Selection"},
 		{kind: "plex.EmptyToaster", name: "emptyToaster"},
@@ -44,11 +44,11 @@ enyo.kind({
 		this.$.filterMenu.openAroundControl(inSender);
 	},
 	reloadSectionWithFilterLevel: function(level) {
-  	if (this.parentMediaContainer !== undefined) {
-  	//get the section details
-  	  this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
-  	this.server = this.parentMediaContainer.server;
-  	  this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
+  		if (this.parentMediaContainer !== undefined) {
+  		//get the section details
+  	  	this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaObject"));
+  		this.server = this.parentMediaContainer.server;
+  	  	this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
   	}
 	},
 	parentMediaContainerChanged: function() {
@@ -56,7 +56,7 @@ enyo.kind({
 		//get the section details
 	    this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
 		this.server = this.parentMediaContainer.server;
-  this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
+  		this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
 	    
 		//get different filtering options for this section
 		this.plexReq = new PlexRequest(enyo.bind(this,"gotFiltersForSection"));
@@ -85,42 +85,22 @@ enyo.kind({
 	},
 	gotMediaContainer: function(pmc) {
 		this.mediaContainer = pmc;
-		
-    	switch (this.getMediaType()) {
-	      case "movie":
-	        this.count = this.mediaContainer.Video.length;
-	        break;
-	      case "artist":
-	      case "show":
-	        this.count = this.mediaContainer.Directory.length;
-	        break;
-	      default:
-	        this.count = 0;
-	        break;
-	    }
-      
-		
+		this.count = parseInt(this.mediaContainer.size); //size is always there
+		//start building the grid now
 		this.buildCells();
 		this.$.selection.clear();
 		this.$.grid_list.refresh();
 		
-	},
-	getMediaType: function() {
-	  if (this.mediaContainer.Video != null) {
-	    return this.mediaContainer.Video[0].type;
-	  }
-	  else if (this.mediaContainer.Directory != null) {
-	    return this.mediaContainer.Directory[0].type;
-	  }
-	  else
-	    return "unknown";
 	},
 	getPlexMediaObject: function(index) {
 	  if (this.mediaContainer.Video != null) {
 	    return this.mediaContainer.Video[index];
 	  }
 	  else if (this.mediaContainer.Directory != null) {
-	    return this.mediaContainer.Directory[index];
+	  	if (this.count == 1)
+	  		return this.mediaContainer.Directory; //if there's only 1 item in Directory, it wont be an array but the object of that item
+	  	else
+	    	return this.mediaContainer.Directory[index];
 	  }
 	},
 	buildCells: function() {
@@ -183,12 +163,16 @@ enyo.kind({
 		      this.showArtist(pmo);
 		      break;
 		    case "movie":
+		    case "episode":
 		      this.showPreplay(pmo);
 		      break;
 		    case "show":
-		      this.log("show chosen");
-			  this.showArtist(pmo);
+		      this.log("show chosen, get seasons");
+			  this.getSeasons(pmo);
 		      break;
+		    case "season":
+		    	this.log("season chosen, get episodes");
+		    	this.getEpisodes(pmo);
 		  }
 		},
 	showArtist: function(pmo) {
@@ -201,4 +185,16 @@ enyo.kind({
       this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server}]);
       this.$.emptyToaster.open();
 	},
+	getSeasons: function(pmo) {
+		this.plexReq = new PlexRequest(enyo.bind(this,"refreshGridWithMediaContainer"));
+		this.plexReq.dataForUrlAsync(this.server,pmo.key);	
+	},
+	refreshGridWithMediaContainer: function(pmc) {
+		this.gotMediaContainer(pmc);
+	},
+	getEpisodes: function(pmo) {
+		this.plexReq = new PlexRequest(enyo.bind(this,"refreshGridWithMediaContainer"));
+		this.plexReq.dataForUrlAsync(this.server,pmo.key);	
+	},
+
 });
