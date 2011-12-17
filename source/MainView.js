@@ -12,7 +12,8 @@ enyo.kind({
 				{kind:enyo.VFlexBox, flex:1, components: [
 		 			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", onSelectView: "viewSelected", components: [
 						{kind: "plex.GridView", name: "grid_view"},
-						{kind: "plex.WelcomeView", name: "welcomeView"}
+						{kind: "plex.WelcomeView", name: "welcomeView"},
+						{kind: "plex.StartView", name: "startView"},
 					]}
 				]},
 
@@ -45,7 +46,10 @@ enyo.kind({
 		if (this.rootMediaContainer.length < 1) {
 			this.$.right_pane.selectViewByName("welcomeView");
 		}
-	
+		//clean startup, let's show recently added in the grid
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotRecentlyAdded"));
+		this.plexReq.recentlyAdded();
+
 		this.$.left_pane.render();
 		this.$.sectionsView.setParentMediaContainer(this.rootMediaContainer);
 		this.$.left_pane.selectViewByName("sectionsView");
@@ -55,6 +59,11 @@ enyo.kind({
 	showGridView: function(inSender, inSection) {
 		this.selectedSection = inSection; //actually both the section AND the server it belongs to
     	this.$.right_pane.selectViewByName("grid_view");
+	},
+	gotRecentlyAdded: function(pmc) {
+		this.$.startView.setServer(pmc[0].server);
+		this.$.startView.setMediaContainer(pmc[0].pmc);
+		this.$.right_pane.selectViewByName("startView");		
 	},
 	viewSelected: function(inSender, inView, inPreviousView) {
 	    inView.setParentMediaContainer(this.selectedSection);

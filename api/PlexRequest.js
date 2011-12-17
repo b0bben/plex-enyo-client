@@ -169,7 +169,22 @@ enyo.kind({
 		}
 		this.callback(mediaObjs);
 	},
-	
+	recentlyAdded: function() {
+		var url = "/library/recentlyAdded";
+		var mediaObjs = [];
+		for(var i=0; i < this.servers.length; i++) {
+			var server = this.servers[i];
+			if (server.include) {
+				var pmo = this.dataForUrlSync(server,url);
+				var mediaObj = {server: server,	pmc: pmo.MediaContainer};
+
+				//server is not available if pmo is null
+				if (pmo !== undefined)
+					mediaObjs.push(mediaObj);				
+			}
+		}
+		this.callback(mediaObjs);
+	},
 	getSectionForKey: function(server,key,level) {
 		level = level || "all"
 		var url = "/library/sections/" + key + "/" + level;
