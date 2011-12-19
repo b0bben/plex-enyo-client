@@ -20,7 +20,6 @@ enyo.kind({
         	]},
       	]},
       ]},
-      {kind: "Sound"},
 	  ]}
 	],
 	create: function() {
@@ -84,12 +83,13 @@ enyo.kind({
 		onclick_song: function(inSender, inEvent) {
 		  var songItem = this.tracks[inEvent.rowIndex];
 		  if (songItem !== undefined && !this.playing) {
-		    this.$.sound.setSrc(this.plexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
-		    this.$.sound.play();
+		  	this.owner.owner.owner.owner.startMusicPlayback(songItem, null);
+		    //this.$.sound.setSrc(this.plexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
+		    //this.$.sound.play();
 		    this.playing = true;
 		  }
-		  else if (this.$.sound.audio.playbackRate > 0 || this.playing) {
-		    this.$.sound.audio.pause();
+		  else if (this.playing) {
+		    //this.$.sound.audio.pause();
 		    this.playing = false;
 		  }
 		},
