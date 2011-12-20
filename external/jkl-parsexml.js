@@ -29,9 +29,9 @@ if ( typeof(JKL) == 'undefined' ) JKL = function() {};
 // ================================================================
 //  class: JKL.ParseXML 
 
-JKL.ParseXML = function ( url, query, method ) {
+JKL.ParseXML = function ( url, query, method, headers ) {
     // debug.print( "new JKL.ParseXML( '"+url+"', '"+query+"', '"+method+"' );" );
-    this.http = new JKL.ParseXML.HTTP( url, query, method, false );
+    this.http = new JKL.ParseXML.HTTP( url, query, method, headers,false );
     return this;
 };
 
@@ -469,7 +469,7 @@ JKL.ParseXML.LoadVars.prototype.parseResponse = function () {
 //  class: JKL.ParseXML.HTTP
 //  constructer: new JKL.ParseXML.HTTP()
 
-JKL.ParseXML.HTTP = function( url, query, method, textmode ) {
+JKL.ParseXML.HTTP = function( url, query, method, headers, textmode ) {
     // debug.print( "new JKL.ParseXML.HTTP( '"+url+"', '"+query+"', '"+method+"', '"+textmode+"' );" );
     this.url = url;
     if ( typeof(query) == "string" ) {
@@ -484,6 +484,10 @@ JKL.ParseXML.HTTP = function( url, query, method, textmode ) {
     } else {
         this.method = "GET";
     }
+    if (headers) {
+        this.headers = headers;
+    }
+
     this.textmode = textmode ? true : false;
     this.req = null;
     this.xmldom_flag = false;
@@ -568,6 +572,9 @@ JKL.ParseXML.HTTP.prototype.load = function() {
     if ( typeof(this.req.setRequestHeader) != "undefined" ) {
         // debug.print( "Content-Type: "+JKL.ParseXML.HTTP.REQUEST_TYPE+" (request)" );
         this.req.setRequestHeader( "Content-Type", JKL.ParseXML.HTTP.REQUEST_TYPE );
+        for (var name in this.headers) {
+            this.req.setRequestHeader(name,this.headers[name]);
+        }
     }
 
     // Content-Type: text/xml (response header)
@@ -627,6 +634,7 @@ JKL.ParseXML.HTTP.prototype.checkResponse = function() {
     // HTTP response code
     if ( this.req.status-0 > 0 &&
          this.req.status != 200 &&          // OK
+         this.req.status != 201 &&          // OK (Created)
          this.req.status != 206 &&          // Partial Content
          this.req.status != 304 ) {         // Not Modified
         // debug.print( "status: "+this.req.status );

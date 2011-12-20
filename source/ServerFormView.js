@@ -62,7 +62,7 @@ enyo.kind({
 		]},
 		
 		{name: "loginTitle", caption: "Login details", kind: "RowGroup", components: [
-			{kind: "Input", name: "username", hint: $L("Type your username"), changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"},
+			{kind: "Input", name: "username", hint: $L("Type your username"), autocorrect: false, spellcheck: false, changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"},
 			{kind: "PasswordInput", name: "password", hint: $L("Type your password"),changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"}
 		]},
 		{content:$L('Login details are only needed when the server is outside your network.'), className: "prefs-body-text", style:"margin-bottom:8px"},

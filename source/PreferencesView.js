@@ -18,7 +18,10 @@ enyo.kind({
 				method: "browse", subscribe: true, onSuccess: "gotBrowsed", onFailure: "genericFailure"},
 			{name: "resolverBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
 					method: "resolve", subscribe: true, onSuccess: "gotResolved", onFailure: "genericFailure"},
+			
 			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onDelete: "serverRemoved",onCancel: "backHandler", lazy: true, showing: false},
+			{name: "myPlexForm", kind: "plex.MyPlexFormView", onLoggedIn: "loggedInToMyPlex", onLogout: "logoutFromMyPlex",onCancel: "backHandler", lazy: true, showing: false},
+
 			{name: "mainPrefs", kind: enyo.Control, layoutKind: "VFlexLayout", components:[
 				{name: "header", kind: "PageHeader", className: "preferences-header", pack: "center", components: [
 					{kind: "Image", src: "images/PlexIcon.png", className: "preferences-header-image"},
@@ -26,17 +29,39 @@ enyo.kind({
 				]},
 				{kind: "Scroller", flex: 1, components: [
 					{kind: "Control", className: "enyo-preferences-box", components: [
-						{content:$L("All servers set to 'Show' will be available for browsing."), className: "prefs-body-text", style:"margin:none;"},
-						{kind: "RowGroup", caption: $L("Plex Media Servers"), style: "margin-bottom: 10px", components: [
-							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
+						//myplex login
+						{kind: "RowGroup", caption: "myPlex details", components: [
+							{kind: enyo.Item, layoutKind: "HFlexLayout", tapHighlight: true, components: [
+								{name: "loginButton", content: $L("Login to myPlex ..."), onclick: "showMyPlexForm"},
+							]},
+						]},
+
+						//myplex PMSes
+						{kind: "RowGroup", caption: $L("Servers shared via myPlex"), style: "margin-bottom: 10px", components: [
+							{name: "myPlexServerList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listMyPlexSetupRow",components: [
 								{kind: enyo.Item, className: "server-list-item", components: [
-									{kind: "LabeledContainer", name: "serverName", onclick: "listItemTap", label: "Server nr 1", components: [
-										{kind: "ToggleButton", name: "includeServer", onclick: "", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick",}
+									{kind: "LabeledContainer", name: "myPlexServerName", onclick: "listItemTap", label: "Server nr 1", components: [
+										{kind: "ToggleButton", name: "myPlexIncludeServer", onclick: "", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick", onclick: "togglePreferenceClick"}
 									]},
 								]}
 							]}
 						]},
-						{kind: "Button", caption: $L("Add new server ..."), onclick: "showAddServerForm"},
+						{content:$L("Use myPlex to access servers shared with you"), className: "prefs-body-text", style:"margin:none;"},
+						
+						//local PMSes
+						{kind: "RowGroup", caption: $L("Servers on your network"), style: "margin-bottom: 10px", components: [
+							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
+								{kind: enyo.Item, className: "server-list-item", layoutKind: "HFlexLayout", components: [
+									{name: "serverName", onclick: "listItemTap", label: "Server nr 1", flex: 1},
+									{kind: "ToggleButton", name: "includeServer", onclick: "", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick"},
+								]},
+							]},
+							{kind: enyo.Item, className: "server-list-item", layoutKind: "HFlexLayout", components: [
+								{content: $L("Add new network server ..."), onclick: "showAddServerForm"},
+							]},
+						]},
+						{content:$L("All servers set to 'Show' will be available for browsing."), className: "prefs-body-text", style:"margin:none;"},
+
 						/*
 						{kind: "RowGroup", caption: $L("Autofill"), components: [
 							{kind: "LabeledContainer", caption: $L("Names and Passwords"), components: [
@@ -57,7 +82,7 @@ enyo.kind({
 						]},
 						{content:$L('Higher quality settings provide better looking video, but require more network bandwith.'), className: "prefs-body-text", style:"margin-bottom:8px"},
 					]},
-					{name: "console", kind: "HtmlContent", style: "font-size: 10pt; background-color: white;"},
+					{name: "console", kind: "HtmlContent", style: "font-size: 10pt; background-color: white; display:none;"},
 				]},
 				{kind: "Toolbar", pack: "center", className: "enyo-toolbar-light", components: [
 		 	   	{kind: "Button", caption: $L("Done"), onclick: "doClose", className: "enyo-preference-button enyo-button-affirmative"}
@@ -90,7 +115,7 @@ enyo.kind({
   	  return;
   	}
 	
-		this.$.console.addContent("RESOLVE>: " + JSON.stringify(inResponse)+ "<br/>");
+		this.$.console.addContent("RESOLVE>: " + JSON.stringify(inResponse.targetName)+ "<br/>");
 
     //add found server to server list
     var serverName = inResponse.targetName;
@@ -125,6 +150,13 @@ enyo.kind({
 		this.$.serverForm.setServer(undefined);
 		this.$.serverForm.setShowing(true);
 	},
+	showMyPlexForm: function(inSender) {
+		this.$.pane.selectViewByName("myPlexForm");
+		this.$.myPlexForm.setMyPlexDetails(undefined);
+		this.$.myPlexForm.setShowing(true);
+	},
+
+	// new local servers
 	newServerAdded: function(inSender, inServer) {
 		this.servers.push(inServer);
 		this.savePrefs();
@@ -139,6 +171,15 @@ enyo.kind({
 		
 		this.loadPrefs(); //force refresh of settings
 	},
+	//myplex
+	loggedInToMyPlex: function(inSender, myPlexUserData) {
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
+		var authToken = myPlexUserData["authentication-token"];
+		this.plexReq.getMyPlexServers(authToken);
+	},
+	gotMyPlexSections: function(sections) {
+		
+	},
 	backHandler: function(inSender) {
 		this.$.pane.back();
 	},
@@ -147,7 +188,7 @@ enyo.kind({
 		
     // check if the row is selected
 		if (this.servers !== undefined && inIndex < this.servers.length) {
-			this.$.serverName.setLabel(this.servers[inIndex].name);
+			this.$.serverName.setContent(this.servers[inIndex].name);
 			this.$.includeServer.setState(this.servers[inIndex].include)
 			return true;
 		}

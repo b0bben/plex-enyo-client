@@ -13,6 +13,7 @@ enyo.depends(
 	"source/EmptyToaster.js",
 	"source/PreferencesView.js",
 	"source/ServerFormView.js",
+	"source/MyPlexFormView.js",
 	"source/ServerSections.js",
 	"source/PlexViewVideo.js",
 	"source/MessageDialog.js",

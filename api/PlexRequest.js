@@ -119,12 +119,6 @@ enyo.kind({
 		    return "&X-Plex-Access-Key=" + publicKey + "&X-Plex-Access-Time=" + time + "&X-Plex-Access-Code=" + url;
 		
 	},
-	loginSuccess: function(inSender, inResponse, inRequest) {
-	    console.log("LOGIN SUCCESS: " + inResponse);
-	},
-	loginFailure: function(inSender, inResponse, inRequest) {
-	    console.log("LOGIN FAIL: " + inResponse);
-	},
 	dataForUrlAsync: function(server,plexUrl) {
 		if (server !== undefined && plexUrl !== undefined) { 
 			var url = server.baseUrl + plexUrl;
@@ -147,7 +141,42 @@ enyo.kind({
 			}
 		}
 	},
-	
+	make_base_auth: function(user, password) {
+	  var tok = user + ':' + password;
+	  var hash = encode64(tok);
+	  return "Basic " + hash;
+	},
+	loginToMyPlex: function(user,pass) {
+		var url = "https://my.plexapp.com/users/sign_in.xml";
+		var auth = this.make_base_auth(user,pass);
+		var headers = {"Authorization":auth, 
+									"X-Plex-Product": "plex_webos", 
+									"X-Plex-Version": "0.5.5",
+									"X-Plex-Provides": "client",
+									"X-Plex-Client-Identifier": "bob_test",
+									"X-Plex-Platform": "webos",
+									"X-Plex-Platform-Version": "3.0.4",
+									"X-Plex-Device": "HP Touchpad" };
+		
+		var xml = new JKL.ParseXML(url,"","POST",headers);
+		xml.async(enyo.bind(this,"processMyPlexLogin"));
+		xml.parse();
+		//var data = xml.parse();
+		//return data;
+	},
+	processMyPlexLogin: function(data) {
+		console.log("processMyPlexLogin: " + enyo.json.stringify(data));
+		this.callback(data);
+	},
+	getMyPlexServers: function(authToken) {
+	  var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
+  	var xml = new JKL.ParseXML(url);
+	 	xml.async(enyo.bind(this,"processMyPlexSections"));
+	 	xml.parse();
+	},
+	processMyPlexSections: function(data) {
+		console.log("myplex sections: " + enyo.json.stringify(data));
+	},
 	processPlexData: function(data) {
 		var pmc = data.MediaContainer;
 		this.callback(pmc);	
