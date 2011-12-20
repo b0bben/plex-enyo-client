@@ -99,7 +99,7 @@ enyo.kind({
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
 		this.plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
-		this.plexReq.loadServerListFromCookie();
+		this.plexReq.loadPrefsFromCookie();
 		this.plexReq.librarySections();
 		
 	},

@@ -1,12 +1,15 @@
 enyo.kind({
 	name: "PlexServer",
-	constructor: function(name,host,port,username,password,include) {
+	constructor: function(machineIdentifier,name,host,port,username,password,include, owned, accessToken) {
 		this.name = name;
 		this.host = host;
 		this.port = port;
+		this.machineIdentifier = machineIdentifier;
 		this.username = username;
 		this.password = password;
 		this.include = include;
+		this.owned = owned;
+		this.accessToken = accessToken;
 		this.baseUrl = this.host + ":" + this.port;
 	},
 	
@@ -15,49 +18,55 @@ enyo.kind({
   name: "PlexRequest",
   kind: enyo.Component,
   constructor: function(callback) {
-  this.inherited(arguments);
-	this.callback = callback;
-	var self = this;
-	this.servers = [];
-	this.plex_access_key = "";
-	this.loadServerListFromCookie();
+	  this.inherited(arguments);
+		this.callback = callback;
+		var self = this;
+		this.servers = [];
+		this.myplexServers = [];
+		this.videoQuality = "8";
+		this.plex_access_key = "";
+		this.prefs = undefined;
+		this.loadPrefsFromCookie();
   },
-	loadServerListFromCookie: function() {
-		/*
-		*	Server list cookie will be array of servers like this:
-		*	{name:serverName,
-			host:serverUrl,
-			port:serverPort,
-			user:username,
-			pass:password,
-			include: true};
-		*/
-		
+	loadPrefsFromCookie: function() {
 		var prefCookie = enyo.getCookie("prefs");
 		
-		if (prefCookie !== undefined) {
-			var prefs = enyo.json.parse(prefCookie);
-			this.servers = [];
-			for (var i = prefs.length - 1; i >= 0; i--){
-				var serverAsJson = prefs[i];
-				var plexServer = new PlexServer(serverAsJson.name,serverAsJson.host,serverAsJson.port,serverAsJson.username,serverAsJson.password,serverAsJson.include);
-
-					this.servers.push(plexServer);
-				
-			};
-			//this.log("loaded " + this.servers.length);
+		if (prefCookie) {
+			// mixin will use the cookie value of the pref
+			// if it exists, else use the default
+			this.prefs = enyo.mixin(this.prefs, enyo.json.parse(prefCookie));
+			this.log("loaded prefs: " + enyo.json.stringify(this.prefs));
+			this.servers = this.prefs.servers;
+			this.myplexServers = this.prefs.myplexServers;
+			this.myplexUser = this.prefs.myplexUser;
+			this.videoQuality = this.prefs.videoQuality;
 		}
 	},
 	savePrefs: function() {
-	  enyo.setCookie("prefs", enyo.json.stringify(this.servers));
+		this.prefs = {
+			servers: this.servers,
+			myplexServers: this.myplexServers,
+			myplexUser: this.myplexUser,
+			videoQuality: this.videoQuality,
+		};
+	  enyo.setCookie("prefs", enyo.json.stringify(this.prefs));
+	  this.log("saved prefs: " + enyo.json.stringify(this.prefs));
 	},
 	serverForUrl: function(serverUrl) {
-	  this.loadServerListFromCookie(); //refresh list of servers incase we've added some without saving
+	  this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
 	  for (var i = 0; i < this.servers.length; i++) {
 	    if (this.servers[i].host == serverUrl)
 	      return this.servers[i];
 	  }
 	  return null;
+	},
+	getMyPlexServerWithMachineId: function(machineid){
+	  this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
+	  for (var i = 0; i < this.myplexServers.length; i++) {
+	    if (this.myplexServers[i].machineIdentifier == machineid)
+	      return this.myplexServers[i];
+	  }
+	  return null;		
 	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl) {
 	  //Step 1: general transcoding URL + server URL
@@ -141,42 +150,8 @@ enyo.kind({
 			}
 		}
 	},
-	make_base_auth: function(user, password) {
-	  var tok = user + ':' + password;
-	  var hash = encode64(tok);
-	  return "Basic " + hash;
-	},
-	loginToMyPlex: function(user,pass) {
-		var url = "https://my.plexapp.com/users/sign_in.xml";
-		var auth = this.make_base_auth(user,pass);
-		var headers = {"Authorization":auth, 
-									"X-Plex-Product": "plex_webos", 
-									"X-Plex-Version": "0.5.5",
-									"X-Plex-Provides": "client",
-									"X-Plex-Client-Identifier": "bob_test",
-									"X-Plex-Platform": "webos",
-									"X-Plex-Platform-Version": "3.0.4",
-									"X-Plex-Device": "HP Touchpad" };
-		
-		var xml = new JKL.ParseXML(url,"","POST",headers);
-		xml.async(enyo.bind(this,"processMyPlexLogin"));
-		xml.parse();
-		//var data = xml.parse();
-		//return data;
-	},
-	processMyPlexLogin: function(data) {
-		console.log("processMyPlexLogin: " + enyo.json.stringify(data));
-		this.callback(data);
-	},
-	getMyPlexServers: function(authToken) {
-	  var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
-  	var xml = new JKL.ParseXML(url);
-	 	xml.async(enyo.bind(this,"processMyPlexSections"));
-	 	xml.parse();
-	},
-	processMyPlexSections: function(data) {
-		console.log("myplex sections: " + enyo.json.stringify(data));
-	},
+
+	// PMS START
 	processPlexData: function(data) {
 		var pmc = data.MediaContainer;
 		this.callback(pmc);	
@@ -233,5 +208,57 @@ enyo.kind({
 			var response = this.dataForUrlSync(server,url);
 			console.log("stopped transcoder, resp: " + response);
 		}
-	}
+	},
+
+
+	// MYPLEX START
+	make_base_auth: function(user, password) {
+	  var tok = user + ':' + password;
+	  var hash = encode64(tok);
+	  return "Basic " + hash;
+	},
+	loginToMyPlex: function(user,pass) {
+		var url = "https://my.plexapp.com/users/sign_in.xml";
+		var auth = this.make_base_auth(user,pass);
+		var headers = {"Authorization":auth, 
+									"X-Plex-Product": "plex_webos", 
+									"X-Plex-Version": "0.5.5",
+									"X-Plex-Provides": "client",
+									"X-Plex-Client-Identifier": "bob_test",
+									"X-Plex-Platform": "webos",
+									"X-Plex-Platform-Version": "3.0.4",
+									"X-Plex-Device": "HP Touchpad" };
+		
+		var xml = new JKL.ParseXML(url,"","POST",headers);
+		xml.async(enyo.bind(this,"processMyPlexLogin"));
+		xml.parse();
+		//var data = xml.parse();
+		//return data;
+	},
+	processMyPlexLogin: function(data) {
+		console.log("processMyPlexLogin: " + enyo.json.stringify(data));
+		this.callback(data);
+	},
+	getMyPlexServers: function(authToken) {
+	  var url = "https://my.plexapp.com/pms/servers?X-Plex-Token=" + authToken;
+  	var xml = new JKL.ParseXML(url);
+	 	xml.async(enyo.bind(this,"processMyPlexServers"));
+	 	xml.parse();
+	},
+	getMyPlexSections: function(authToken) {
+	  var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
+  	var xml = new JKL.ParseXML(url);
+	 	xml.async(enyo.bind(this,"processMyPlexSections"));
+	 	xml.parse();
+	},
+	processMyPlexServers: function(data) {
+		//console.log("myplex servers: " + enyo.json.stringify(data));
+		this.callback(data.MediaContainer);	
+	},
 });
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
