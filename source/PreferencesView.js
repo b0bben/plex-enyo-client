@@ -20,7 +20,7 @@ enyo.kind({
 					method: "resolve", subscribe: true, onSuccess: "gotResolved", onFailure: "genericFailure"},
 			
 			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onDelete: "serverRemoved",onCancel: "backHandler", lazy: true, showing: false},
-			{name: "myPlexForm", kind: "plex.MyPlexFormView", onLoggedIn: "loggedInToMyPlex", onLogout: "logoutFromMyPlex",onCancel: "backHandler", lazy: true, showing: false},
+			{name: "myPlexForm", kind: "plex.MyPlexFormView", onLoggedIn: "loggedInToMyPlex", onLoggedOut: "logoutFromMyPlex",onCancel: "backHandler", lazy: true, showing: false},
 
 			{name: "mainPrefs", kind: enyo.Control, layoutKind: "VFlexLayout", components:[
 				{name: "header", kind: "PageHeader", className: "preferences-header", pack: "center", components: [
@@ -92,25 +92,32 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.plexReq = new PlexRequest();
-		this.loadPrefs();
+		this.reloadPrefs();
 		//this.$.browserBonjour.call({"regType":"_plexmediasvr._tcp", "domainName":"local."});
 		this.$.pane.selectViewByName("mainPrefs");
 	},
-	loadPrefs: function() {
+	reloadPrefs: function() {
+		this.plexReq.loadPrefsFromCookie();
 		if (this.plexReq.myplexUser) {
 			this.$.loginButton.setShowing(false);
 			this.$.myplexLoginItem.createComponent({name: "loggedInButton", 
 																content: $L("Logged in as ") + this.plexReq.myplexUser.username + " (" +this.plexReq.myplexUser.email + ")"});
 			this.$.myplexLoginItem.setShowing(true);
+			this.refreshMyPlexServers();
+		}
+		else {
+			this.$.myplexLoginItem.setShowing(false);
+			//this.$.myplexLoginItem.$.loggedInButton.destroy();
+			this.$.loginButton.setShowing(true);
 		}
 
-		if (this.plexReq.servers.length > 0){
+		//if (this.plexReq.servers.length > 0){
 			this.$.serverList.render();; //force-refresh local server list
-		}
+		//}
 
-		if (this.plexReq.myplexServers.length > 0){
-			this.$.myPlexServerList.render();; //force-refresh myplex server list
-		}
+		//if (this.plexReq.myplexServers.length > 0){
+			this.$.myPlexServerList.render(); //force-refresh myplex server list
+		//}
 	},
 	gotBrowsed: function(inSender, inResponse) {
 	  if (inResponse.returnValue) {
@@ -172,25 +179,39 @@ enyo.kind({
 		this.plexReq.savePrefs();
 		this.$.pane.back();
 		
-		this.plexReq.loadPrefsFromCookie(); //force refresh of settings
+		this.reloadPrefs(); //force refresh of settings
 	},
 	serverRemoved: function(inSender, inServerIndex) {
 		this.plexReq.servers.remove(inServerIndex);
 		this.plexReq.savePrefs();
 		this.$.pane.back();
 		
-		this.plexReq.loadPrefsFromCookie(); //force refresh of settings
+		this.plexReq.reloadPrefs(); //force refresh of settings
 	},
 	//myplex
 	loggedInToMyPlex: function(inSender, myPlexUserData) {
 		if (myPlexUserData !== undefined) {
 			this.plexReq.myplexUser = myPlexUserData;
-			this.plexReq.savePrefs();
-			this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexServers"));
-			var authToken = myPlexUserData["authentication-token"];
-			this.plexReq.getMyPlexServers(authToken);			
+			this.plexReq.savePrefs();		
 		}
+		this.reloadPrefs();
+		this.$.pane.back();
+	},
+	refreshMyPlexServers: function() {
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexServers"));
+		this.plexReq.getMyPlexServers();	
+	},
+	logoutFromMyPlex: function(inSender, myPlexUserData) {
+		if (myPlexUserData !== undefined) {
+			//destroy any myplex login and servers and save
+			delete this.plexReq.myplexUser;
+			this.plexReq.myplexServers = [];
+			this.plexReq.savePrefs();
 
+			//refresh list
+			this.reloadPrefs();
+		}
+		this.$.pane.back();
 	},
 	gotMyPlexServers: function(pmc) {
 		if (pmc !== undefined) {
@@ -212,7 +233,7 @@ enyo.kind({
 				}
 			}
 		}
-		this.$.pane.back();
+		this.$.myPlexServerList.render();
 	},
 	listMyPlexSetupRow: function(inSender, inIndex) {
 		this.log("listar myplex servers");
@@ -226,7 +247,7 @@ enyo.kind({
 	},
 	myplexLoginItemTap: function(inSender, inEvent) {
 		this.$.pane.selectViewByName("myPlexForm");
-		this.$.serverForm.setServer(this.plexReq.myplexUser);
+		this.$.myPlexForm.setMyPlexDetails(this.plexReq.myplexUser);
 	},
 	backHandler: function(inSender) {
 		this.$.pane.back();

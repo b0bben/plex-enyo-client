@@ -45,17 +45,19 @@ enyo.kind({
   },
   myPlexDetailsChanged: function() {
     if (this.myPlexDetails !== undefined) {
-      ui.username.setValue(this.server.username);
-      ui.password.setValue(this.server.password);
+      var ui = this.$;
+      ui.username.setValue(this.myPlexDetails.username);
+      ui.password.setDisabled(true);
       
-      this.$.loginButton.setDisabled(true);
-      this.$.logoutButton.setDisabled(false);
+      ui.loginButton.setDisabled(true);
+      ui.logoutButton.setDisabled(false);
     } else {
       var ui = this.$;
       ui.username.setValue("");
       ui.password.setValue("");
-      this.$.loginButton.setDisabled(false);
-      this.$.logoutButton.setDisabled(true);
+      ui.password.setDisabled(false);
+      ui.loginButton.setDisabled(false);
+      ui.logoutButton.setDisabled(true);
     }
   },
   loginTapped: function(inSender, inEvent) {
@@ -73,17 +75,10 @@ enyo.kind({
         //TODO: error handling
   },
   logoutTapped: function(inSender, inEvent) {
-    var prefCookie = enyo.getCookie("prefs");
-    
-    if (prefCookie !== undefined) {
-      var serverList = enyo.json.parse(prefCookie);
-      for (var i = serverList.length - 1; i >= 0; i--){
-        var serverAsJson = serverList[i];
-        if (serverAsJson.name == this.server.name && serverAsJson.host == this.server.host && serverAsJson.port == this.server.port){
-          this.doDelete(i);
-        } 
-      };
+    if (this.myPlexDetails !== undefined) {
+      this.doLoggedOut(this.myPlexDetails);
     }
+
   },
   myPlexLoginResponse: function(userData) {
     console.log("myPlexLoginResponse: "+userData.user["authentication-token"]);

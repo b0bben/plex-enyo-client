@@ -60,14 +60,6 @@ enyo.kind({
 	  }
 	  return null;
 	},
-	getMyPlexServerWithMachineId: function(machineid){
-	  this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
-	  for (var i = 0; i < this.myplexServers.length; i++) {
-	    if (this.myplexServers[i].machineIdentifier == machineid)
-	      return this.myplexServers[i];
-	  }
-	  return null;		
-	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl) {
 	  //Step 1: general transcoding URL + server URL
 	  var transcodingUrl = "/video/:/transcode/segmented/start.m3u8";
@@ -239,9 +231,10 @@ enyo.kind({
 		console.log("processMyPlexLogin: " + enyo.json.stringify(data));
 		this.callback(data);
 	},
-	getMyPlexServers: function(authToken) {
+	getMyPlexServers: function() {
+		var authToken = this.myplexUser["authentication-token"];
 	  var url = "https://my.plexapp.com/pms/servers?X-Plex-Token=" + authToken;
-  	var xml = new JKL.ParseXML(url);
+	  var xml = new JKL.ParseXML(url);
 	 	xml.async(enyo.bind(this,"processMyPlexServers"));
 	 	xml.parse();
 	},
@@ -254,6 +247,14 @@ enyo.kind({
 	processMyPlexServers: function(data) {
 		//console.log("myplex servers: " + enyo.json.stringify(data));
 		this.callback(data.MediaContainer);	
+	},
+	getMyPlexServerWithMachineId: function(machineid){
+	  //this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
+	  for (var i = 0; i < this.myplexServers.length; i++) {
+	    if (this.myplexServers[i].machineIdentifier == machineid)
+	      return this.myplexServers[i];
+	  }
+	  return null;		
 	},
 });
 // Array Remove - By John Resig (MIT Licensed)
