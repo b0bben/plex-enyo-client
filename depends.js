@@ -19,6 +19,8 @@ enyo.depends(
 	"source/MessageDialog.js",
 	"source/StartView.js",
 	"source/PlayerControl.js",
+	"source/MyPlexSectionsView.js",
+	"source/MyPlexSection.js",
 	//plex api
 	"api/PlexRequest.js",
 	"api/base64.js",

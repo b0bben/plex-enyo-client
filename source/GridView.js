@@ -53,17 +53,18 @@ enyo.kind({
 	},
 	parentMediaContainerChanged: function() {
 	  if (this.parentMediaContainer !== undefined) {
-		//get the section details
+			//get the section details
 	    this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
-		this.server = this.parentMediaContainer.server;
-  		this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
+			this.server = this.parentMediaContainer.server;
+			var key = this.parentMediaContainer.section.path ? this.parentMediaContainer.section.path : this.parentMediaContainer.section.key;
+  		this.plexReq.getSectionForKey(this.parentMediaContainer.server,key);
 	    
-		//get different filtering options for this section
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotFiltersForSection"));
-		this.plexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
-    
+			//get different filtering options for this section
+			//this.plexReq = new PlexRequest(enyo.bind(this,"gotFiltersForSection"));
+			//this.plexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
+	    
 	  
-		this.$.grid_header.setContent(this.parentMediaContainer.section.title);
+			this.$.grid_header.setContent(this.parentMediaContainer.section.title);
 	  }
 	},
 	gotFiltersForSection: function(pmc) {
@@ -130,7 +131,7 @@ enyo.kind({
 				  var pmo = this.getPlexMediaObject(idx);
 					//this.log("idx: " + idx);
 
-					var path = this.parentMediaContainer.server.baseUrl + pmo.thumb;
+					var path = this.plexReq.getAssetUrl(this.parentMediaContainer.server,pmo.thumb);
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
 					//coverart img and properties

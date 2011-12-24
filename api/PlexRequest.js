@@ -10,7 +10,7 @@ enyo.kind({
 		this.include = include;
 		this.owned = owned;
 		this.accessToken = accessToken;
-		this.baseUrl = this.host + ":" + this.port;
+		this.baseUrl = "http://" + this.host + ":" + this.port;
 	},
 	
 })
@@ -121,11 +121,18 @@ enyo.kind({
 		
 	},
 	dataForUrlAsync: function(server,plexUrl) {
+		//need both server AND url
 		if (server !== undefined && plexUrl !== undefined) { 
 			var url = server.baseUrl + plexUrl;
 		 	var xml = new JKL.ParseXML(url);
 		 	xml.async(enyo.bind(this,"processPlexData"));
 		 	xml.parse();	
+		}
+		//got a complete url, usually via myplex
+		else if (server === undefined && plexUrl !== undefined) { 
+		 	var xml = new JKL.ParseXML(plexUrl);
+		 	xml.async(enyo.bind(this,"processPlexData"));
+		 	xml.parse();				
 		}
 	},
 	
@@ -182,8 +189,12 @@ enyo.kind({
 		this.callback(mediaObjs);
 	},
 	getSectionForKey: function(server,key,level) {
+		var authToken = this.myplexUser["authentication-token"];
 		level = level || "all"
-		var url = "/library/sections/" + key + "/" + level;
+		var url = key + "/" + level;
+		if (authToken) {
+			url += "?X-Plex-Token=" + authToken;
+		}
 		this.dataForUrlAsync(server,url);
 		
 	},
@@ -193,6 +204,14 @@ enyo.kind({
 	},
 	getFullUrlForPlexUrl: function(server,url) {
 	  return server.baseUrl + url;
+	},
+	getAssetUrl: function(server, asset_key) {
+		var authToken = this.myplexUser["authentication-token"];
+		var url = server.baseUrl + asset_key;
+		if (authToken) {
+			url += "?X-Plex-Token=" + authToken;
+		}
+		return url;
 	},
 	stopTranscoder: function(server) {
 		if (server.hasOwnProperty("baseUrl")) {
@@ -238,12 +257,6 @@ enyo.kind({
 	 	xml.async(enyo.bind(this,"processMyPlexServers"));
 	 	xml.parse();
 	},
-	getMyPlexSections: function(authToken) {
-	  var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
-  	var xml = new JKL.ParseXML(url);
-	 	xml.async(enyo.bind(this,"processMyPlexSections"));
-	 	xml.parse();
-	},
 	processMyPlexServers: function(data) {
 		//console.log("myplex servers: " + enyo.json.stringify(data));
 		this.callback(data.MediaContainer);	
@@ -255,6 +268,21 @@ enyo.kind({
 	      return this.myplexServers[i];
 	  }
 	  return null;		
+	},
+	myPlexSections: function() {
+		if (this.myplexUser === undefined){
+			this.callback(undefined); //nothing to see here, move along
+			return;
+		}
+		var authToken = this.myplexUser["authentication-token"];
+	  var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
+  	var xml = new JKL.ParseXML(url);
+	 	xml.async(enyo.bind(this,"processMyPlexSections"));
+	 	xml.parse();
+	},
+	processMyPlexSections: function(data) {
+		console.log(data);
+		this.callback(data.MediaContainer);
 	},
 });
 // Array Remove - By John Resig (MIT Licensed)

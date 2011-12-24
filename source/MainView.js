@@ -6,9 +6,10 @@ enyo.kind({
 			{name: "mainBrowsingView", kind: enyo.Control, layoutKind: "HFlexLayout", components:[
 				{kind:enyo.VFlexBox, width:'320px', height: "100%", style:"border-right: 2px solid;", components: [
 					{flex: 1, name: "left_pane", kind: "Pane", components: [
-						{kind: "plex.SectionsView", name: "sectionsView",flex:1, onSelectedSection: "showGridView"},
+						{kind: "plex.SectionsView", name: "sectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy: true},
+						{kind: "plex.MyPlexSectionsView", name: "myPlexSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy:true},
 					]},
-					{name: "musicPlayer", kind: "plex.PlayerControl"},
+					{name: "musicPlayer", kind: "plex.PlayerControl",showing: false, lazy: true},
 					/*{kind: "Toolbar", components: [
 						{kind: "GrabButton"},
 						{caption: "Go", onclick: "doGo"}
@@ -17,7 +18,6 @@ enyo.kind({
 				{kind:enyo.VFlexBox, flex:1, components: [
 		 			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", onSelectView: "viewSelected", components: [
 						{kind: "plex.GridView", name: "grid_view"},
-						{kind: "plex.WelcomeView", name: "welcomeView"},
 						{kind: "plex.StartView", name: "startView"},
 					]}
 				]},
@@ -32,6 +32,7 @@ enyo.kind({
 			]},
 			{name:"prefsView", kind:"plex.PreferencesView", lazy: true, showing: false, onClose:"closePrefsView"},
 			{name: "videoPlayer", kind: "PlexViewVideo", flex:1, lazy: true, showing: false},
+			{kind: "plex.WelcomeView", name: "welcomeView",lazy: true, showing: false},
 		]},
 		
 	],
@@ -40,8 +41,9 @@ enyo.kind({
 		this.$.pane.selectViewByName("mainBrowsingView");
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
-		this.plexReq.librarySections();
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
+		//this.plexReq.librarySections();
+		this.plexReq.myPlexSections();
 		
 	},
 	gotSections: function(plexMediaContainer) {
@@ -50,7 +52,7 @@ enyo.kind({
 		this.log("got sections for " + this.rootMediaContainer.length + " servers");
 		//no servers added, show first-run
 		if (this.rootMediaContainer.length < 1) {
-			this.$.right_pane.selectViewByName("welcomeView");
+			this.$.pane.selectViewByName("welcomeView");
 		}
 		else {
 			//clean startup, let's show recently added in the grid
@@ -63,6 +65,19 @@ enyo.kind({
 		//enyo.scrim.hide();
 	
 	},
+	gotMyPlexSections: function(pmc) {
+		if (pmc !== undefined && pmc.size > 0) {
+			this.$.left_pane.render();
+			this.$.left_pane.selectViewByName("myPlexSectionsView");
+			this.$.myPlexSectionsView.setShowing(true);
+			this.$.myPlexSectionsView.setParentMediaContainer(pmc);
+
+			
+		}
+		else {
+			this.$.pane.selectViewByName("welcomeView");
+		}
+	},
 	showGridView: function(inSender, inSection) {
 		this.selectedSection = inSection; //actually both the section AND the server it belongs to
     	this.$.right_pane.selectViewByName("grid_view");
@@ -73,7 +88,9 @@ enyo.kind({
 		this.$.right_pane.selectViewByName("startView");		
 	},
 	viewSelected: function(inSender, inView, inPreviousView) {
-	    inView.setParentMediaContainer(this.selectedSection);
+		if (this.selectedSection) {
+			inView.setParentMediaContainer(this.selectedSection);	
+		}
 	},
 	showPreferences: function() {
 		this.$.pane.selectViewByName("prefsView");
@@ -98,9 +115,10 @@ enyo.kind({
 		this.$.pane.back();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
 		this.plexReq.loadPrefsFromCookie();
-		this.plexReq.librarySections();
+		//this.plexReq.librarySections();
+		this.plexReq.myPlexSections();
 		
 	},
 	startVideoPlayer: function(src, pmo, server) {

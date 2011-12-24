@@ -100,9 +100,9 @@ enyo.kind({
 		this.plexReq.loadPrefsFromCookie();
 		if (this.plexReq.myplexUser) {
 			this.$.loginButton.setShowing(false);
+			this.$.myplexLoginItem.setShowing(true);
 			this.$.myplexLoginItem.createComponent({name: "loggedInButton", 
 																content: $L("Logged in as ") + this.plexReq.myplexUser.username + " (" +this.plexReq.myplexUser.email + ")"});
-			this.$.myplexLoginItem.setShowing(true);
 			this.refreshMyPlexServers();
 		}
 		else {
