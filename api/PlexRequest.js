@@ -209,7 +209,7 @@ enyo.kind({
 		var authToken = this.myplexUser["authentication-token"];
 		var url = server.baseUrl + asset_key;
 		if (authToken) {
-			url += "?X-Plex-Token=" + authToken;
+			url += "&X-Plex-Token=" + authToken;
 		}
 		return url;
 	},
@@ -282,8 +282,40 @@ enyo.kind({
 	},
 	processMyPlexSections: function(data) {
 		console.log(data);
-		this.callback(data.MediaContainer);
+		var myPlexSections = this.arrangeMyPlexServersAndSections(data.MediaContainer);
+		this.callback(myPlexSections);
 	},
+	arrangeMyPlexServersAndSections: function(pmc) {
+		this.listedServers = [];
+    if (pmc !== undefined) {
+      for (var i = 0; i < pmc.size; i++) {
+        var serverAndSection = pmc.Directory[i];
+        var newServer = { serverName: serverAndSection.serverName,
+                          machineIdentifier: serverAndSection.machineIdentifier,
+                          sections: [serverAndSection]};
+        
+        this.addOrInsertNewServer(newServer);
+      }
+    }
+    return this.listedServers;
+  },
+  addOrInsertNewServer: function(newServer) {
+    if (this.listedServers.length == 0) {
+      this.listedServers.push(newServer);
+      return;
+    }
+    for (var i = 0; i < this.listedServers.length; i++) {
+      if (this.listedServers[i].machineIdentifier == newServer.machineIdentifier) {
+        //for (var j = 0; j < newServer.sections.length; j++) {
+          this.listedServers[i].sections.push(newServer.sections[0]);
+          return;
+        //};
+        
+      }
+    };
+    this.listedServers.push(newServer);
+    return;
+  },
 });
 // Array Remove - By John Resig (MIT Licensed)
 Array.prototype.remove = function(from, to) {
