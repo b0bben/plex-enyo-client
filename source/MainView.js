@@ -41,8 +41,12 @@ enyo.kind({
 		this.$.pane.selectViewByName("mainBrowsingView");
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
+		//local networks sections
+		//this.plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
 		//this.plexReq.librarySections();
+
+		//myplex sections
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
 		this.plexReq.myPlexSections();
 		
 	},
@@ -59,17 +63,18 @@ enyo.kind({
 			this.plexReq = new PlexRequest(enyo.bind(this,"gotRecentlyAdded"));
 			this.plexReq.recentlyAdded();
 		}
-		this.$.left_pane.render();
-		this.$.sectionsView.setParentMediaContainer(this.rootMediaContainer);
+		//this.$.left_pane.render();
 		this.$.left_pane.selectViewByName("sectionsView");
+		this.$.sectionsView.setParentMediaContainer(this.rootMediaContainer);
+		
 		//enyo.scrim.hide();
 	
 	},
 	gotMyPlexSections: function(pmc) {
-		if (pmc !== undefined && pmc.size > 0) {
+		if (pmc !== undefined && pmc.length > 0) {
 			this.$.left_pane.render();
 			this.$.left_pane.selectViewByName("myPlexSectionsView");
-			this.$.myPlexSectionsView.setShowing(true);
+			//this.$.myPlexSectionsView.setShowing(true);
 			this.$.myPlexSectionsView.setParentMediaContainer(pmc);
 
 			
@@ -80,7 +85,7 @@ enyo.kind({
 	},
 	showGridView: function(inSender, inSection) {
 		this.selectedSection = inSection; //actually both the section AND the server it belongs to
-    	this.$.right_pane.selectViewByName("grid_view");
+    this.$.right_pane.selectViewByName("grid_view");
 	},
 	gotRecentlyAdded: function(pmc) {
 		this.$.startView.setServer(pmc[0].server);

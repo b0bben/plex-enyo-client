@@ -15,79 +15,63 @@ enyo.kind({
     ]},
     {kind: enyo.Scroller, flex: 1, components: [
       {name: "serverList",kind: "VirtualRepeater",flex: 1, height: "100%", onSetupRow: "setupServerItems", components: [
-         {name: "cells", kind: "VFlexBox"}
+        {name: "cells", kind: "VFlexBox"},
       ]},
-    ]},
-        
+    ]},    
     {kind: "Selection"},
-    /*{kind: "Button", onclick: "openAppMenu", caption: "appmenu"},*/
+    {kind: "Button", onclick: "openAppMenu", caption: "appmenu"},
   ],
   create: function() {
     this.inherited(arguments);
-    this.listedServers = [];
-    this.sections = [];
+    this.sectionsUi = [];
     this.headerContentChanged();
-    this.$.cells.destroyControls();
     //this.parentMediaContainerChanged();
     this.objCurrNavItem = "";
     this.selectedRow = -1;
+    this.log("created MyPlexSectionView");
+    //this.$.cells.destroyControls();
+    //this.$.serverList.render();
+    
   },
   headerContentChanged: function() {
-    //this.$.header.setContent(this.headerContent);
-  },
-  parentMediaContainerChanged: function() {
-    this.sortUniqueServers();
-    this.render();
     //this.$.cells.destroyControls();
     //this.$.serverList.render();
   },
-  sortUniqueServers: function() {
-    if (this.parentMediaContainer !== undefined) {
-      for (var i = 0; i < this.parentMediaContainer.size; i++) {
-        var serverAndSection = this.parentMediaContainer.Directory[i];
-        var newServer = { serverName: serverAndSection.serverName,
-                          machineIdentifier: serverAndSection.machineIdentifier,
-                          sections: [serverAndSection]};
-        
-        this.addOrInsertNewServer(newServer);
-            
-      }
-    }
+  parentMediaContainerChanged: function() {
+    this.buildSections()
   },
-  addOrInsertNewServer: function(newServer) {
-    if (this.listedServers.length == 0) {
-      this.listedServers.push(newServer);
-      return;
-    }
-    for (var i = 0; i < this.listedServers.length; i++) {
-      if (this.listedServers[i].machineIdentifier == newServer.machineIdentifier) {
-        //for (var j = 0; j < newServer.sections.length; j++) {
-          this.listedServers[i].sections.push(newServer.sections[0]);
-          return;
-        //};
-        
-      }
-    };
-    this.listedServers.push(newServer);
-    return;
+  buildSections: function() {
+    for (var i = 0; i < this.parentMediaContainer.length; i++) {
+      var myplexServer = this.parentMediaContainer[i];
+      var c = {kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", sections: myplexServer.sections, caption: myplexServer.serverName, owner:this};
+      this.sectionsUi.push(c);
+    };    
+    this.$.cells.destroyControls();
+    this.$.serverList.render();
   },
   setupServerItems: function(inSender, inIndex) {
-    if (this.listedServers.length == 0) {
+    //this.$.cells.destroyControls(); //needs to be done, or we'll get each server each time
+    if (this.parentMediaContainer === undefined || this.parentMediaContainer.length == 0) {
       return false;
     }      
-    var myPlexServer = this.listedServers[inIndex];
-    if (myPlexServer !== undefined) {
-      this.log("creating myplex section " + myPlexServer.serverName);
-      this.$.cells.createComponents([{kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", 
-                                    sharedServer: myPlexServer, 
-                                    caption: myPlexServer.serverName, 
-                                    owner: this}]);
-      this.log("created");
+    
+    if (!this.created) {
+      this.$.cells.createComponents(this.sectionsUi);  
+      this.log("created myplex sections");
+      this.created = true;
       return true;
     }
-    return false;
   },
   sectionRowSelected: function(inSender, inSection, inServer) {
+    //deal with selection across multiple instances of MyPlexSection
+    var ctrls = this.$.cells.getControls();
+    for (var i = 0; i < ctrls.length; i++) {
+      var ctrl = ctrls[i];
+      if (ctrl != inSender) {
+        ctrl.selectedRow = -1;
+        ctrl.render();
+      }
+    };
     this.log("section selected: " + inServer.name + "->" + inSection.title);
     var pmo = {"server": inServer, "section": inSection};
     this.doSelectedSection(pmo);

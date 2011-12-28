@@ -63,7 +63,6 @@ enyo.kind({
 			//this.plexReq = new PlexRequest(enyo.bind(this,"gotFiltersForSection"));
 			//this.plexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
 	    
-	  
 			this.$.grid_header.setContent(this.parentMediaContainer.section.title);
 	  }
 	},

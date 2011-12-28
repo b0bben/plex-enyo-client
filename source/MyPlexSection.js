@@ -3,7 +3,7 @@ enyo.kind({
   kind: enyo.DividerDrawer,
   captionClassName: 'library-navigation-item library-navigation-section-divider',
   published: {
-    sharedServer: undefined,
+    sections: undefined,
     showCaption: false,
   },
   events: {
@@ -11,22 +11,23 @@ enyo.kind({
   },
   components: [
     {name: "sectionList", kind: "VirtualRepeater",flex: 1, className: "section-list",onSetupRow: "setupSectionRowItems", components: [
-    {name: "sectionItem", kind: enyo.Item, layoutKind: "VFlexLayout", style: "border-top:none;",onclick: "sectionRowSelected",Xonmousedown: "sectionRowSelected", components: [
-    {name: "sectionButton", kind: "plex.ButtonMenu"},
-  ]},
+    {name: "sectionItem", kind: enyo.Item, layoutKind: "VFlexLayout", style: "border-top:none;",
+    onclick: "sectionRowSelected",Xonmousedown: "sectionRowSelected", components: [
+      {name: "sectionButton", kind: "plex.ButtonMenu"},
+    ]},
   ]},       
   ],
   create: function() {
     this.inherited(arguments);
     this.selectedRow = -1;
-    this.sections = [];
-    this.sharedServerChanged();
-    this.showCaptionChanged();
+    this.sectionsChanged();
+    //this.showCaptionChanged();
+    this.log("created MyPlexSection");
   },
-  sharedServerChanged: function() {
-    if (this.sharedServer !== undefined) {
-      this.log("creating myplex sharedServer " + this.sharedServer.serverName);
-      this.$.sectionList.render();
+  sectionsChanged: function() {
+    if (this.sections !== undefined) {
+      this.log("creating " + this.sections.length + " sections");
+      this.render();
     }
   },
   showCaptionChanged: function() {
@@ -36,11 +37,9 @@ enyo.kind({
     // check if the row is selected
     // color the row if it is
     this.$.sectionItem.addRemoveClass("active", (inIndex == this.selectedRow));
-    var section = this.sharedServer.sections[inIndex];
+    var section = this.sections[inIndex];
     if (section) {          
       this.$.sectionButton.setHeaderContent(section);
-      
-      //this.log("ritar sektion: " + section.title);
       return true;
     }
 
@@ -48,7 +47,7 @@ enyo.kind({
   },
   sectionRowSelected: function(inSender, inEvent) {
     this.selectedRow = inEvent.rowIndex;
-    var sectionAndServer = this.sharedServer.sections[this.selectedRow];
+    var sectionAndServer = this.sections[this.selectedRow];
     var myPlexServer = new PlexServer(sectionAndServer.machineIdentifier,
                                       sectionAndServer.serverName,
                                       sectionAndServer.host, 
@@ -59,7 +58,7 @@ enyo.kind({
                                       sectionAndServer.owned,
                                       sectionAndServer.accessToken);
     //send both the server and the section that was chosen upstreams, this will eventually end up in the grid
-    this.doRowSelected(this.sharedServer.sections[this.selectedRow], myPlexServer);
+    this.doRowSelected(this.sections[this.selectedRow], myPlexServer);
     this.$.sectionList.render();
   }
 });
