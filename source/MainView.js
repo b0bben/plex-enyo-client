@@ -117,6 +117,7 @@ enyo.kind({
 	    this.$.appMenu.close();
 	},
 	closePrefsView: function(inView) {
+		clearInterval(this.$.prefsView.intervarlTimerId);
 		this.$.pane.back();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs

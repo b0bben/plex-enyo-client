@@ -95,6 +95,8 @@ enyo.kind({
 		this.reloadPrefs();
 		//this.$.browserBonjour.call({"regType":"_plexmediasvr._tcp", "domainName":"local."});
 		this.$.pane.selectViewByName("mainPrefs");
+		//refresher that watches the server list for reachability
+		this.intervarlTimerId = setInterval(enyo.bind(this, this.checkServerReachability), 5000);
 	},
 	reloadPrefs: function() {
 		this.plexReq.loadPrefsFromCookie();
@@ -197,6 +199,12 @@ enyo.kind({
 		this.reloadPrefs();
 		this.$.pane.back();
 	},
+	checkServerReachability: function() {
+		this.log("checking servers");
+		//plexReq is constantly watching the servers and updating their .online flag when reachability changes,
+		//so we just need to refresh the list to show the current reachability status
+		this.$.myPlexServerList.render();
+	},
 	refreshMyPlexServers: function() {
 		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexServers"));
 		this.plexReq.getMyPlexServers();	
@@ -217,16 +225,15 @@ enyo.kind({
 		if (pmc !== undefined) {
 			for (var i = 0; i < pmc.Server.length; i++) {
 				var server = pmc.Server[i];
-				var foundServer = {
-							machineIdentifier:server.machineIdentifier,
-							name:server.name,
-    		  		host:server.host, 
-    		  		port:server.port, //always 32400
-    		  		user:null,
-    		  		pass:null,
-    		  		include:true,
-    		  		owned:server.owned,
-    		  		accessToken:server.accessToken};
+				var foundServer = new PlexServer(server.machineIdentifier,
+																				server.name,
+																				server.host,
+																				server.port,
+																				null,
+																				null,
+																				true,
+																				server.owned,
+																				server.accessToken);
 		    var existingServer = this.plexReq.getMyPlexServerWithMachineId(server.machineIdentifier);
 		    if (!existingServer) {
 		      this.plexReq.myplexServers.push(foundServer);
@@ -240,8 +247,14 @@ enyo.kind({
 		
     // check if the row is selected
 		if (this.plexReq.myplexServers !== undefined && inIndex < this.plexReq.myplexServers.length) {
-			this.$.myPlexServerName.setLabel(this.plexReq.myplexServers[inIndex].name);
-			this.$.myPlexIncludeServer.setState(this.plexReq.myplexServers[inIndex].include);
+			var myplexServer = this.plexReq.myplexServers[inIndex];
+			var reachabilityStatus = myplexServer.online ? $L("(online)") : $L("(offline)");
+			this.$.myPlexServerName.setLabel(myplexServer.name + reachabilityStatus);
+			this.$.myPlexIncludeServer.setState(myplexServer.include);
+			if (!myplexServer.online) {
+				this.$.item.setDisabled(true);
+				this.$.myPlexIncludeServer.setState(false);
+			}
 			return true;
 		}
 	},

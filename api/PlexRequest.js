@@ -1,19 +1,36 @@
-enyo.kind({
-	name: "PlexServer",
-	constructor: function(machineIdentifier,name,host,port,username,password,include, owned, accessToken) {
-		this.name = name;
-		this.host = host;
-		this.port = port;
-		this.machineIdentifier = machineIdentifier;
-		this.username = username;
-		this.password = password;
-		this.include = include;
-		this.owned = owned;
-		this.accessToken = accessToken;
-		this.baseUrl = "http://" + this.host + ":" + this.port;
-	},
-	
-})
+var PlexServer = function(machineIdentifier,name,host,port,username,password,include, owned, accessToken) {
+	this.name = name;
+	this.host = host;
+	this.port = port;
+	this.machineIdentifier = machineIdentifier;
+	this.username = username;
+	this.password = password;
+	this.include = include;
+	this.owned = owned;
+	this.accessToken = accessToken;
+	this.online = false;
+	this.baseUrl = "http://" + host + ":" + port;
+
+	this.checkIfReachable = function() {
+		var url = this.baseUrl + "/library/recentlyAdded?X-Plex-Token=" + this.accessToken;
+		var xml = new JKL.ParseXML(url);
+		xml.async(enyo.bind(this,"reachCheckResponse"));
+		xml.parse();
+	};
+	this.reachCheckResponse = function(data) {
+		if (data !== undefined) {
+			this.online = true;
+		}
+		else {
+			this.online = false;
+			this.include = false;
+			console.log(this.name + " is offline");
+		}
+	};
+
+	//check (asyncl-y) if server is reachable at this point
+	this.checkIfReachable();
+}
 enyo.kind({
   name: "PlexRequest",
   kind: enyo.Component,
@@ -27,6 +44,8 @@ enyo.kind({
 		this.plex_access_key = "";
 		this.prefs = undefined;
 		this.loadPrefsFromCookie();
+		var thisInst = this;
+		setInterval(enyo.bind(this,"checkServerReachability"), 30000);
   },
 	loadPrefsFromCookie: function() {
 		var prefCookie = enyo.getCookie("prefs");
@@ -35,11 +54,18 @@ enyo.kind({
 			// mixin will use the cookie value of the pref
 			// if it exists, else use the default
 			this.prefs = enyo.mixin(this.prefs, enyo.json.parse(prefCookie));
-			this.log("loaded prefs: " + enyo.json.stringify(this.prefs));
+			//this.log("loaded prefs: " + enyo.json.stringify(this.prefs));
 			this.servers = this.prefs.servers;
-			this.myplexServers = this.prefs.myplexServers;
 			this.myplexUser = this.prefs.myplexUser;
 			this.videoQuality = this.prefs.videoQuality;
+
+			this.myplexServer = [];
+			//need to create PlexServer insatnces for reachability to work
+			for (var i = 0; i < this.prefs.myplexServers.length; i++) {
+				var serverObj = this.prefs.myplexServers[i];
+				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken);
+				this.myplexServers.push(server);
+			};
 		}
 	},
 	savePrefs: function() {
@@ -59,6 +85,13 @@ enyo.kind({
 	      return this.servers[i];
 	  }
 	  return null;
+	},
+	checkServerReachability: function() {
+		for (var i = 0; i < this.myplexServers.length; i++) {
+			var myplexServer = this.myplexServers[i];
+			myplexServer.checkIfReachable();
+			this.log("started reachability check on " + myplexServer.name);
+		};
 	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl) {
 	  //Step 1: general transcoding URL + server URL
