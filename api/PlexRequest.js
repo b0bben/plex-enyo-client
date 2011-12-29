@@ -9,7 +9,9 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 	this.owned = owned;
 	this.accessToken = accessToken;
 	this.online = false;
-	this.baseUrl = "http://" + host + ":" + port;
+
+	//this.baseUrl = "http://" + host + ":" + port;
+	this.baseUrl = host + ":" + port;
 
 	this.checkIfReachable = function() {
 		var url = this.baseUrl + "/library/recentlyAdded?X-Plex-Token=" + this.accessToken;
@@ -55,16 +57,23 @@ enyo.kind({
 			// if it exists, else use the default
 			this.prefs = enyo.mixin(this.prefs, enyo.json.parse(prefCookie));
 			//this.log("loaded prefs: " + enyo.json.stringify(this.prefs));
-			this.servers = this.prefs.servers;
 			this.myplexUser = this.prefs.myplexUser;
 			this.videoQuality = this.prefs.videoQuality;
 
+			this.servers = [];
 			this.myplexServer = [];
 			//need to create PlexServer insatnces for reachability to work
 			for (var i = 0; i < this.prefs.myplexServers.length; i++) {
 				var serverObj = this.prefs.myplexServers[i];
 				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken);
 				this.myplexServers.push(server);
+			};
+
+			//need to create PlexServer insatnces for reachability to work
+			for (var i = 0; i < this.prefs.servers.length; i++) {
+				var serverObj = this.prefs.servers[i];
+				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken);
+				this.servers.push(server);
 			};
 		}
 	},
@@ -190,20 +199,16 @@ enyo.kind({
 	},
 	
 	librarySections: function() {
-		var url = "/library/sections/";
+		var url = "";
+		var sectionsUrl = "/system/library/sections";
 		var mediaObjs = [];
 		for(var i=0; i < this.servers.length; i++) {
 			var server = this.servers[i];
-			if (server.include) {
-				var pmo = this.dataForUrlSync(server,url);
-				var mediaObj = {server: server,	pmo: pmo};
-
-				//server is not available if pmo is null
-				if (pmo !== undefined)
-					mediaObjs.push(mediaObj);				
-			}
+			url = server.baseUrl + sectionsUrl;
 		}
-		this.callback(mediaObjs);
+		var xml = new JKL.ParseXML(url);
+ 		xml.async(enyo.bind(this,"processMyPlexSections"));
+ 		xml.parse();
 	},
 	recentlyAdded: function() {
 		var url = "/library/recentlyAdded";
@@ -315,8 +320,9 @@ enyo.kind({
 	},
 	processMyPlexSections: function(data) {
 		console.log(data);
-		var myPlexSections = this.arrangeMyPlexServersAndSections(data.MediaContainer);
-		this.callback(myPlexSections);
+		//var myPlexSections = this.arrangeMyPlexServersAndSections(data.MediaContainer);
+		//this.callback(myPlexSections);
+		this.callback(data.MediaContainer);
 	},
 	arrangeMyPlexServersAndSections: function(pmc) {
 		this.listedServers = [];

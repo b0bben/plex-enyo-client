@@ -4,7 +4,8 @@ enyo.kind({
 	className: "enyo-bg",
 	published: {
 		headerContent: "",
-		parentMediaContainer: undefined,
+		localMediaContainer: undefined,
+		myplexMediaContainer: undefined,
 	},
 	events: {
 		onSelectedSection: ""
@@ -26,6 +27,8 @@ enyo.kind({
 		this.inherited(arguments);
 		this.listedServers = [];
 		this.sections = [];
+		this.isLocal = false;
+		this.isMyPlex = false;
 		this.headerContentChanged();
 		this.$.cells.destroyControls();
 		//this.parentMediaContainerChanged();
@@ -35,23 +38,34 @@ enyo.kind({
 	headerContentChanged: function() {
 		//this.$.header.setContent(this.headerContent);
 	},
-	parentMediaContainerChanged: function() {
+	localMediaContainerChanged: function() {
+		this.isLocal = true;
+		this.render();
+		//this.$.cells.destroyControls();
+		//this.$.serverList.render();
+	},
+	myplexMediaContainerChanged: function() {
+		this.isMyPlex = true;
 		this.render();
 		//this.$.cells.destroyControls();
 		//this.$.serverList.render();
 	},
 	setupServerItems: function(inSender, inIndex) {
-				var mediaObj = this.parentMediaContainer[inIndex];
-				if (mediaObj !== undefined) {
-					this.log("creating server " + mediaObj.server.name);
-					this.$.cells.createComponents([{kind: "plex.ServerSection", onRowSelected: "sectionRowSelected", 
-																				mediaServer: mediaObj, 
-																				caption: this.parentMediaContainer.length == 1 ? "" : mediaObj.server.name, 
-																				owner: this}]);
-          this.log("created");
-					return true;
-				}
-				return false;
+		
+		var	pmc = this.isLocal ? this.localMediaContainer : this.myplexMediaContainer;
+
+
+		var mediaObj = this.pmc[inIndex];
+		if (mediaObj !== undefined) {
+			this.log("creating local: " + this.isLocal + " / myplex: " + this.isMyPlex);
+			this.$.cells.createComponents([{kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", 
+																		mediaServer: mediaObj, 
+																		caption: this.isLocal ? $L("My library") : $L("Shared library"), 
+																		owner: this}]);
+      this.log("created");
+			return true;
+		}
+		return false;
 	},
 	sectionRowSelected: function(inSender, inSection, inServer) {
 		this.log("section selected: " + inServer.name + "->" + inSection.title);

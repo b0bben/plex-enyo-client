@@ -4,22 +4,17 @@ enyo.kind({
   className: "enyo-bg",
   published: {
     headerContent: "",
-    parentMediaContainer: undefined,
+    localMediaContainer: undefined,
+    myplexMediaContainer: undefined,
   },
   events: {
     onSelectedSection: ""
   },
   components: [
-    {name: "header", kind: "Header",style: '-webkit-box-align: center !important;',pack: 'center', className: "enyo-header-dark", components: [
-      {kind: "Image", src: "images/PlexTextLogo.png", style: "padding: 0px !important;"}
-    ]},
-    {kind: enyo.Scroller, flex: 1, components: [
       {name: "serverList",kind: "VirtualRepeater",flex: 1, height: "100%", onSetupRow: "setupServerItems", components: [
         {name: "cells", kind: "VFlexBox"},
       ]},
-    ]},    
     {kind: "Selection"},
-    {kind: "Button", onclick: "openAppMenu", caption: "appmenu"},
   ],
   create: function() {
     this.inherited(arguments);
@@ -37,21 +32,34 @@ enyo.kind({
     //this.$.cells.destroyControls();
     //this.$.serverList.render();
   },
-  parentMediaContainerChanged: function() {
-    this.buildSections()
+  localMediaContainerChanged: function() {
+    this.isLocal = true;
+    this.buildSections();
+  },
+  myplexMediaContainerChanged: function() {
+    this.isMyPlex = true;
+    this.buildSections();
   },
   buildSections: function() {
-    for (var i = 0; i < this.parentMediaContainer.length; i++) {
-      var myplexServer = this.parentMediaContainer[i];
-      var c = {kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", sections: myplexServer.sections, caption: myplexServer.serverName, owner:this};
+    if (this.isLocal){
+      this.pmc = this.localMediaContainer;
+      this.libraryTitle = $L("Local library");
+    }
+    else if (this.isMyPlex) {
+      this.pmc = this.myplexMediaContainer;
+      this.libraryTitle = $L("Shared library");
+    }
+    //for (var i = 0; i < this.pmc.size; i++) {
+    //  var myplexServer = this.pmc.Directory[i];
+      var c = {kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", sections: this.pmc.Directory, caption: this.libraryTitle, owner:this};
       this.sectionsUi.push(c);
-    };    
+    //};    
     this.$.cells.destroyControls();
     this.$.serverList.render();
   },
   setupServerItems: function(inSender, inIndex) {
     //this.$.cells.destroyControls(); //needs to be done, or we'll get each server each time
-    if (this.parentMediaContainer === undefined || this.parentMediaContainer.length == 0) {
+    if (this.pmc === undefined || this.pmc.length == 0) {
       return false;
     }      
     

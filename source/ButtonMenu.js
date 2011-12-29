@@ -7,21 +7,17 @@ enyo.kind({
 	published: {
 		headerContent: "",
 		menuList: [],
-		server: "",
 	},
 	components: [
 		{name: "sectionImage", kind: "Image", width: "36px",heigth: "36px"},
-		{name: "sectionName", content: "TV Shows", style: "margin-left: 25px"},
+		{kind: enyo.VFlexBox, align: "right", components: [
+			{name: "sectionName", content: "TV Shows", style: "margin-left: 25px"},
+			{name: "serverName", content: "mini-tv", style: "margin-left: 25px;font-size: 12px;color: gray;"},		
+		]},
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.serverChanged();
-		//this.headerContentChanged();
 		this.menuListChanged();
-	},
-	serverChanged: function() {
-		//this.log("serverChanged");
-		//this.$.serverName.setContent("(" + this.server.name +")")
 	},
 	menuListChanged: function() {
 		//this.log("menuListChanged");
@@ -29,6 +25,7 @@ enyo.kind({
 	headerContentChanged: function() {
 		//this.log("headerContentChanged");
 		this.$.sectionName.setContent(this.headerContent.title);
+		this.$.serverName.setContent(this.headerContent.serverName);
 		switch(this.headerContent.type)
 		{
 			case 'movie':

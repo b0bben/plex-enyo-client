@@ -4,10 +4,16 @@ enyo.kind({
 	components: [
 		{kind:enyo.Pane, flex: 1, components: [
 			{name: "mainBrowsingView", kind: enyo.Control, layoutKind: "HFlexLayout", components:[
-				{kind:enyo.VFlexBox, width:'320px', height: "100%", style:"border-right: 2px solid;", components: [
-					{flex: 1, name: "left_pane", kind: "Pane", components: [
-						{kind: "plex.SectionsView", name: "sectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy: true},
-						{kind: "plex.MyPlexSectionsView", name: "myPlexSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy:true},
+				{kind:enyo.VFlexBox, width:'320px', className: "enyo-bg", height: "100%", style:"border-right: 2px solid;", components: [
+					{flex: 1, name: "left_pane", kind: "enyo.VFlexBox", components: [
+					    {name: "header", kind: "Header",style: '-webkit-box-align: center !important;',pack: 'center', className: "enyo-header-dark", components: [
+						    {kind: "Image", src: "images/PlexTextLogo.png", style: "padding: 0px !important;"}
+						  ]},
+						  {kind: enyo.Scroller, flex: 1, components: [
+								{kind: "plex.MyPlexSectionsView", name: "localSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy: true},
+								{kind: "plex.MyPlexSectionsView", name: "myPlexSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy:true},
+							]},
+							{kind: "Button", onclick: "openAppMenuHandler", caption: "appmenu"},
 					]},
 					{name: "musicPlayer", kind: "plex.PlayerControl",showing: false, lazy: true},
 					/*{kind: "Toolbar", components: [
@@ -42,45 +48,41 @@ enyo.kind({
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
 		//local networks sections
-		//this.plexReq = new PlexRequest(enyo.bind(this,"gotSections"));
-		//this.plexReq.librarySections();
+		this.plexReq = new PlexRequest(enyo.bind(this,"gotLocalSections"));
+		this.plexReq.librarySections();
 
 		//myplex sections
 		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
 		this.plexReq.myPlexSections();
+
 		
 	},
-	gotSections: function(plexMediaContainer) {
-		this.rootMediaContainer = plexMediaContainer;
-		//this.$.left_pane.createComponents([{kind: "plex.SectionsView", name: "view_sections", parentMediaContainer: plexMediaContainer,headerContent: plexMediaContainer.title1, flex:1, owner:this}]);
-		this.log("got sections for " + this.rootMediaContainer.length + " servers");
-		//no servers added, show first-run
-		if (this.rootMediaContainer.length < 1) {
-			this.$.pane.selectViewByName("welcomeView");
-		}
-		else {
-			//clean startup, let's show recently added in the grid
-			this.plexReq = new PlexRequest(enyo.bind(this,"gotRecentlyAdded"));
-			this.plexReq.recentlyAdded();
-		}
-		//this.$.left_pane.render();
-		this.$.left_pane.selectViewByName("sectionsView");
-		this.$.sectionsView.setParentMediaContainer(this.rootMediaContainer);
-		
-		//enyo.scrim.hide();
-	
-	},
-	gotMyPlexSections: function(pmc) {
-		if (pmc !== undefined && pmc.length > 0) {
-			this.$.left_pane.render();
-			this.$.left_pane.selectViewByName("myPlexSectionsView");
+	gotLocalSections: function(pmc) {
+		if (pmc !== undefined && pmc.size > 0) {
+			//this.$.left_pane.render();
+			//this.$.left_pane.selectViewByName("localSectionsView");
 			//this.$.myPlexSectionsView.setShowing(true);
-			this.$.myPlexSectionsView.setParentMediaContainer(pmc);
+			this.$.localSectionsView.show();
+			this.$.localSectionsView.setLocalMediaContainer(pmc);
 
 			
 		}
 		else {
-			this.$.pane.selectViewByName("welcomeView");
+			//TODO: this.$.pane.selectViewByName("welcomeView");
+		}
+	
+	},
+	gotMyPlexSections: function(pmc) {
+		if (pmc !== undefined && pmc.size > 0) {
+			//this.$.left_pane.render();
+			//this.$.left_pane.selectViewByName("myPlexSectionsView");
+			this.$.myPlexSectionsView.show();
+			this.$.myPlexSectionsView.setMyplexMediaContainer(pmc);
+
+			
+		}
+		else {
+			//TODO: this.$.pane.selectViewByName("welcomeView");
 		}
 	},
 	showGridView: function(inSender, inSection) {
