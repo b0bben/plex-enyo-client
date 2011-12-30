@@ -1,4 +1,5 @@
 enyo.depends(
+	"external/arrayextras.js",
 	//view src
 	"source/MainView.js",
 	"source/GridView.js",

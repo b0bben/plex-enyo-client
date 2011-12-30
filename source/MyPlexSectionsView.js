@@ -51,7 +51,7 @@ enyo.kind({
     }
     //for (var i = 0; i < this.pmc.size; i++) {
     //  var myplexServer = this.pmc.Directory[i];
-      var c = {kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", sections: this.pmc.Directory, caption: this.libraryTitle, owner:this};
+      var c = {kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", sections: this.pmc, caption: this.libraryTitle, owner:this};
       this.sectionsUi.push(c);
     //};    
     this.$.cells.destroyControls();

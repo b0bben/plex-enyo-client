@@ -42,12 +42,17 @@ enyo.kind({
 		var self = this;
 		this.servers = [];
 		this.myplexServers = [];
+		this.localSections = [];
+		this.myplexSections = [];
 		this.videoQuality = "8";
 		this.plex_access_key = "";
 		this.prefs = undefined;
 		this.loadPrefsFromCookie();
 		var thisInst = this;
 		setInterval(enyo.bind(this,"checkServerReachability"), 30000);
+  },
+  setCallback: function(callback){
+  	this.callback = callback;
   },
 	loadPrefsFromCookie: function() {
 		var prefCookie = enyo.getCookie("prefs");
@@ -197,7 +202,13 @@ enyo.kind({
 		var pmc = data.MediaContainer;
 		this.callback(pmc);	
 	},
-	
+	processLocalSections: function(data) {
+		//console.log(data);
+		if (data !== undefined) {
+			this.localSections = data.MediaContainer.Directory;
+		}
+		this.callback(this.localSections);
+	},	
 	librarySections: function() {
 		var url = "";
 		var sectionsUrl = "/system/library/sections";
@@ -207,7 +218,7 @@ enyo.kind({
 			url = server.baseUrl + sectionsUrl;
 		}
 		var xml = new JKL.ParseXML(url);
- 		xml.async(enyo.bind(this,"processMyPlexSections"));
+ 		xml.async(enyo.bind(this,"processLocalSections"));
  		xml.parse();
 	},
 	recentlyAdded: function() {
@@ -320,9 +331,25 @@ enyo.kind({
 	},
 	processMyPlexSections: function(data) {
 		console.log(data);
-		//var myPlexSections = this.arrangeMyPlexServersAndSections(data.MediaContainer);
-		//this.callback(myPlexSections);
-		this.callback(data.MediaContainer);
+		this.myplexSections = [];
+		if (data.MediaContainer.Directory.length > 0) {
+			for (var i = 0; i < data.MediaContainer.Directory.length; i++) {
+				var item = data.MediaContainer.Directory[i];
+				if (!this.isInLocalSections(item)) {
+					this.myplexSections.push(item);
+				} 
+			};
+		}
+		this.callback(this.myplexSections);
+	},
+	isInLocalSections: function(item) {
+		for (var i = this.localSections.length - 1; i >= 0; i--) {
+			var localSec = this.localSections[i];
+			if (item.machineIdentifier === localSec.machineIdentifier) {
+				return true;
+			}
+		};
+		return false;
 	},
 	arrangeMyPlexServersAndSections: function(pmc) {
 		this.listedServers = [];

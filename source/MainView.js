@@ -49,16 +49,10 @@ enyo.kind({
 		this.selectedSection = "";
 		//local networks sections
 		this.plexReq = new PlexRequest(enyo.bind(this,"gotLocalSections"));
-		this.plexReq.librarySections();
-
-		//myplex sections
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
-		this.plexReq.myPlexSections();
-
-		
+		this.plexReq.librarySections();		
 	},
 	gotLocalSections: function(pmc) {
-		if (pmc !== undefined && pmc.size > 0) {
+		if (pmc !== undefined && pmc.length > 0) {
 			//this.$.left_pane.render();
 			//this.$.left_pane.selectViewByName("localSectionsView");
 			//this.$.myPlexSectionsView.setShowing(true);
@@ -70,10 +64,14 @@ enyo.kind({
 		else {
 			//TODO: this.$.pane.selectViewByName("welcomeView");
 		}
+
+		//myplex sections
+		this.plexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
+		this.plexReq.myPlexSections();
 	
 	},
 	gotMyPlexSections: function(pmc) {
-		if (pmc !== undefined && pmc.size > 0) {
+		if (pmc !== undefined && pmc.length > 0) {
 			//this.$.left_pane.render();
 			//this.$.left_pane.selectViewByName("myPlexSectionsView");
 			this.$.myPlexSectionsView.show();
@@ -123,7 +121,7 @@ enyo.kind({
 		this.$.pane.back();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexSections"));
+		this.plexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
 		this.plexReq.loadPrefsFromCookie();
 		//this.plexReq.librarySections();
 		this.plexReq.myPlexSections();
