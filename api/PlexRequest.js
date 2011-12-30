@@ -1,17 +1,22 @@
-var PlexServer = function(machineIdentifier,name,host,port,username,password,include, owned, accessToken) {
+var PlexServer = function(machineIdentifier,name,host,port,username,password,include, owned, accessToken, local) {
 	this.name = name;
 	this.host = host;
-	this.port = port;
+	this.port = port ? port : "32400";
 	this.machineIdentifier = machineIdentifier;
 	this.username = username;
 	this.password = password;
 	this.include = include;
 	this.owned = owned;
+	this.local = local === "1" ? true : false;
 	this.accessToken = accessToken;
 	this.online = false;
 
-	//this.baseUrl = "http://" + host + ":" + port;
-	this.baseUrl = host + ":" + port;
+	if (this.host.match("^(https|http)")) {
+		this.baseUrl = this.host + ":" + this.port;
+	}
+	else {
+		this.baseUrl = "http://" + this.host + ":" + this.port;
+	}
 
 	this.checkIfReachable = function() {
 		var url = this.baseUrl + "/library/recentlyAdded?X-Plex-Token=" + this.accessToken;
@@ -66,18 +71,18 @@ enyo.kind({
 			this.videoQuality = this.prefs.videoQuality;
 
 			this.servers = [];
-			this.myplexServer = [];
+			this.myplexServers = [];
 			//need to create PlexServer insatnces for reachability to work
 			for (var i = 0; i < this.prefs.myplexServers.length; i++) {
 				var serverObj = this.prefs.myplexServers[i];
-				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken);
+				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken,false);
 				this.myplexServers.push(server);
 			};
 
 			//need to create PlexServer insatnces for reachability to work
 			for (var i = 0; i < this.prefs.servers.length; i++) {
 				var serverObj = this.prefs.servers[i];
-				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken);
+				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken, true);
 				this.servers.push(server);
 			};
 		}
@@ -238,11 +243,10 @@ enyo.kind({
 		this.callback(mediaObjs);
 	},
 	getSectionForKey: function(server,key,level) {
-		var authToken = this.myplexUser["authentication-token"];
 		level = level || "all"
 		var url = key + "/" + level;
-		if (authToken) {
-			url += "?X-Plex-Token=" + authToken;
+		if (server.accessToken) {
+			url += "?X-Plex-Token=" + server.accessToken;
 		}
 		this.dataForUrlAsync(server,url);
 		
@@ -257,8 +261,8 @@ enyo.kind({
 	getAssetUrl: function(server, asset_key) {
 		var authToken = this.myplexUser["authentication-token"];
 		var url = server.baseUrl + asset_key;
-		if (authToken) {
-			url += "&X-Plex-Token=" + authToken;
+		if (server.accessToken) {
+			url += "&X-Plex-Token=" + server.accessToken;
 		}
 		return url;
 	},

@@ -56,7 +56,8 @@ enyo.kind({
                                       null,
                                       true,
                                       sectionAndServer.owned,
-                                      sectionAndServer.accessToken);
+                                      sectionAndServer.accessToken,
+                                      sectionAndServer.local);
     //send both the server and the section that was chosen upstreams, this will eventually end up in the grid
     this.doRowSelected(this.sections[this.selectedRow], myPlexServer);
     this.$.sectionList.render();

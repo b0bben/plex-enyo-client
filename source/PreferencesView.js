@@ -233,7 +233,8 @@ enyo.kind({
 																				null,
 																				true,
 																				server.owned,
-																				server.accessToken);
+																				server.accessToken,
+																				server.local);
 		    var existingServer = this.plexReq.getMyPlexServerWithMachineId(server.machineIdentifier);
 		    if (!existingServer) {
 		      this.plexReq.myplexServers.push(foundServer);

@@ -44,17 +44,20 @@ enyo.kind({
 		this.$.filterMenu.openAroundControl(inSender);
 	},
 	reloadSectionWithFilterLevel: function(level) {
-  		if (this.parentMediaContainer !== undefined) {
+  	if (this.parentMediaContainer !== undefined) {
   		//get the section details
-  	  	this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaObject"));
+  	  this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaObject"));
   		this.server = this.parentMediaContainer.server;
-  	  	this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
+  	  this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
   	}
 	},
 	parentMediaContainerChanged: function() {
+		this.$.selection.clear();
+		this.$.grid_list.refresh();
+		
 	  if (this.parentMediaContainer !== undefined) {
 			//get the section details
-	    this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaContainer"));
+	    this.plexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
 			this.server = this.parentMediaContainer.server;
 			var key = this.parentMediaContainer.section.path ? this.parentMediaContainer.section.path : this.parentMediaContainer.section.key;
   		this.plexReq.getSectionForKey(this.parentMediaContainer.server,key);
