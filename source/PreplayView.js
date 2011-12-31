@@ -73,7 +73,6 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.plexReq = new PlexRequest();
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
@@ -117,7 +116,7 @@ enyo.kind({
 		}
 	},
 	transcoderUrlForVideoObject: function() {
-	  var transcodingUrl = this.plexReq.transcodeUrlForVideoUrl(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key);
+	  var transcodingUrl = window.PlexReq.transcodeUrlForVideoUrl(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key);
 	  this.log(transcodingUrl);
 	  return transcodingUrl;
 	},

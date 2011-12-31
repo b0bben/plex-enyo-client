@@ -41,7 +41,6 @@ enyo.kind({
   create: function() {
     this.inherited(arguments);
     this.myPlexDetailsChanged();
-    this.plexReq = new PlexRequest();
   },
   myPlexDetailsChanged: function() {
     if (this.myPlexDetails !== undefined) {
@@ -65,11 +64,11 @@ enyo.kind({
       var password = this.$.password.getValue();
       
       if (username !== undefined && password !== undefined) {
-        this.plexReq = new PlexRequest(enyo.bind(this,"myPlexLoginResponse"));
+        window.PlexReq.setCallback(enyo.bind(this,"myPlexLoginResponse"));
         this.$.loginButton.setActive(true);
         this.$.loginButton.setDisabled(true);
         //send request to myplex async
-        this.plexReq.loginToMyPlex(username,password);
+        window.PlexReq.loginToMyPlex(username,password);
       }
       else {}
         //TODO: error handling

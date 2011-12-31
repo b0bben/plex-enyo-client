@@ -27,7 +27,6 @@ enyo.kind({
 		this.count = 0;
 		this.filterLevel = "";
 		this.mediaContainer="";
-		this.plexReq = new PlexRequest();
 		this.inherited(arguments);
 		this.parentMediaContainerChanged();
 	},
@@ -46,25 +45,25 @@ enyo.kind({
 	reloadSectionWithFilterLevel: function(level) {
   	if (this.parentMediaContainer !== undefined) {
   		//get the section details
-  	  this.plexReq = new PlexRequest(enyo.bind(this,"gotMediaObject"));
+  	  window.PlexReq.setCallback(enyo.bind(this,"gotMediaObject"));
   		this.server = this.parentMediaContainer.server;
-  	  this.plexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
+  	  window.PlexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
   	}
 	},
 	parentMediaContainerChanged: function() {
 		this.$.selection.clear();
 		this.$.grid_list.refresh();
-		
+
 	  if (this.parentMediaContainer !== undefined) {
 			//get the section details
-	    this.plexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
+	    window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
 			this.server = this.parentMediaContainer.server;
 			var key = this.parentMediaContainer.section.path ? this.parentMediaContainer.section.path : this.parentMediaContainer.section.key;
-  		this.plexReq.getSectionForKey(this.parentMediaContainer.server,key);
+  		window.PlexReq.getSectionForKey(this.parentMediaContainer.server,key);
 	    
 			//get different filtering options for this section
-			//this.plexReq = new PlexRequest(enyo.bind(this,"gotFiltersForSection"));
-			//this.plexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
+			//window.PlexReq.setCallback(enyo.bind(this,"gotFiltersForSection"));
+			//window.PlexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
 	    
 			this.$.grid_header.setContent(this.parentMediaContainer.section.title);
 	  }
@@ -133,7 +132,7 @@ enyo.kind({
 				  var pmo = this.getPlexMediaObject(idx);
 					//this.log("idx: " + idx);
 
-					var path = this.plexReq.getAssetUrl(this.parentMediaContainer.server,pmo.thumb);
+					var path = window.PlexReq.getAssetUrl(this.parentMediaContainer.server,pmo.thumb);
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
 					//coverart img and properties
@@ -189,15 +188,15 @@ enyo.kind({
       this.$.emptyToaster.open();
 	},
 	getSeasons: function(pmo) {
-		this.plexReq = new PlexRequest(enyo.bind(this,"refreshGridWithMediaContainer"));
-		this.plexReq.dataForUrlAsync(this.server,pmo.key);	
+		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
+		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
 	},
 	refreshGridWithMediaContainer: function(pmc) {
 		this.gotMediaContainer(pmc);
 	},
 	getEpisodes: function(pmo) {
-		this.plexReq = new PlexRequest(enyo.bind(this,"refreshGridWithMediaContainer"));
-		this.plexReq.dataForUrlAsync(this.server,pmo.key);	
+		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
+		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
 	},
 
 });

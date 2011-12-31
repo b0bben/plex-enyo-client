@@ -14,11 +14,6 @@ enyo.kind({
 	},
 	components: [
 		{kind: enyo.Pane, flex: 1, components: [
-			{name: "browserBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
-				method: "browse", subscribe: true, onSuccess: "gotBrowsed", onFailure: "genericFailure"},
-			{name: "resolverBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", 
-					method: "resolve", subscribe: true, onSuccess: "gotResolved", onFailure: "genericFailure"},
-			
 			{name: "serverForm", kind: "plex.ServerFormView", onSave: "newServerAdded", onDelete: "serverRemoved",onCancel: "backHandler", lazy: true, showing: false},
 			{name: "myPlexForm", kind: "plex.MyPlexFormView", onLoggedIn: "loggedInToMyPlex", onLoggedOut: "logoutFromMyPlex",onCancel: "backHandler", lazy: true, showing: false},
 
@@ -39,9 +34,7 @@ enyo.kind({
 						{kind: "RowGroup", caption: $L("Servers shared via myPlex"), style: "margin-bottom: 10px", components: [
 							{name: "myPlexServerList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listMyPlexSetupRow",components: [
 								{kind: enyo.Item, className: "server-list-item", components: [
-									{kind: "LabeledContainer", name: "myPlexServerName",label: "Server nr 1", components: [
-									{kind: "ToggleButton", name: "myPlexIncludeServer", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick", onclick: "togglePreferenceClick"}
-									]},
+									{kind: "LabeledContainer", name: "myPlexServerName",label: "Server nr 1"},
 								]}
 							]}
 						]},
@@ -52,11 +45,10 @@ enyo.kind({
 							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
 								{kind: enyo.Item, onclick: "listItemTap", className: "server-list-item",layoutKind: "HFlexLayout", components: [
 									{name: "serverName", label: "Server nr 1", flex: 1},
-									{kind: "ToggleButton", name: "includeServer", onclick: "", onLabel: $L("Show"), offLabel: $L("Hide"), onChange: "togglePreferenceClick"},
 								]},
 							]},
 							//{kind: enyo.Item, className: "server-list-item", layoutKind: "HFlexLayout", components: [
-								{content: $L("Add new network server ..."), onclick: "showAddServerForm"},
+								//{content: $L("Add new network server ..."), onclick: "showAddServerForm"},
 							//]},
 						]},
 						{content:$L("All servers set to 'Show' will be available for browsing."), className: "prefs-body-text", style:"margin:none;"},
@@ -91,21 +83,18 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.plexReq = new PlexRequest();
 		this.reloadPrefs();
-		//this.$.browserBonjour.call({"regType":"_plexmediasvr._tcp", "domainName":"local."});
 		this.$.pane.selectViewByName("mainPrefs");
 		//refresher that watches the server list for reachability
 		this.intervarlTimerId = setInterval(enyo.bind(this, this.checkServerReachability), 5000);
 	},
 	reloadPrefs: function() {
-		this.plexReq.loadPrefsFromCookie();
-		if (this.plexReq.myplexUser) {
+		window.PlexReq.loadPrefsFromCookie();
+		if (window.PlexReq.myplexUser) {
 			this.$.loginButton.setShowing(false);
 			this.$.myplexLoginItem.setShowing(true);
 			this.$.myplexLoginItem.createComponent({name: "loggedInButton", 
-																content: $L("Logged in as ") + this.plexReq.myplexUser.username + " (" +this.plexReq.myplexUser.email + ")"});
-			this.refreshMyPlexServers();
+																content: $L("Logged in as ") + window.PlexReq.myplexUser.username + " (" +window.PlexReq.myplexUser.email + ")"});
 		}
 		else {
 			this.$.myplexLoginItem.setShowing(false);
@@ -113,56 +102,13 @@ enyo.kind({
 			this.$.loginButton.setShowing(true);
 		}
 
-		//if (this.plexReq.servers.length > 0){
+		//if (window.PlexReq.servers.length > 0){
 			this.$.serverList.render();; //force-refresh local server list
 		//}
 
-		//if (this.plexReq.myplexServers.length > 0){
+		//if (window.PlexReq.myplexServers.length > 0){
 			this.$.myPlexServerList.render(); //force-refresh myplex server list
 		//}
-	},
-	gotBrowsed: function(inSender, inResponse) {
-	  if (inResponse.returnValue) {
-	    //just a msg that it went well, skip it
-	    return;
-	  }
-		this.$.console.addContent("BROWSE> " + JSON.stringify(inResponse.instanceName) + "<br/>");
-
-    //we've found something, let's resolve this to get some details about the machine
-		this.$.resolverBonjour.call({"regType":inResponse.regType, "domainName":inResponse.domainName,
-		                            "instanceName":inResponse.instanceName, "subscribe": true});
-	},
-	gotResolved: function(inSender, inResponse) {
-  	if (inResponse.returnValue) {
-	    //just a msg that it went well, skip it
-  	  return;
-  	}
-	
-		this.$.console.addContent("RESOLVE>: " + JSON.stringify(inResponse.targetName)+ "<br/>");
-
-    //add found server to server list
-    var serverName = inResponse.targetName;
-    var serverUrl = "http://" + inResponse.IPv4Address; //no http included when found via bonjour
-    
-    var foundServer = {
-	    				name:serverName,
-    		  		host:serverUrl, 
-    		  		port:32400, //always 32400
-    		  		user:undefined,
-    		  		pass:undefined,
-    		  		include:true,
-    		  		owned:"1",
-    		  		accessToken:undefined};
-    
-    var existingServer = this.plexReq.serverForUrl(serverUrl);
-    if (!existingServer) {
-      this.plexReq.servers.push(foundServer);
-      this.plexReq.savePrefs();
-      this.$.serverList.render();; //force-refresh list
-    }
-	},
-	genericFailure: function(inSender, inResponse) {
-		this.log("failure: " + JSON.stringify(inResponse));
 	},
 	showAddServerForm: function(inSender) {
 		this.$.pane.selectViewByName("serverForm");
@@ -177,24 +123,24 @@ enyo.kind({
 
 	// new local servers
 	newServerAdded: function(inSender, inServer) {
-		this.plexReq.servers.push(inServer);
-		this.plexReq.savePrefs();
+		window.PlexReq.servers.push(inServer);
+		window.PlexReq.savePrefs();
 		this.$.pane.back();
 		
 		this.reloadPrefs(); //force refresh of settings
 	},
 	serverRemoved: function(inSender, inServerIndex) {
-		this.plexReq.servers.remove(inServerIndex);
-		this.plexReq.savePrefs();
+		window.PlexReq.servers.remove(inServerIndex);
+		window.PlexReq.savePrefs();
 		this.$.pane.back();
 		
-		this.plexReq.reloadPrefs(); //force refresh of settings
+		window.PlexReq.reloadPrefs(); //force refresh of settings
 	},
 	//myplex
 	loggedInToMyPlex: function(inSender, myPlexUserData) {
 		if (myPlexUserData !== undefined) {
-			this.plexReq.myplexUser = myPlexUserData;
-			this.plexReq.savePrefs();		
+			window.PlexReq.myplexUser = myPlexUserData;
+			window.PlexReq.savePrefs();		
 		}
 		this.reloadPrefs();
 		this.$.pane.back();
@@ -206,15 +152,15 @@ enyo.kind({
 		this.$.myPlexServerList.render();
 	},
 	refreshMyPlexServers: function() {
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotMyPlexServers"));
-		this.plexReq.getMyPlexServers();	
+		window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexServers"));
+		window.PlexReq.getMyPlexServers();	
 	},
 	logoutFromMyPlex: function(inSender, myPlexUserData) {
 		if (myPlexUserData !== undefined) {
 			//destroy any myplex login and servers and save
-			delete this.plexReq.myplexUser;
-			this.plexReq.myplexServers = [];
-			this.plexReq.savePrefs();
+			delete window.PlexReq.myplexUser;
+			window.PlexReq.myplexServers = [];
+			window.PlexReq.savePrefs();
 
 			//refresh list
 			this.reloadPrefs();
@@ -235,9 +181,9 @@ enyo.kind({
 																				server.owned,
 																				server.accessToken,
 																				server.local);
-		    var existingServer = this.plexReq.getMyPlexServerWithMachineId(server.machineIdentifier);
+		    var existingServer = window.PlexReq.getMyPlexServerWithMachineId(server.machineIdentifier);
 		    if (!existingServer) {
-		      this.plexReq.myplexServers.push(foundServer);
+		      window.PlexReq.myplexServers.push(foundServer);
 				}
 			}
 		}
@@ -247,21 +193,19 @@ enyo.kind({
 		this.log("listar myplex servers");
 		
     // check if the row is selected
-		if (this.plexReq.myplexServers !== undefined && inIndex < this.plexReq.myplexServers.length) {
-			var myplexServer = this.plexReq.myplexServers[inIndex];
+		if (window.PlexReq.myplexServers !== undefined && inIndex < window.PlexReq.myplexServers.length) {
+			var myplexServer = window.PlexReq.myplexServers[inIndex];
 			var reachabilityStatus = myplexServer.online ? $L("(online)") : $L("(offline)");
 			this.$.myPlexServerName.setLabel(myplexServer.name + reachabilityStatus);
-			this.$.myPlexIncludeServer.setState(myplexServer.include);
 			if (!myplexServer.online) {
 				this.$.item.setDisabled(true);
-				this.$.myPlexIncludeServer.setState(false);
 			}
 			return true;
 		}
 	},
 	myplexLoginItemTap: function(inSender, inEvent) {
 		this.$.pane.selectViewByName("myPlexForm");
-		this.$.myPlexForm.setMyPlexDetails(this.plexReq.myplexUser);
+		this.$.myPlexForm.setMyPlexDetails(window.PlexReq.myplexUser);
 	},
 	backHandler: function(inSender) {
 		this.$.pane.back();
@@ -270,16 +214,15 @@ enyo.kind({
 		this.log("listar servers");
 		
     // check if the row is selected
-		if (this.plexReq.servers !== undefined && inIndex < this.plexReq.servers.length) {
-			this.$.serverName.setContent(this.plexReq.servers[inIndex].name);
-			this.$.includeServer.setState(this.plexReq.servers[inIndex].include)
+		if (window.PlexReq.servers !== undefined && inIndex < window.PlexReq.servers.length) {
+			this.$.serverName.setContent(window.PlexReq.servers[inIndex].name);
 			return true;
 		}
 	},
 	listItemTap: function(inSender, inEvent) {
 		selectedRow = inEvent.rowIndex;
-		if (selectedRow < this.plexReq.servers.length) {
-			var server = this.plexReq.servers[selectedRow];
+		if (selectedRow < window.PlexReq.servers.length) {
+			var server = window.PlexReq.servers[selectedRow];
 			this.$.pane.selectViewByName("serverForm");
 			this.$.serverForm.setServer(server);
 			

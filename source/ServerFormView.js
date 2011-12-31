@@ -53,6 +53,7 @@ enyo.kind({
 		server: undefined,
 	},
 	components: [
+		{name: "getServerStatus", kind: "WebService", onSuccess: "gotServerStatus", onFailure: "gotServerFailure"},
 		{name: "nameTitle", caption:$L("Server nickname"), kind: "RowGroup", components: [
 			{kind: "Input", name: "servername", hint: $L("Give this server a friendly name"), spellcheck: false, autocorrect:false},
 		]},
@@ -77,7 +78,6 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotNothing"));
 		this.serverDetails = "";
 		this.serverChanged();
 	},
@@ -110,26 +110,20 @@ enyo.kind({
       var serverUrl = this.$.serverurl.getValue();
       var username = this.$.username.getValue();
       var password = this.$.password.getValue();
-      
-      var existingServer = this.plexReq.serverForUrl(serverUrl);
+
+      		  var existingServer = window.PlexReq.serverForUrl(serverUrl);
       if (existingServer != null) {
 
         existingServer.name = serverName;
         existingServer.username = username;
         existingServer.password = password;
         
-        this.plexReq.savePrefs();
+        window.PlexReq.savePrefs();
         this.owner.owner.$.pane.back();
-      } else {    
-        this.serverDetails = {name:serverName,
-        		  		host:serverUrl,
-        		  		port:32400, //always 32400
-        		  		user:username,
-        		  		pass:password,
-        		  		include: true};
-        
-        this.doSave(this.serverDetails);
-      }
+      } else {  
+	      this.$.getServerStatus.setUrl(serverUrl + ":32400/servers");
+	      this.$.getServerStatus.call();
+    }
 	},
 	removeServerTapped: function(inSender, inEvent) {
 		var prefCookie = enyo.getCookie("prefs");
@@ -143,6 +137,20 @@ enyo.kind({
 				}	
 			};
 		}
+	},
+	gotServerStatus: function(inSender, inResponse, inRequest) {
+  	this.log(inResponse);
+    /*    this.serverDetails = {name:serverName,
+        		  		host:serverUrl,
+        		  		port:32400, //always 32400
+        		  		user:username,
+        		  		pass:password,
+        		  		include: true};
+        
+        this.doSave(this.serverDetails);*/
+	},
+	gotServerFailure: function(inSender, inResponse, inRequest) {
+		this.log(inResponse);
 	},
 	gotNothing: function() {
 	//placeholder

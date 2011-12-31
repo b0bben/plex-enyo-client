@@ -41,7 +41,11 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 enyo.kind({
   name: "PlexRequest",
   kind: enyo.Component,
-  constructor: function(callback) {
+  components: [
+		{name: "browserBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", method: "browse", subscribe: true, onSuccess: "gotBrowsed", onFailure: "genericFailure"},
+		{name: "resolverBonjour", kind: "PalmService", service: "palm://com.palm.zeroconf/", method: "resolve", subscribe: true, onSuccess: "gotResolved", onFailure: "genericFailure"},
+  ],
+  create: function(callback) {
 	  this.inherited(arguments);
 		this.callback = callback;
 		var self = this;
@@ -97,6 +101,82 @@ enyo.kind({
 	  enyo.setCookie("prefs", enyo.json.stringify(this.prefs));
 	  this.log("saved prefs: " + enyo.json.stringify(this.prefs));
 	},
+
+	//BONJOUR START
+	searchNearbyServerWithBonjour: function() {
+		this.log("looking for servers via bonjour...");
+		this.$.browserBonjour.call({"regType":"_plexmediasvr._tcp", "domainName":"local."});
+	},
+	gotBrowsed: function(inSender, inResponse) {
+	  if (inResponse.returnValue) {
+	    //just a msg that it went well, skip it
+	    return;
+	  }
+		this.log("BROWSE> " + JSON.stringify(inResponse.instanceName));
+
+    //we've found something, let's resolve this to get some details about the machine
+		this.$.resolverBonjour.call({"regType":inResponse.regType, "domainName":inResponse.domainName,
+		                            "instanceName":inResponse.instanceName, "subscribe": true});
+	},
+	gotResolved: function(inSender, inResponse) {
+  	if (inResponse.returnValue) {
+	    //just a msg that it went well, skip it
+  	  return;
+  	}
+	
+		this.log("RESOLVE>: " + JSON.stringify(inResponse.targetName));
+
+    //add found server to server list
+    var serverName = inResponse.targetName;
+    var serverUrl = "http://" + inResponse.IPv4Address; //no http included when found via bonjour
+    
+    var existingServer = this.serverForUrl(serverUrl);
+    if (!existingServer) {
+    	serverUrl += ":32400/servers";
+   		var xml = new JKL.ParseXML(serverUrl);
+		 	xml.async(enyo.bind(this,"processLocalServerViaBonjour"));
+		 	xml.parse();
+	  	
+    }
+	},
+	processLocalServerViaBonjour: function(data) {
+  	for(var i=0; i < data.MediaContainer.Server.length; i++){
+  		var server = data.MediaContainer.Server[i];
+  		
+	    if (!this.isInLocalServers(server.machineIdentifier)) {
+	    	this.log("creating plexserver: " + server.name + " host: " + server.host);
+	    	var foundServer = new PlexServer(server.machineIdentifier,
+	    				server.name,
+    		  		server.host, 
+    		  		server.port,
+    		  		undefined,
+    		  		undefined,
+    		  		true,
+    		  		"1",
+    		  		undefined,
+    		  		"1");		
+	      this.servers.push(foundServer);
+	      this.savePrefs();
+	      this.log("added bonjour server: " + server.name);
+	    }
+  	}
+  	//refresh shit
+  	this.loadPrefsFromCookie();
+	},
+	genericFailure: function(inSender, inResponse) {
+		this.log("failure: " + JSON.stringify(inResponse));
+	},
+	//END BONJOUR
+	
+	isInLocalServers: function(machineid){
+	  //this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
+	  for (var i = 0; i < this.servers.length; i++) {
+	    if (this.servers[i].machineIdentifier === machineid)
+	      return true;
+	  }
+	  return false;		
+	},
+		
 	serverForUrl: function(serverUrl) {
 	  this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
 	  for (var i = 0; i < this.servers.length; i++) {
@@ -106,10 +186,11 @@ enyo.kind({
 	  return null;
 	},
 	checkServerReachability: function() {
-		for (var i = 0; i < this.myplexServers.length; i++) {
-			var myplexServer = this.myplexServers[i];
-			myplexServer.checkIfReachable();
-			this.log("started reachability check on " + myplexServer.name);
+		var allServers = this.servers.concat(this.myplexServers);
+		for (var i = 0; i < allServers.length; i++) {
+			var server = allServers[i];
+			server.checkIfReachable();
+			this.log("started reachability check on " + server.name);
 		};
 	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl) {
@@ -311,16 +392,14 @@ enyo.kind({
 	 	xml.parse();
 	},
 	processMyPlexServers: function(data) {
-		//console.log("myplex servers: " + enyo.json.stringify(data));
-		this.callback(data.MediaContainer);	
-	},
-	getMyPlexServerWithMachineId: function(machineid){
-	  //this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
-	  for (var i = 0; i < this.myplexServers.length; i++) {
-	    if (this.myplexServers[i].machineIdentifier == machineid)
-	      return this.myplexServers[i];
-	  }
-	  return null;		
+		console.log("myplex servers: " + enyo.json.stringify(data));
+		for (var item in data.MediaContainer.Server){
+			var server = data.MediaContainer.Server[item];
+			if (!this.isInLocalServers(server.machineIdentifier)) {
+				this.myplexServers.push(server);
+			}
+		}
+		this.savePrefs();
 	},
 	myPlexSections: function() {
 		if (this.myplexUser === undefined){
@@ -387,9 +466,3 @@ enyo.kind({
     return;
   },
 });
-// Array Remove - By John Resig (MIT Licensed)
-Array.prototype.remove = function(from, to) {
-  var rest = this.slice((to || from) + 1 || this.length);
-  this.length = from < 0 ? this.length + from : from;
-  return this.push.apply(this, rest);
-};

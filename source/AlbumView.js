@@ -26,7 +26,6 @@ enyo.kind({
 		this.inherited(arguments);
 		this.tracks = [];
 		this.playing = false;
-		this.plexReq = new PlexRequest();
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
@@ -84,7 +83,7 @@ enyo.kind({
 		  var songItem = this.tracks[inEvent.rowIndex];
 		  if (songItem !== undefined && !this.playing) {
 		  	this.owner.owner.owner.owner.startMusicPlayback(songItem, null);
-		    //this.$.sound.setSrc(this.plexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
+		    //this.$.sound.setSrc(window.PlexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
 		    //this.$.sound.play();
 		    this.playing = true;
 		  }

@@ -23,7 +23,6 @@ enyo.kind({
 	],
 	create: function() {
 		this.count = 0;
-		this.plexReq = new PlexRequest();
 		this.inherited(arguments);
 		this.mediaContainerChanged();
 	},
@@ -139,15 +138,15 @@ enyo.kind({
       this.$.emptyToaster.open();
 	},
 	getSeasons: function(pmo) {
-		this.plexReq = new PlexRequest(enyo.bind(this,"refreshGridWithMediaContainer"));
-		this.plexReq.dataForUrlAsync(this.server,pmo.key);	
+		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
+		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
 	},
 	refreshGridWithMediaContainer: function(pmc) {
 		this.gotMediaContainer(pmc);
 	},
 	getEpisodes: function(pmo) {
-		this.plexReq = new PlexRequest(enyo.bind(this,"refreshGridWithMediaContainer"));
-		this.plexReq.dataForUrlAsync(this.server,pmo.key);	
+		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
+		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
 	},
 
 });

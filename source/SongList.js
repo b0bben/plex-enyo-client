@@ -20,15 +20,14 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.plexReq = new PlexRequest();
 		this.tracks = [];
 		this.playing = false;
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
 		if (this.plexMediaObject != undefined) {
-      this.plexReq = new PlexRequest(enyo.bind(this,"gotSongs"));
-      this.plexReq.dataForUrl(this.plexMediaObject.key);
+      window.PlexReq.setCallback(enyo.bind(this,"gotSongs"));
+      window.PlexReq.dataForUrl(this.plexMediaObject.key);
 			this.log("songlist for: " + this.plexMediaObject.title);
 		}
 	},
@@ -48,7 +47,7 @@ enyo.kind({
 	onclick_song: function(inSender, inEvent) {
 	  var songItem = this.tracks[inEvent.rowIndex];
 	  if (songItem !== undefined && !this.playing) {
-	    this.$.sound.setSrc(this.plexReq.getFullUrlForPlexUrl(songItem.Media.Part.key));
+	    this.$.sound.setSrc(window.PlexReq.getFullUrlForPlexUrl(songItem.Media.Part.key));
 	    this.$.sound.play();
 	    this.playing = true;
 	  }

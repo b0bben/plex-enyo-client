@@ -28,7 +28,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.albums = [];
-		this.plexReq = "";
+		window.PlexReq = "";
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
@@ -48,8 +48,8 @@ enyo.kind({
 			}
   		
   		//get them albums now
-			this.plexReq = new PlexRequest(enyo.bind(this,"gotAlbums"));
-			this.plexReq.dataForUrlAsync(this.server,this.plexMediaObject.key);
+			window.PlexReq.setCallback(enyo.bind(this,"gotAlbums"));
+			window.PlexReq.dataForUrlAsync(this.server,this.plexMediaObject.key);
 		}
 	},
 	gotAlbums: function(pmc) {
@@ -65,8 +65,8 @@ enyo.kind({
       
       for (var i=0; i < this.albums.length; i++){
       	var album = this.albums[i];
-      	this.plexReq = new PlexRequest(enyo.bind(this,"gotSongs"));
-      	this.plexReq.dataForUrlAsync(this.server,album.key);
+      	window.PlexReq.setCallback(enyo.bind(this,"gotSongs"));
+      	window.PlexReq.dataForUrlAsync(this.server,album.key);
       	this.log("requested songlist for: " + album.title);
       }
 

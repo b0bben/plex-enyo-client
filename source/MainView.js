@@ -48,8 +48,13 @@ enyo.kind({
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
 		//local networks sections
-		this.plexReq = new PlexRequest(enyo.bind(this,"gotLocalSections"));
-		this.plexReq.librarySections();		
+		window.PlexReq.setCallback(enyo.bind(this,"gotLocalSections"));
+		//start collecting servers
+		window.PlexReq.searchNearbyServerWithBonjour();
+		window.PlexReq.getMyPlexServers();
+
+		window.PlexReq.librarySections();		
+		this.log();
 	},
 	gotLocalSections: function(pmc) {
 		if (pmc !== undefined && pmc.length > 0) {
@@ -66,8 +71,8 @@ enyo.kind({
 		}
 
 		//myplex sections
-		this.plexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
-		this.plexReq.myPlexSections();
+		window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
+		window.PlexReq.myPlexSections();
 	
 	},
 	gotMyPlexSections: function(pmc) {
@@ -121,10 +126,10 @@ enyo.kind({
 		this.$.pane.back();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
-		this.plexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
-		this.plexReq.loadPrefsFromCookie();
-		//this.plexReq.librarySections();
-		this.plexReq.myPlexSections();
+		window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
+		window.PlexReq.loadPrefsFromCookie();
+		//window.PlexReq.librarySections();
+		window.PlexReq.myPlexSections();
 		
 	},
 	startVideoPlayer: function(src, pmo, server) {

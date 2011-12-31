@@ -1673,8 +1673,7 @@ enyo.kind({
         this.destroy();
     },
     stopTranscoder: function() {
-        var plexReq = new PlexRequest();
-        plexReq.stopTranscoder(this.server);
+        window.PlexReq.stopTranscoder(this.server);
         console.log("stopped transcoder");
     },
     pauseAndShowControls: function () {
