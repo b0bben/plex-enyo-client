@@ -52,8 +52,7 @@ enyo.kind({
 		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersRefreshed"));
 		//start collecting servers
 		window.PlexReq.searchNearbyServerWithBonjour();
-		window.PlexReq.getMyPlexServers();
-
+		//start getting local sections, response from this will start getting myplex sections as well...
 		window.PlexReq.librarySections();		
 		this.log();
 	},

@@ -159,6 +159,8 @@ enyo.kind({
 	processLocalServerViaBonjour: function(data) {
 		this.log();
 		var foundServers = [];
+		var addedNewServers = false;
+
 		if (data.MediaContainer.size === "1") {
 			foundServers.push(data.MediaContainer.Server);
 		}
@@ -182,13 +184,17 @@ enyo.kind({
     		  		undefined,
     		  		"1");		
 	      this.servers.push(foundServer);
-	      this.savePrefs();
-	      this.log("added bonjour server: " + server.name);
-
-	      //refresh shit
-  			this.loadPrefsFromCookie();
-				this.serversRefreshedCallback.call();
+	      addedNewServers = true;
 	    }
+  	}
+
+  	if (addedNewServers) {
+	    this.savePrefs();
+	    this.log("added bonjour server: " + server.name);
+
+	    //refresh shit
+			this.loadPrefsFromCookie();
+			this.serversRefreshedCallback.call();
   	}
 
 	},
@@ -264,7 +270,10 @@ enyo.kind({
 	  
 	},
 	getImageTranscodeUrl: function(server,width, height, url) {
-		var transcodeUrl = server.baseUrl + "/photo/:/transcode?width=" + width + "&height=" + height + "&format=jpeg&url=" + url;
+		var transcodeUrl = server.baseUrl + "/photo/:/transcode?width=" + width + "&height=" + height + "&format=jpeg&url=" + encodeURIComponent("http://127.0.0.1:32400" + url);
+		if (server.accessToken) {
+			transcodeUrl += "&X-Plex-Token=" + server.accessToken;
+		}
 		return transcodeUrl;
 	},
 	authWithUrl: function(plexUrl) {
@@ -330,7 +339,7 @@ enyo.kind({
 	// PMS START
 	processPlexData: function(data) {
 		var pmc = data.MediaContainer;
-		this.log(pmc);
+		//this.log(pmc);
 		this.callback(pmc);	
 	},
 	librarySections: function() {
@@ -434,21 +443,15 @@ enyo.kind({
 		console.log("processMyPlexLogin: " + enyo.json.stringify(data));
 		this.callback(data);
 	},
-	getMyPlexServers: function() {
-		if (this.myplexUser === undefined) {
-			return;
-		}
-		var authToken = this.myplexUser["authentication-token"];
-	  var url = "https://my.plexapp.com/pms/servers?X-Plex-Token=" + authToken;
-	  var xml = new JKL.ParseXML(url);
-	 	xml.async(enyo.bind(this,"processMyPlexServers"));
-	 	xml.parse();
-	},
 	processMyPlexServers: function(data) {
 		console.log("myplex servers: " + enyo.json.stringify(data));
+		var addedNewServers = false;
+
 		for (var i=0;i<data.MediaContainer.Directory.length;i++){
 			var server = data.MediaContainer.Directory[i];
-			if (!this.isInLocalServers(server.machineIdentifier)) {
+			var existingServer = this.getServerWithMachineId(server.machineIdentifier);
+
+			if (!this.isInLocalServers(server.machineIdentifier) && !existingServer) {
 				this.log("creating myplex server: " + server.name + " address: " + server.address);
 	    	var foundServer = new PlexServer(server.machineIdentifier,
 	    				server.name,
@@ -460,16 +463,18 @@ enyo.kind({
     		  		"1",
     		  		server.accessToken,
     		  		"0");
-				this.myplexServers.push(server);
-				this.savePrefs();
-				this.log("added myplex server: " + server.name);
-
-	      //refresh shit
-  			this.loadPrefsFromCookie();
-				this.serversRefreshedCallback.call();
+				this.myplexServers.push(foundServer);
+				addedNewServers = true;
 			}
 		}
-		
+		if (addedNewServers) {
+			this.savePrefs();
+			this.log("added myplex server: " + server.name);
+
+			//refresh shit
+			this.loadPrefsFromCookie();
+			this.serversRefreshedCallback.call();
+		}
 	},
 	myPlexSections: function() {
 		if (this.myplexUser === undefined){
