@@ -49,6 +49,7 @@ enyo.kind({
 		this.selectedSection = "";
 		//local networks sections
 		window.PlexReq.setCallback(enyo.bind(this,"gotLocalSections"));
+		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersRefreshed"));
 		//start collecting servers
 		window.PlexReq.searchNearbyServerWithBonjour();
 		window.PlexReq.getMyPlexServers();
@@ -87,6 +88,11 @@ enyo.kind({
 		else {
 			//TODO: this.$.pane.selectViewByName("welcomeView");
 		}
+	},
+	gotServersRefreshed: function() {
+		this.log("servers refreshed, refreshing sections...");
+		window.PlexReq.setCallback(enyo.bind(this,"gotLocalSections"));
+		window.PlexReq.librarySections(); //refresh sections
 	},
 	showGridView: function(inSender, inSection) {
 		this.selectedSection = inSection; //actually both the section AND the server it belongs to

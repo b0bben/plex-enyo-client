@@ -19,14 +19,21 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 	}
 
 	this.checkIfReachable = function() {
-		var url = this.baseUrl + "/library/recentlyAdded?X-Plex-Token=" + this.accessToken;
+		var url = this.baseUrl;
+		if (this.accessToken) {
+			url += "?X-Plex-Token=" + this.accessToken;
+		}
+		console.log(url);
 		var xml = new JKL.ParseXML(url);
 		xml.async(enyo.bind(this,"reachCheckResponse"));
 		xml.parse();
+		
 	};
 	this.reachCheckResponse = function(data) {
+		//console.log("reachabiliityCheckResp: " + data);
 		if (data !== undefined) {
 			this.online = true;
+			console.log(data.MediaContainer.friendlyName + " is online and running version: " + data.MediaContainer.version);
 		}
 		else {
 			this.online = false;
@@ -37,6 +44,8 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 
 	//check (asyncl-y) if server is reachable at this point
 	this.checkIfReachable();
+	
+	
 }
 enyo.kind({
   name: "PlexRequest",
@@ -48,6 +57,7 @@ enyo.kind({
   create: function(callback) {
 	  this.inherited(arguments);
 		this.callback = callback;
+		this.serversRefreshedCallback = undefined;
 		var self = this;
 		this.servers = [];
 		this.myplexServers = [];
@@ -63,6 +73,9 @@ enyo.kind({
   setCallback: function(callback){
   	this.callback = callback;
   },
+  setServersRefreshedCallback: function(callback) {
+  	this.serversRefreshedCallback = callback;
+  },
 	loadPrefsFromCookie: function() {
 		var prefCookie = enyo.getCookie("prefs");
 		
@@ -77,17 +90,21 @@ enyo.kind({
 			this.servers = [];
 			this.myplexServers = [];
 			//need to create PlexServer insatnces for reachability to work
-			for (var i = 0; i < this.prefs.myplexServers.length; i++) {
-				var serverObj = this.prefs.myplexServers[i];
-				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken,false);
-				this.myplexServers.push(server);
+			for (var item in this.prefs.myplexServers) {
+				var serverObj = this.prefs.myplexServers[item];
+				if (serverObj != null && serverObj.hasOwnProperty("host")) {
+					var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken,false);
+					this.myplexServers.push(server);
+				}
 			};
 
 			//need to create PlexServer insatnces for reachability to work
 			for (var i = 0; i < this.prefs.servers.length; i++) {
 				var serverObj = this.prefs.servers[i];
-				var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken, true);
-				this.servers.push(server);
+				if (serverObj != null && serverObj.hasOwnProperty("host")) {
+					var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken, true);
+					this.servers.push(server);
+				}
 			};
 		}
 	},
@@ -140,14 +157,23 @@ enyo.kind({
     }
 	},
 	processLocalServerViaBonjour: function(data) {
-  	for(var i=0; i < data.MediaContainer.Server.length; i++){
-  		var server = data.MediaContainer.Server[i];
+		this.log();
+		var foundServers = [];
+		if (data.MediaContainer.size === "1") {
+			foundServers.push(data.MediaContainer.Server);
+		}
+		else if (data.MediaContainer.size > 1) {
+			foundServers = data.MediaContainer.Server;
+		}
+
+  	for(var i=0; i < foundServers.length; i++){
+  		var server = foundServers[i];
   		
 	    if (!this.isInLocalServers(server.machineIdentifier)) {
-	    	this.log("creating plexserver: " + server.name + " host: " + server.host);
+	    	this.log("creating local plexserver: " + server.name + " address: " + server.address);
 	    	var foundServer = new PlexServer(server.machineIdentifier,
 	    				server.name,
-    		  		server.host, 
+    		  		server.address, 
     		  		server.port,
     		  		undefined,
     		  		undefined,
@@ -158,10 +184,13 @@ enyo.kind({
 	      this.servers.push(foundServer);
 	      this.savePrefs();
 	      this.log("added bonjour server: " + server.name);
+
+	      //refresh shit
+  			this.loadPrefsFromCookie();
+				this.serversRefreshedCallback.call();
 	    }
   	}
-  	//refresh shit
-  	this.loadPrefsFromCookie();
+
 	},
 	genericFailure: function(inSender, inResponse) {
 		this.log("failure: " + JSON.stringify(inResponse));
@@ -193,6 +222,17 @@ enyo.kind({
 			this.log("started reachability check on " + server.name);
 		};
 	},
+	getServerWithMachineId: function(machineid) {
+		if (machineid !== undefined) {
+			var allServers = this.servers.concat(this.myplexServers);
+			for (var item in allServers) {
+				var server = allServers[item];
+				if (server.machineIdentifier === machineid) {
+					return server;
+				}
+			}
+		}
+	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl) {
 	  //Step 1: general transcoding URL + server URL
 	  var transcodingUrl = "/video/:/transcode/segmented/start.m3u8";
@@ -222,6 +262,10 @@ enyo.kind({
 	  
 	  return server.baseUrl + targetUrl;
 	  
+	},
+	getImageTranscodeUrl: function(server,width, height, url) {
+		var transcodeUrl = server.baseUrl + "/photo/:/transcode?width=" + width + "&height=" + height + "&format=jpeg&url=" + url;
+		return transcodeUrl;
 	},
 	authWithUrl: function(plexUrl) {
 		var publicKey = "KQMIY6GATPC63AIMC4R2";
@@ -286,15 +330,9 @@ enyo.kind({
 	// PMS START
 	processPlexData: function(data) {
 		var pmc = data.MediaContainer;
+		this.log(pmc);
 		this.callback(pmc);	
 	},
-	processLocalSections: function(data) {
-		//console.log(data);
-		if (data !== undefined) {
-			this.localSections = data.MediaContainer.Directory;
-		}
-		this.callback(this.localSections);
-	},	
 	librarySections: function() {
 		var url = "";
 		var sectionsUrl = "/system/library/sections";
@@ -307,6 +345,19 @@ enyo.kind({
  		xml.async(enyo.bind(this,"processLocalSections"));
  		xml.parse();
 	},
+	processLocalSections: function(data) {
+		console.log(data);
+		this.localSections = [];
+		if (data !== undefined && data.MediaContainer.Directory.length > 0) {
+			for (var i = 0; i < data.MediaContainer.Directory.length; i++) {
+				var item = data.MediaContainer.Directory[i];
+				//if (!this.isInLocalSections(item)) {
+					this.localSections.push(item);
+				//} 
+			};
+		}
+		this.callback(this.localSections);
+	},	
 	recentlyAdded: function() {
 		var url = "/library/recentlyAdded";
 		var mediaObjs = [];
@@ -340,7 +391,6 @@ enyo.kind({
 	  return server.baseUrl + url;
 	},
 	getAssetUrl: function(server, asset_key) {
-		var authToken = this.myplexUser["authentication-token"];
 		var url = server.baseUrl + asset_key;
 		if (server.accessToken) {
 			url += "&X-Plex-Token=" + server.accessToken;
@@ -385,6 +435,9 @@ enyo.kind({
 		this.callback(data);
 	},
 	getMyPlexServers: function() {
+		if (this.myplexUser === undefined) {
+			return;
+		}
 		var authToken = this.myplexUser["authentication-token"];
 	  var url = "https://my.plexapp.com/pms/servers?X-Plex-Token=" + authToken;
 	  var xml = new JKL.ParseXML(url);
@@ -393,13 +446,30 @@ enyo.kind({
 	},
 	processMyPlexServers: function(data) {
 		console.log("myplex servers: " + enyo.json.stringify(data));
-		for (var item in data.MediaContainer.Server){
-			var server = data.MediaContainer.Server[item];
+		for (var i=0;i<data.MediaContainer.Directory.length;i++){
+			var server = data.MediaContainer.Directory[i];
 			if (!this.isInLocalServers(server.machineIdentifier)) {
+				this.log("creating myplex server: " + server.name + " address: " + server.address);
+	    	var foundServer = new PlexServer(server.machineIdentifier,
+	    				server.name,
+    		  		server.address, 
+    		  		server.port,
+    		  		undefined,
+    		  		undefined,
+    		  		true,
+    		  		"1",
+    		  		server.accessToken,
+    		  		"0");
 				this.myplexServers.push(server);
+				this.savePrefs();
+				this.log("added myplex server: " + server.name);
+
+	      //refresh shit
+  			this.loadPrefsFromCookie();
+				this.serversRefreshedCallback.call();
 			}
 		}
-		this.savePrefs();
+		
 	},
 	myPlexSections: function() {
 		if (this.myplexUser === undefined){
@@ -416,6 +486,7 @@ enyo.kind({
 		console.log(data);
 		this.myplexSections = [];
 		if (data.MediaContainer.Directory.length > 0) {
+			this.processMyPlexServers(data); //section list contains servers as well...
 			for (var i = 0; i < data.MediaContainer.Directory.length; i++) {
 				var item = data.MediaContainer.Directory[i];
 				if (!this.isInLocalSections(item)) {

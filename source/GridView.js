@@ -132,11 +132,12 @@ enyo.kind({
 				  var pmo = this.getPlexMediaObject(idx);
 					//this.log("idx: " + idx);
 
-					var path = window.PlexReq.getAssetUrl(this.parentMediaContainer.server,pmo.thumb);
+					//var path = window.PlexReq.getAssetUrl(this.parentMediaContainer.server,pmo.thumb);
+					var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,100,149,pmo.thumb);
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
 					//coverart img and properties
-					c.$.coverDiv.$.coverImg.setSrc(path);
+					c.$.coverDiv.$.coverImg.setSrc(thumbUrl);
 					//label below cover art
 					c.$.cover_label.setContent(lbl);
 					//this.log("returning cover");

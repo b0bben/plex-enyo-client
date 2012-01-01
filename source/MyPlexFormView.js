@@ -80,7 +80,7 @@ enyo.kind({
 
   },
   myPlexLoginResponse: function(userData) {
-    console.log("myPlexLoginResponse: "+userData.user["authentication-token"]);
+    console.log("myPlexLoginResponse: " + userData); //.user["authentication-token"]);
     this.$.loginButton.setActive(false);
     this.$.loginButton.setDisabled(true);
     this.$.logoutButton.setDisabled(false);
