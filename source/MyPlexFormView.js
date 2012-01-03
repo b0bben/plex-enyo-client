@@ -37,6 +37,7 @@ enyo.kind({
     {kind:"Toolbar", className:"enyo-toolbar-light", components:[
       {kind: "Button", label: $L("Cancel"), className:"accounts-toolbar-btn", onclick: "doCancel"}
     ]},
+    { name: "loginFailureDialog", kind: "MessageDialog", message: $L("Could not login to myPlex. Please check that you have entered your username and password correctly.") }
   ],
   create: function() {
     this.inherited(arguments);
@@ -81,10 +82,15 @@ enyo.kind({
   },
   myPlexLoginResponse: function(userData) {
     console.log("myPlexLoginResponse: " + userData); //.user["authentication-token"]);
-    this.$.loginButton.setActive(false);
-    this.$.loginButton.setDisabled(true);
-    this.$.logoutButton.setDisabled(false);
+    if (userData === undefined) {
+      this.$.loginFailureDialog.openAtCenter();
+    }
+    else {
+      this.$.loginButton.setActive(false);
+      this.$.loginButton.setDisabled(true);
+      this.$.logoutButton.setDisabled(false);
 
-    this.doLoggedIn(userData.user);
+      this.doLoggedIn(userData.user);
+    }
   },
 });

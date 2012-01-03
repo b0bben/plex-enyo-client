@@ -310,6 +310,9 @@ enyo.kind({
 		//need both server AND url
 		if (server !== undefined && plexUrl !== undefined) { 
 			var url = server.baseUrl + plexUrl;
+			if (server.accessToken) {
+				url += "?X-Plex-Token=" + server.accessToken;
+			}
 		 	var xml = new JKL.ParseXML(url);
 		 	xml.async(enyo.bind(this,"processPlexData"));
 		 	xml.parse();	
@@ -326,6 +329,9 @@ enyo.kind({
 		if (server !== undefined && plexUrl !== undefined) { 
 			try {
 				var url = server.baseUrl + plexUrl;
+				if (server.accessToken) {
+					url += "?X-Plex-Token=" + server.accessToken;
+				}
 		 		var xml = new JKL.ParseXML(url);
 		 		var data = xml.parse();
 				return data;
@@ -386,9 +392,6 @@ enyo.kind({
 	getSectionForKey: function(server,key,level) {
 		level = level || "all"
 		var url = key + "/" + level;
-		if (server.accessToken) {
-			url += "?X-Plex-Token=" + server.accessToken;
-		}
 		this.dataForUrlAsync(server,url);
 		
 	},
@@ -444,7 +447,7 @@ enyo.kind({
 		this.callback(data);
 	},
 	processMyPlexServers: function(data) {
-		console.log("myplex servers: " + enyo.json.stringify(data));
+		console.log("myplex servers: " + data.MediaContainer.size);
 		var addedNewServers = false;
 
 		for (var i=0;i<data.MediaContainer.Directory.length;i++){
@@ -452,9 +455,9 @@ enyo.kind({
 			var existingServer = this.getServerWithMachineId(server.machineIdentifier);
 
 			if (!this.isInLocalServers(server.machineIdentifier) && !existingServer) {
-				this.log("creating myplex server: " + server.name + " address: " + server.address);
+				this.log("creating myplex server: " + server.serverName + " address: " + server.address);
 	    	var foundServer = new PlexServer(server.machineIdentifier,
-	    				server.name,
+	    				server.serverName,
     		  		server.address, 
     		  		server.port,
     		  		undefined,

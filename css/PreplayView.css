@@ -128,9 +128,19 @@ body {
   color: white;
   /*border: 1px solid green;*/
 }
-
 .info_text {
-  color: #888;
+  color: #bfbfbf;
+  font-size: 14px;
+  margin-right: 5px;
+  padding-right: 5px;
+}
+
+.info_text:after {
+  content: ' |';
+}
+
+.info_text:last-child:after {
+  content: '';
 }
 .rating_holder {
   display: block;

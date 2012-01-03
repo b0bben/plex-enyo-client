@@ -102,13 +102,11 @@ enyo.kind({
 			this.$.loginButton.setShowing(true);
 		}
 
-		//if (window.PlexReq.servers.length > 0){
-			this.$.serverList.render();; //force-refresh local server list
-		//}
-
-		//if (window.PlexReq.myplexServers.length > 0){
-			this.$.myPlexServerList.render(); //force-refresh myplex server list
-		//}
+		this.render();
+		
+		this.$.serverList.render();; //force-refresh local server list
+		this.$.myPlexServerList.render(); //force-refresh myplex server list
+		
 	},
 	showAddServerForm: function(inSender) {
 		this.$.pane.selectViewByName("serverForm");
@@ -140,7 +138,8 @@ enyo.kind({
 	loggedInToMyPlex: function(inSender, myPlexUserData) {
 		if (myPlexUserData !== undefined) {
 			window.PlexReq.myplexUser = myPlexUserData;
-			window.PlexReq.savePrefs();		
+			window.PlexReq.savePrefs();
+			window.PlexReq.myPlexSections(); //force-refresh myplex servers (via sections)
 		}
 		this.reloadPrefs();
 		this.$.pane.back();
@@ -150,10 +149,6 @@ enyo.kind({
 		//plexReq is constantly watching the servers and updating their .online flag when reachability changes,
 		//so we just need to refresh the list to show the current reachability status
 		this.$.myPlexServerList.render();
-	},
-	refreshMyPlexServers: function() {
-		window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexServers"));
-		window.PlexReq.getMyPlexServers();	
 	},
 	logoutFromMyPlex: function(inSender, myPlexUserData) {
 		if (myPlexUserData !== undefined) {
@@ -168,25 +163,7 @@ enyo.kind({
 		this.$.pane.back();
 	},
 	gotMyPlexServers: function(pmc) {
-		if (pmc !== undefined) {
-			for (var i = 0; i < pmc.Server.length; i++) {
-				var server = pmc.Server[i];
-				var foundServer = new PlexServer(server.machineIdentifier,
-																				server.name,
-																				server.host,
-																				server.port,
-																				null,
-																				null,
-																				true,
-																				server.owned,
-																				server.accessToken,
-																				server.local);
-		    var existingServer = window.PlexReq.getMyPlexServerWithMachineId(server.machineIdentifier);
-		    if (!existingServer) {
-		      window.PlexReq.myplexServers.push(foundServer);
-				}
-			}
-		}
+		//don't need to do anything with in-param since the serverlist will read the servers from plexreq when asked to refresh
 		this.$.myPlexServerList.render();
 	},
 	listMyPlexSetupRow: function(inSender, inIndex) {
