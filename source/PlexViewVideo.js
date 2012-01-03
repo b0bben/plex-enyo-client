@@ -192,6 +192,7 @@ enyo.kind({
 enyo.kind({
     name: "PlexViewVideo",
     kind: 'enyo.ViewImage',
+    style: "background-color: #000000;",
     components: [
         { name: "video", kind: "enyo.Video", className: "video-default", showControls: "" },
         { name: "headerBar", kind: "HFlexBox", className: "vid-header-bar show-vid-header-bar",
