@@ -68,7 +68,13 @@ enyo.kind({
 		this.prefs = undefined;
 		this.loadPrefsFromCookie();
 		var thisInst = this;
-		setInterval(enyo.bind(this,"checkServerReachability"), 30000);
+		this.startReachabilityChecking();
+  },
+  stopReachabilityChecking:function() {
+  	clearInterval(this.reachIntervalId);
+  },
+  startReachabilityChecking: function() {
+  	this.reachIntervalId = setInterval(enyo.bind(this,"checkServerReachability"), 30000);
   },
   setCallback: function(callback){
   	this.callback = callback;
@@ -239,7 +245,7 @@ enyo.kind({
 			}
 		}
 	},
-	transcodeUrlForVideoUrl: function(pmo, server, videoUrl) {
+	transcodeUrlForVideoUrl: function(pmo, server, videoUrl, offset) {
 	  //Step 1: general transcoding URL + server URL
 	  var transcodingUrl = "/video/:/transcode/segmented/start.m3u8";
 	  var fakeUrl = "http://localhost:32400"
@@ -254,17 +260,21 @@ enyo.kind({
 	  //step 6: identifier
 	  targetUrl += "&identifier=" + "com.plexapp.plugins.library"; //TODO: get from somewhere...
 	  //step 7: quality
-	  targetUrl += "&quality=" + 6; //TODO: get from settings
+	  targetUrl += "&quality=" + this.videoQuality;
 	  //step 8: key
 	  targetUrl += "&key=" + encodeURIComponent(fakeUrl + pmo.key);
-	  targetUrl += "&session=" + 1111;//enyo.fetchDeviceInfo().serialNumber;
+	  targetUrl += "&session=" + "1111"; //enyo.fetchDeviceInfo().serialNumber
 	  //step 9: 3G flag
 	  targetUrl += "&3g=0" //no 3G on teh touchpad
+
+	 	if (offset) {
+	 		targetUrl += "&offset=" + pmo.viewOffset / 1000;
+	 	}
 	  
 	  //there's no step 9! 
 	  targetUrl += this.authWithUrl(targetUrl);
 	  
-	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=mp3,aac{bitrate:160000}");
+	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=aac{bitrate:160000}");
 	  
 	  return server.baseUrl + targetUrl;
 	  
@@ -330,7 +340,7 @@ enyo.kind({
 			try {
 				var url = server.baseUrl + plexUrl;
 				if (server.accessToken) {
-					url += "?X-Plex-Token=" + server.accessToken;
+					url += "&X-Plex-Token=" + server.accessToken;
 				}
 		 		var xml = new JKL.ParseXML(url);
 		 		var data = xml.parse();
@@ -411,7 +421,7 @@ enyo.kind({
 	},
 	stopTranscoder: function(server) {
 		if (server.hasOwnProperty("baseUrl")) {
-			var url = "/video/:/transcode/segmented/stop";
+			var url = "/video/:/transcode/segmented/stop?session=" + "1111";
 			var response = this.dataForUrlSync(server,url);
 			console.log("stopped transcoder, resp: " + response);
 		}

@@ -4,7 +4,6 @@ body {
 .enyo-bg{
   background-color: #D8D8D8;
 }
-
 .backdrop-img {
   opacity: 0.3;
   height: 100%;
@@ -28,7 +27,15 @@ body {
   z-index: 0;
   /*border: 1px solid blue;*/
 }
-
+.overlay-play-button {
+  position: absolute;
+  top: 25%;
+  left: 12%;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  background: url(../images/playbtn.png) no-repeat;
+}
 .cover .thumb {
   -webkit-box-shadow: #333538 0px 0px 40px;
   border-bottom-left-radius: 7px 7px;

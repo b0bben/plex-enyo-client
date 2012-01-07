@@ -15,6 +15,7 @@ enyo.kind({
   		{kind: enyo.HFlexBox, className: "enyo-fit", components: [
     		{kind: enyo.VFlexBox, pack: "start", style: "margin: 10px;", components: [
     			{className: "cover", onclick: "clickPlay",components: [
+            {name: "playBtn",className: "overlay-play-button"},
     		    {name: "thumb", kind: "Image", className: "thumb"},
     		    /*{kind: "PlexViewVideo", name: "videoView", visible: false, className: "thumb"},*/
             {kind: enyo.VFlexBox,components: [
@@ -52,7 +53,7 @@ enyo.kind({
   		]},
 		
 		]}, //scroller end
-    
+    { name: "resumeDialog", onResume: "resumeVideoHandler", onFromStart: "fromStartVideoHandler", kind: "plex.ResumeDialog",  width: "400px", message: $L("It looks like you have already watched a part of this video.\r\n\r\nWould you like to resume from where you left off, or play from the start?") },
 		{kind: "Toolbar", align: "center", components: [
   		{name: "dragHandle", kind: "GrabButton", onclick: "closeMyself"},
                     {kind: enyo.HFlexBox, components: [
@@ -164,8 +165,23 @@ enyo.kind({
 
 	},
 	clickPlay: function() {
-    var videoSrc = this.transcoderUrlForVideoObject();
+    if (this.plexMediaObject.viewOffset) {
+      this.$.resumeDialog.setResumeOffset(this.plexMediaObject.viewOffset);  
+      this.$.resumeDialog.openAtCenter();
+    }
+    else {
+      this.fromStartVideoHandler();
+    }
+    
+  },
+  resumeVideoHandler: function() {
+    var transcodingUrl = window.PlexReq.transcodeUrlForVideoUrl(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key, true);
 
-    this.owner.owner.startVideoPlayer(videoSrc,this.plexMediaObject, this.server);
-  }
+    this.owner.owner.startVideoPlayer(transcodingUrl,this.plexMediaObject, this.server, true);    
+  },
+  fromStartVideoHandler: function() {
+    var transcodingUrl = window.PlexReq.transcodeUrlForVideoUrl(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key, false);
+
+    this.owner.owner.startVideoPlayer(transcodingUrl,this.plexMediaObject, this.server, false);    
+  },
 })

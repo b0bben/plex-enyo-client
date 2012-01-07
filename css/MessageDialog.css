@@ -18,7 +18,7 @@
 	-webkit-transform: rotate(0deg) scale(0);
 	opacity: 0;
 	-webkit-transition-property: opacity, -webkit-transform;
-	-webkit-transition-duration: 1s, 1s;
+	-webkit-transition-duration: 0.5s, 0.5s;
 }
 
 .enyo-msgBox-animEnd {

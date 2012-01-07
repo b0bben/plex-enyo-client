@@ -139,7 +139,11 @@ enyo.kind({
 					//coverart img and properties
 					c.$.coverDiv.$.coverImg.setSrc(thumbUrl);
 					//label below cover art
-					c.$.cover_label.setContent(lbl);
+					
+					if (pmo.viewOffset) {
+						lbl += " (W)";
+					}
+					c.$.cover_label.setContent(lbl);					
 					//this.log("returning cover");
 				} else {
 				  //this.log("NOT returning cover");

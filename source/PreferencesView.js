@@ -62,13 +62,16 @@ enyo.kind({
 						{kind: "Button", caption: $L("Clear Autofill Information"), onclick: "", dialog: ""},
 						*/
 						{kind: "RowGroup", caption: $L("Video quality"), components: [
-							{kind: "ListSelector", name: "videoQuality", value: 1, onChange: "videoQualityChange", items: [
-								{caption: $L("8 Mbps, 1080p"), value: 1},
-								{caption: $L("4 Mbps, 720p"), value: 1},
-								{caption: $L("3 Mbps, 720p"), value: 1},
-								{caption: $L("2 Mbps, 720p"), value: 1},
-								{caption: $L("1.5 Mbps, 480p"), value: 1},
-								{caption: $L("720 kbps, 320p"), value: 1},
+							{kind: "ListSelector", name: "videoQuality", value: 1, onChange: "videoQualityChanged", items: [
+								{caption: $L("10 Mbps, 1080p"), value: 11},
+								{caption: $L("8 Mbps, 1080p"), value: 10},
+								{caption: $L("5 Mbps, 1080p"), value: 9},
+								{caption: $L("4 Mbps, 720p"), value: 8},
+								{caption: $L("3 Mbps, 720p"), value: 7},
+								{caption: $L("2 Mbps, 720p"), value: 6},
+								{caption: $L("1.5 Mbps, 480p"), value: 5},
+								{caption: $L("720 kbps, 320p"), value: 4},
+								{caption: $L("320 kbps, 240p"), value: 3},
 							]}
 						]},
 						{content:$L('Higher quality settings provide better looking video, but require more network bandwith.'), className: "prefs-body-text", style:"margin-bottom:8px"},
@@ -102,6 +105,14 @@ enyo.kind({
 			this.$.loginButton.setShowing(true);
 		}
 
+		//quality selector sanity check
+		if (window.PlexReq.videoQuality >= 3 && window.PlexReq.videoQuality <= 11) {
+			this.$.videoQuality.setValue(window.PlexReq.videoQuality);	
+		}
+		else {
+			this.$.videoQuality.setValue(8);
+		}
+		
 		this.render();
 		
 		this.$.serverList.render();; //force-refresh local server list
@@ -207,6 +218,12 @@ enyo.kind({
 	},
 	togglePreferenceClick: function(inSender, inState) {
 	    this.log("Toggled to state" + inState + " for server:"+inSender);
+	},
+	videoQualityChanged: function(inSender, inValue, inOldValue) {
+    if (inValue != inOldValue) {
+    	window.PlexReq.videoQuality = inValue;
+			window.PlexReq.savePrefs();
+		}
 	},
 	
 });

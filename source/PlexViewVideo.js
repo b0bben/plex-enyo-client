@@ -248,6 +248,7 @@ enyo.kind({
       pmo: undefined,
       videoSrc: undefined,
       server: undefined,
+      resume: false,
     },  
     className: "video-view",
     // currently only local videos are supported
@@ -341,21 +342,37 @@ enyo.kind({
 	 },   
     pmoChanged: function() {
        if (this.pmo !== undefined) {
-        this.duration = (this.pmo.duration / 1000);
-        this.viewOffset = (this.pmo.viewOffset / 1000);
+        var durationInSecs = this.pmo.duration / 1000;
+        var viewOffsetInSecs = this.pmo.viewOffset / 1000;
+        this.duration = Math.floor(durationInSecs);
+        
+        if (this.resume)
+            this.log("will resume");
+        else
+            this.log("will NOT resume");
+
+        this.viewOffset = this.resume ? Math.floor(viewOffsetInSecs) : undefined; //don't set offset if we're told not to resume
         this.playTimeMeta = {               // the meta data helping the updateSeeker() to animate
             isMonitorInProgress: false,
             tDuration: this.duration,
             tLastSeeked: 0,
             tScrubberLastUpdate: 0
         };
-        var lastPlayTimeRecorded = this.viewOffset;
+        var lastPlayTimeRecorded = this.resume ? this.viewOffset : undefined;
         if (undefined != lastPlayTimeRecorded && !isNaN(lastPlayTimeRecorded)) {
             this.playTimeMeta.tLastSeeked = lastPlayTimeRecorded;
         }
-
-
-
+        //TODO: set poster & spinner
+        /*if (this.pmo.art) {
+            try {
+                var posterUrl = window.PlexReq.getImageTranscodeUrl(this.server,1240,720,this.pmo.art);
+                this.bufferImage.src = posterUrl;                
+            }
+            catch(err)
+            {
+                this.log("couldn't load poster for video");
+            }   
+        }*/
         var basename = this.pmo.title;
         this.$.videoTitle.setContent(enyo.string.escapeHtml(basename));
 
@@ -416,14 +433,14 @@ enyo.kind({
                 thisInst.updateOnLoadProgress(ev);
             },
             loadedmetadata: function (ev) {
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.loadedmetadata(): on "'+thisInst.dbEntry.path+'", videoWidth='+this.videoWidth+', videoHeight='+this.videoHeight);
+                console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.loadedmetadata(): on "'+thisInst.pmo.title+'", videoWidth='+this.videoWidth+', videoHeight='+this.videoHeight);
                 thisInst.loadState = thisInst.IS_LOADED;
                 thisInst.onVideoLoad(ev);
                 thisInst.adjustVideoSize();
                 postProcess && postProcess();
             },
             seeked: function (ev) {
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.seeked(): seek ACK, '+thisInst.$.video.node.currentTime+', instanceId='+thisInst.instanceId+' on "'+thisInst.dbEntry.path+'"');
+                console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.seeked(): seek ACK, '+thisInst.$.video.node.currentTime+', instanceId='+thisInst.instanceId+' on "'+thisInst.pmo.title+'"');
                 thisInst.onVideoSeeked(ev);
                 thisInst.onVideoSeekedEventNotify(ev);
             },
@@ -440,13 +457,13 @@ enyo.kind({
                 setTimeout(function() { thisInst.showControlbars(); }, 100);
             },
             pause: function (ev) {
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.pause(): pause ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.dbEntry.path+'", node.paused='+thisInst.$.video.node.paused);
+                console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.pause(): pause ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.pmo.title+'", node.paused='+thisInst.$.video.node.paused);
                 thisInst.mediaplayerInitiatedPauseHandler();
             },
             play: function (ev) {
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.play(): play ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.dbEntry.path+'", node.paused='+thisInst.$.video.node.paused+' at '+thisInst.$.video.node.currentTime);
+                console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.play(): play ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.pmo.title+'", node.paused='+thisInst.$.video.node.paused+' at '+thisInst.$.video.node.currentTime);
                 if (thisInst.isInFocused && !thisInst.isCarded) { return; }
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.play(): play ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.dbEntry.path+'", isInFocused='+thisInst.isInFocused+', isCarded='+thisInst.isCarded+', node.paused='+thisInst.$.video.node.paused+' at '+thisInst.$.video.node.currentTime+', prepare to pause...');
+                console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.play(): play ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.pmo.title+'", isInFocused='+thisInst.isInFocused+', isCarded='+thisInst.isCarded+', node.paused='+thisInst.$.video.node.paused+' at '+thisInst.$.video.node.currentTime+', prepare to pause...');
                 thisInst.pauseVideo();
             },
             error: function (ev) {
@@ -460,8 +477,8 @@ enyo.kind({
         var node = this.$.video.hasNode();
         //node.setAttribute("poster", this.bufferImage.src);
         node.setAttribute("x-palm-media-audio-class", "media");
-        //node.setAttribute("x-palm-media-extended-overlay-playback", "true");
-        node.style = "left:"+left+"px;background: #000;";
+        node.setAttribute("x-palm-media-extended-overlay-playback", "true");
+        node.style = "left:"+left+"px;";
         var type;
         for (type in handlers) if (handlers.hasOwnProperty(type)) {
             node.addEventListener(type, handlers[type], false);
@@ -1132,6 +1149,8 @@ enyo.kind({
             case this.IS_LOADED:
                 this.isPlaying = true;
                 doVideoPlay();
+                this.log("started playing, now seek");
+                this.adjustPlayStartTime();
                 break;
             case this.IS_NOT_LOADED:
                 this.isAutoStart = true;
@@ -1591,9 +1610,11 @@ enyo.kind({
             method: this.videoStartPositionReadinessHandler,
             args: [ lastPlayTime ]
         });
-//console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.adjustPlayStartTime(): instanceId="+this.instanceId+" ("+this.mediadService+"), node.paused="+this.$.video.node.paused+", seek to "+lastPlayTime);
+        console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.adjustPlayStartTime(): instanceId="+this.instanceId+" ("+this.mediadService+"), node.paused="+this.$.video.node.paused+", seek to "+lastPlayTime);
         node.currentTime = lastPlayTime;
         this.updateSeeker((lastPlayTime/node.duration)*100);
+        this.log("currentTime on node: " + node.currentTime);
+        this.log("seekable time on node: " + enyo.json.stringify(node.seekable) );
     },
 
     videoStartPositionReadinessHandler: function (actualTime, expectedStartTime) {

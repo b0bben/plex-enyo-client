@@ -137,13 +137,15 @@ enyo.kind({
 		window.PlexReq.myPlexSections();
 		
 	},
-	startVideoPlayer: function(src, pmo, server) {
-	  	this.$.pane.selectViewByName("videoPlayer");
-	  	//src = "http://devimages.apple.com/iphone/samples/bipbopall.html";
-    	//src = "/media/internal/movies/Robotar.m4v";
+	startVideoPlayer: function(src, pmo, server, resume) {
+		window.PlexReq.stopReachabilityChecking();
+	  this.$.pane.selectViewByName("videoPlayer");
+	  //src = "http://devimages.apple.com/iphone/samples/bipbopall.html";
+    //src = "/media/internal/movies/Robotar.m4v";
+    this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
+  	this.$.videoPlayer.setResume(resume);
   	this.$.videoPlayer.setVideoSrc(src);
     this.$.videoPlayer.setPmo(pmo);
-    this.$.videoPlayer.setServer(server);
     this.$.videoPlayer.autoStartOnLoad();
     
 	},
