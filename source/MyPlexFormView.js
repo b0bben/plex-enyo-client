@@ -57,6 +57,7 @@ enyo.kind({
       ui.password.setValue("");
       ui.password.setDisabled(false);
       ui.loginButton.setDisabled(false);
+      ui.loginButton.setActive(false);
       ui.logoutButton.setDisabled(true);
     }
   },

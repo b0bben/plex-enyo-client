@@ -77,7 +77,7 @@ enyo.kind({
 	plexMediaObjectChanged: function() {
 		if (this.plexMediaObject !== undefined) {
 		  //this.$.videoView.setPmo(this.plexMediaObject);
-			this.log("preplay with: " + enyo.json.stringify(this.plexMediaObject));
+			//this.log("preplay with: " + enyo.json.stringify(this.plexMediaObject));
       var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,194,273,this.plexMediaObject.thumb);
 			this.$.thumb.setSrc(thumbUrl);
 			this.$.title.setContent(this.plexMediaObject.title);

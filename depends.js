@@ -2,6 +2,7 @@ enyo.depends(
 	"external/arrayextras.js",
 	"external/extensions.js",
 	//view src
+	"source/videotest.js",
 	"source/MainView.js",
 	"source/GridView.js",
 	"source/SectionsView.js",
@@ -24,6 +25,7 @@ enyo.depends(
 	"source/MyPlexSectionsView.js",
 	"source/MyPlexSection.js",
 	"source/ResumeDialog.js",
+
 	//plex api
 	"api/PlexRequest.js",
 	"api/base64.js",

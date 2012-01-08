@@ -51,9 +51,6 @@ enyo.kind({
   	}
 	},
 	parentMediaContainerChanged: function() {
-		this.$.selection.clear();
-		this.$.grid_list.refresh();
-
 	  if (this.parentMediaContainer !== undefined) {
 			//get the section details
 	    window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
@@ -86,13 +83,13 @@ enyo.kind({
 	  
 	},
 	gotMediaContainer: function(pmc) {
+		this.log();
 		this.mediaContainer = pmc;
 		this.count = parseInt(this.mediaContainer.size); //size is always there
 		//start building the grid now
 		this.buildCells();
 		this.$.selection.clear();
-		this.$.grid_list.refresh();
-		
+		this.$.grid_list.punt();
 	},
 	getPlexMediaObject: function(index) {
 	  if (this.mediaContainer.Video != null) {
@@ -147,7 +144,7 @@ enyo.kind({
 					//this.log("returning cover");
 				} else {
 				  //this.log("NOT returning cover");
-					//return false;
+					return false;
 				}
 
 			}

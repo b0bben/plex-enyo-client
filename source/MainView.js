@@ -39,6 +39,7 @@ enyo.kind({
 			{name:"prefsView", kind:"plex.PreferencesView", lazy: true, showing: false, onClose:"closePrefsView"},
 			{name: "videoPlayer", kind: "PlexViewVideo", flex:1, lazy: true, showing: false},
 			{kind: "plex.WelcomeView", name: "welcomeView",lazy: true, showing: false},
+			{name:"vidobject", kind: "plex.VideoObjectView",onBack:'backHandler', showing: false, lazy:true},
 		]},
 		
 	],
@@ -139,15 +140,18 @@ enyo.kind({
 	},
 	startVideoPlayer: function(src, pmo, server, resume) {
 		window.PlexReq.stopReachabilityChecking();
-	  this.$.pane.selectViewByName("videoPlayer");
-	  //src = "http://devimages.apple.com/iphone/samples/bipbopall.html";
-    //src = "/media/internal/movies/Robotar.m4v";
+	 this.$.pane.selectViewByName("videoPlayer");
+	  //src = "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8";
+    //src = "http://video.nationalgeographic.com/video/player/media-mp4/frog_bull/mp4/variant-playlist.m3u8";
     this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
   	this.$.videoPlayer.setResume(resume);
-  	this.$.videoPlayer.setVideoSrc(src);
-    this.$.videoPlayer.setPmo(pmo);
-    this.$.videoPlayer.autoStartOnLoad();
-    
+  	this.$.videoPlayer.setPmo(pmo);
+    this.$.videoPlayer.setVideoSrc(src);
+
+    /* TEST STUFF
+    this.$.pane.selectViewByName("vidobject");
+    this.$.vidobject.setVideoSrc(src);
+    */
 	},
 	startMusicPlayback: function(src, context) {
 		this.$.musicPlayer.setShowing(true);

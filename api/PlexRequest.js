@@ -274,7 +274,7 @@ enyo.kind({
 	  //there's no step 9! 
 	  targetUrl += this.authWithUrl(targetUrl);
 	  
-	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=aac{bitrate:160000}");
+	  //targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=aac{bitrate:160000}");
 	  
 	  return server.baseUrl + targetUrl;
 	  
