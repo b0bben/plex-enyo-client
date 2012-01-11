@@ -1,8 +1,8 @@
 enyo.kind({
-	kind: "Header",
+	kind: "Control",
 	name: "plex.MusicPlayerControl",
-	height: "80px",
-	className: "enyo-toolbar enyo-hflexbox controls",
+	height: "190px",
+	className: "enyo-vflexbox controls",
 	events: {
 		onClickPrev: "",
 		onClickPlayPause: "",
@@ -16,38 +16,48 @@ enyo.kind({
 	},
 	published: {playEnabled: false, prevNextEnabled: false, trackInfo: undefined},
 	components: [
+
+			
 			{kind: "Sound", audioClass: "media"},
-			{kind: "Control", className: "playback", layoutKind: "HFlexLayout", pack: "start", align: "center", components: [
-				{name: "btnPrev", kind: "IconButton", className: "prev", icon:"images/btn_controls_prev.png", onclick: "onclick_prev", disabled: true}, // This needs to be changed to switch icons like btnPlay
-				{name: "btnPlay", kind: "IconButton", className: "play paused", icon:"images/btn_controls_play.png", label: " ", onclick: "onclick_playpause", disabled: true},
-				{name: "btnNext", kind: "IconButton", className: "next", icon:"images/btn_controls_next.png", onclick: "onclick_next", disabled: true} // This needs to be changed to switch icons like btnPlay
-			]},
-			{kind: "Spacer", style:"max-width:25px;"},
 			{kind: "Control", flex:1, layoutKind: "VFlexLayout", align: "center", pack:"justify", components: [
 				{kind: "HFlexBox", align: "center", className: "current", pack: "justify", components: [
-					{name: "btnRepeat", kind: "Control", className: "toggleMode repeat", onclick: "doRepeatClick"}, //possible class values are off/on/one - let me know if switching classes is harder than say... set styles
+					
 					{kind: "Control", pack:"justify", align: "center", flex:1, className: "info", components: [
 						{name: "lblArtistName", content: "", className: "artist"},
-						{name: "lblSongTitle", content: "", className: "title"}
+						{name: "lblSongTitle", content: "", className: "title"},
 					]},
-					{name: "btnShuffle", kind: "Control", className: "toggleMode shuffle", onclick:"doShuffleClick"} //possible class values are off/on - let me know if switching classes is harder than say... set styles
+					
 					
 				]},
 				{kind: "Control", layoutKind: "HFlexLayout", className: "progress", pack: "center", components: [  						//JC_UI
-					{name: "lblSongTime", kind: "Control", className: "label elapsed", content: "--:--"},
+					
 					{name: "sliderSongTime", kind: "ProgressSlider", onChange: "onChange_sliderSongTime", onChanging: "onChanging_sliderSongTime", onclick: "onClick_sliderSongTime", tapPosition: true, lockBar: true, position:0, flex:1, disabled: true},
+					
+				]},
+				{kind: "HFlexBox", height: "20px", width: "95%", components: [
+					{name: "lblSongTime", kind: "Control", className: "label elapsed", content: "--:--"},
+					{kind: "Spacer", flex: 1},
 					{name: "lblSongDuration", kind: "Control", className: "label duration", content: "--:--"},
-				]}
+				]},
 			]},
-			{kind: "Spacer", style:"max-width:15px;"},
+			{kind: "Control", className: "playback", layoutKind: "HFlexLayout", pack: "center", align: "center", components: [
+				{name: "btnRepeat", kind: "Control", className: "toggleMode repeat", onclick: "doRepeatClick"}, //possible class values are off/on/one - let me know if switching classes is harder than say... set styles
+				{name: "btnPrev", kind: "IconButton", className: "prev", icon:"images/btn_controls_prev.png", onclick: "onclick_prev", disabled: true}, // This needs to be changed to switch icons like btnPlay
+				{name: "btnPlay", kind: "IconButton", className: "play paused", icon:"images/btn_controls_play.png", label: " ", onclick: "onclick_playpause", disabled: true},
+				{name: "btnNext", kind: "IconButton", className: "next", icon:"images/btn_controls_next.png", onclick: "onclick_next", disabled: true}, // This needs to be changed to switch icons like btnPlay
+				{name: "btnShuffle", kind: "Control", className: "toggleMode shuffle", onclick:"doShuffleClick"}, //possible class values are off/on - let me know if switching classes is harder than say... set styles
+			]},
 			/*
+			{kind: "Spacer", style:"max-width:15px;"},
+			
 			{kind: "Control", layoutKind: "VFlexLayout", pack: "justify", width:"190px", align: "end", components:[						//JC_UI
 				{name: "btnFullscreen", kind: "Control", className: "toggleMode fullscreen", onclick: "onclick_FullScreen"},
-			*/
+			
 			{kind: "Control", width:"190px", height: "64px", style: "overflow: hidden;", align: "end", components:[						//JC_UI
 				{name: "btnFullscreen", kind: "Control", style: "position: relative; left: 140px;", className: "toggleMode fullscreen", onclick: "onclick_FullScreen"},				
 				{name: "sliderVolume", kind: "ProgressSlider", lockBar: true, position:0, width:"142px", className: "volume", onChange: "onChange_sliderVolume", onChanging: "onChanging_sliderVolume"}
-			]}
+			]}*/
+			{name: "backdropImg", kind: "Image", className: "backdrop-player"},
 	],
 	
 	
@@ -88,6 +98,9 @@ enyo.kind({
 			
 			this.$.sound.play();
 			this.playedIntervalId = setInterval(enyo.bind(this,"updateTrackTimes"), 1000);
+
+      var backdropUrl = window.PlexReq.getImageTranscodeUrl(this.trackInfo.server,640,640,this.trackInfo.strTrackImage);
+			this.$.backdropImg.setSrc(backdropUrl);
 		}
 	},
 

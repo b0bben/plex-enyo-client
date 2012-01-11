@@ -3,7 +3,6 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 	components: [
 		{kind:enyo.Pane, flex: 1, components: [
-			{name: "musicPlayer", kind: 'plex.MusicPlayerControl', onClickNext: "onClickNext", onClickPrev: "onClickPrev" , onClickPlayPause: "onClickPlayPause", onSetPlaybackTime:"onSetPlaybackTime", onShuffleClick: "onShuffleClick_PlayModeControls", onRepeatClick: "onRepeatClick_PlayModeControls", onSetVolume: "onSetPlaybackVolume" , onRequestVolume: "onRequestSysVolume", onClickFullScreen: "onClick_FullScreen"},
 			{name: "mainBrowsingView", kind: enyo.Control, layoutKind: "HFlexLayout", components:[
 				{kind:enyo.VFlexBox, width:'320px', className: "enyo-bg", height: "100%", style:"border-right: 2px solid;", components: [
 					{flex: 1, name: "left_pane", kind: "enyo.VFlexBox", components: [
@@ -15,6 +14,7 @@ enyo.kind({
 								{kind: "plex.MyPlexSectionsView", name: "myPlexSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy:true},
 							]},
 							/*{kind: "Button", onclick: "openAppMenuHandler", caption: "appmenu"},*/
+							{name: "musicPlayer", kind: 'plex.MusicPlayerControl', showing: false, onClickNext: "onClickNext", onClickPrev: "onClickPrev" , onClickPlayPause: "onClickPlayPause", onSetPlaybackTime:"onSetPlaybackTime", onShuffleClick: "onShuffleClick_PlayModeControls", onRepeatClick: "onRepeatClick_PlayModeControls", onSetVolume: "onSetPlaybackVolume" , onRequestVolume: "onRequestSysVolume", onClickFullScreen: "onClick_FullScreen"},
 					]},
 				]},
 				{kind:enyo.VFlexBox, flex:1, components: [
