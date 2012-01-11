@@ -90,6 +90,17 @@ enyo.kind({
 		this.buildCells();
 		this.$.selection.clear();
 		this.$.grid_list.punt();
+		
+		switch(pmc.viewGroup) {
+
+	    case "season":
+	    case "episode":
+	      this.log("grid showing tvshows");
+	      //var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,900,60,pmc.banner);
+		  	//this.$.header.applyStyle("background-image", "url(" + thumbUrl + ")");
+		  	
+	      break;
+	  }
 	},
 	getPlexMediaObject: function(index) {
 	  if (this.mediaContainer.Video != null) {
@@ -111,10 +122,11 @@ enyo.kind({
 		this.cells = [];
 		var numberOfGridItems = this.cellCount > this.count ? this.count : this.cellCount;
 		for (var i=0; i<numberOfGridItems; i++) {
-			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", idx: i, onclick: "cellClick", style: "padding: 8px;width: 175px;height: 220px;", owner: this});
+			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", idx: i, onclick: "cellClick", style: "padding: 8px;width: 175px;", owner: this});
 			var imgDiv = c.createComponent({name: "coverDiv", className: "cover-shadow"});
-			imgDiv.createComponent({kind: "Image", name: "coverImg", className: "cover-image"});
+			var cover = imgDiv.createComponent({kind: "Image", name: "coverImg"});
 			c.createComponent({name: "cover_label", className: "cover-label"});
+			c.createComponent({name: "cover_sublabel", className: "cover-sublabel"});
 			this.cells.push(c);
 		}
 		this.log("cells: " + this.cells.length);
@@ -128,17 +140,44 @@ enyo.kind({
 				if (idx < this.count) {
 				  var pmo = this.getPlexMediaObject(idx);
 					//this.log("idx: " + idx);
+					if (pmo === undefined) {
+						return true;
+					}
+					if (pmo.thumb !== undefined) {
+						var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,200,200,pmo.thumb);
+						//coverart img and properties
+						c.$.coverDiv.$.coverImg.setSrc(thumbUrl);						
+					}
 
-					//var path = window.PlexReq.getAssetUrl(this.parentMediaContainer.server,pmo.thumb);
-					var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,100,149,pmo.thumb);
 					var lbl = pmo.title;
 					c.applyStyle("background-color", this.$.selection.isSelected(idx) ? "#333" : null);
-					//coverart img and properties
-					c.$.coverDiv.$.coverImg.setSrc(thumbUrl);
-					//label below cover art
+
+					//change cover size depening if we're showing episodes/artist/else...
+					if (pmo.type === "artist") {
+						c.$.coverDiv.$.coverImg.addRemoveClass("cover-image-artist",true);
+						c.$.coverDiv.addRemoveClass("cover-shadow", false);
+					}
+					else if (pmo.type === "episode") {
+						c.$.coverDiv.$.coverImg.addRemoveClass("cover-image-episode",true);
+						c.$.coverDiv.addRemoveClass("cover-shadow", false);
+						if (pmo.parentIndex) {
+							c.$.cover_sublabel.setContent($L("Season ") + pmo.parentIndex + $L(", Episode ") + pmo.index);	
+						}
+						else {
+							c.$.cover_sublabel.setContent($L("Episode ") + pmo.index);
+						}
+						
+					}
+					else {
+						c.$.coverDiv.$.coverImg.addRemoveClass("cover-image",true);
+						c.$.coverDiv.addRemoveClass("cover-shadow", true);
+						c.$.cover_sublabel.setContent(pmo.year);
+					}
+					
 					
 					if (pmo.viewOffset) {
-						lbl += " (W)";
+						var d = c.$.coverDiv.createComponent({content: ""})
+						d.addRemoveClass("watched_flag",true);
 					}
 					c.$.cover_label.setContent(lbl);					
 					//this.log("returning cover");
@@ -161,24 +200,28 @@ enyo.kind({
 		this.showViewForMediaObject(pmo);
 	},
 	showViewForMediaObject: function(pmo) {
-		  switch(pmo.type) {
-		    case "artist":
-		      this.log("artist chosen");
-		      this.showArtist(pmo);
-		      break;
-		    case "movie":
-		    case "episode":
-		      this.showPreplay(pmo);
-		      break;
-		    case "show":
-		      this.log("show chosen, get seasons");
-			  this.getSeasons(pmo);
-		      break;
-		    case "season":
-		    	this.log("season chosen, get episodes");
-		    	this.getEpisodes(pmo);
-		  }
-		},
+		if (!pmo.type) { //allLEaves or something else strange
+			this.getChildren(pmo);
+		}
+
+	  switch(pmo.type) {
+	    case "artist":
+	      this.log("artist chosen");
+	      this.showArtist(pmo);
+	      break;
+	    case "movie":
+	    case "episode":
+	      this.showPreplay(pmo);
+	      break;
+	    case "show":
+	      this.log("show chosen, get seasons");
+		  this.getChildren(pmo);
+	      break;
+	    case "season":
+	    	this.log("season chosen, get episodes");
+	    	this.getChildren(pmo);
+	  }
+	},
 	showArtist: function(pmo) {
   		this.$.emptyToaster.$.client.destroyControls();
 		  this.$.emptyToaster.$.client.createComponents([{kind: "plex.ArtistView", owner: this, plexMediaObject:pmo, server: this.server}]);
@@ -189,14 +232,10 @@ enyo.kind({
       this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server}]);
       this.$.emptyToaster.open();
 	},
-	getSeasons: function(pmo) {
-		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
-		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
-	},
 	refreshGridWithMediaContainer: function(pmc) {
 		this.gotMediaContainer(pmc);
 	},
-	getEpisodes: function(pmo) {
+	getChildren: function(pmo) {
 		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
 		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
 	},

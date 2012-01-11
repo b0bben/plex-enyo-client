@@ -40,7 +40,7 @@
 	height: 24px;
 	overflow:hidden;
 	background: url(../images/menuitem-arrow.png) 0 -20px no-repeat;
-
+	background-size: auto; !important
 }
 
 .enyo-button-switched.enyo-collapsible-arrow {
@@ -93,5 +93,5 @@
 }
 
 .library-navigation-section-divider .enyo-divider-right-cap, .library-navigation-section-divider .enyo-divider-left-cap {
-	-webkit-border-image: url(../images/list-header-divider.png) 0 0 repeat repeat;
+	background: url(../images/list-header-divider.png) 0 0 repeat repeat; !important
 }

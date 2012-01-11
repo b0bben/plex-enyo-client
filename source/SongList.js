@@ -16,7 +16,6 @@ enyo.kind({
       ]},
     
     ]},
-  	{kind: "Sound"}
 	],
 	create: function() {
 		this.inherited(arguments);

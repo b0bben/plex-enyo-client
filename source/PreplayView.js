@@ -61,9 +61,6 @@ enyo.kind({
                 {name: "runtime", className: "info_text", content: "118 minutes"},
                 {name: "category", className: "info_text", content: "Sci-fi"},
               ]}, //released, runtime, category
-		  /*{name: 'playButton',kind: 'Button',className: 'photos button',caption: ' ',onclick: 'clickPlay',components: [
-		      {kind: 'Image', src:'images/icn-slideshow.png' }
-		  ]},*/
   	]},
   /*	{kind: "Toaster", name: "videoToast", style: "top: 0px;width: 1024px;height: 768px",flyInFrom: "right", components: [ 
   	  {name: "videoPlayer", kind: "PlexViewVideo", flex:1},
@@ -115,11 +112,6 @@ enyo.kind({
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
       var backdropUrl = window.PlexReq.getImageTranscodeUrl(this.server,1280,720,this.plexMediaObject.art);
-      /*var backdropUrl = this.server.baseUrl + this.plexMediaObject.art;
-      if (this.server.accessToken) {
-        backdropUrl += "&X-Plex-Token=" + this.server.accessToken;
-      }*/
-
 			this.$.backdropImg.setSrc(backdropUrl);
 
 			//finally render the shit out of this...

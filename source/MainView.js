@@ -1,8 +1,9 @@
 enyo.kind({
 	name: "plex.MainView",
-	kind: enyo.HFlexBox,
+	kind: enyo.VFlexBox,
 	components: [
 		{kind:enyo.Pane, flex: 1, components: [
+			{name: "musicPlayer", kind: 'plex.MusicPlayerControl', onClickNext: "onClickNext", onClickPrev: "onClickPrev" , onClickPlayPause: "onClickPlayPause", onSetPlaybackTime:"onSetPlaybackTime", onShuffleClick: "onShuffleClick_PlayModeControls", onRepeatClick: "onRepeatClick_PlayModeControls", onSetVolume: "onSetPlaybackVolume" , onRequestVolume: "onRequestSysVolume", onClickFullScreen: "onClick_FullScreen"},
 			{name: "mainBrowsingView", kind: enyo.Control, layoutKind: "HFlexLayout", components:[
 				{kind:enyo.VFlexBox, width:'320px', className: "enyo-bg", height: "100%", style:"border-right: 2px solid;", components: [
 					{flex: 1, name: "left_pane", kind: "enyo.VFlexBox", components: [
@@ -13,13 +14,8 @@ enyo.kind({
 								{kind: "plex.MyPlexSectionsView", name: "localSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy: true},
 								{kind: "plex.MyPlexSectionsView", name: "myPlexSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy:true},
 							]},
-							{kind: "Button", onclick: "openAppMenuHandler", caption: "appmenu"},
+							/*{kind: "Button", onclick: "openAppMenuHandler", caption: "appmenu"},*/
 					]},
-					{name: "musicPlayer", kind: "plex.PlayerControl",showing: false, lazy: true},
-					/*{kind: "Toolbar", components: [
-						{kind: "GrabButton"},
-						{caption: "Go", onclick: "doGo"}
-					]},*/
 				]},
 				{kind:enyo.VFlexBox, flex:1, components: [
 		 			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", onSelectView: "viewSelected", components: [
@@ -27,8 +23,6 @@ enyo.kind({
 						{kind: "plex.StartView", name: "startView"},
 					]}
 				]},
-
-				//{name: "PlayerControl", kind: 'kindPlayerControl', onClickNext: "onClickNext", onClickPrev: "onClickPrev" , onClickPlayPause: "onClickPlayPause", onSetPlaybackTime:"onSetPlaybackTime", onShuffleClick: "onShuffleClick_PlayModeControls", onRepeatClick: "onRepeatClick_PlayModeControls", onSetVolume: "onSetPlaybackVolume" , onRequestVolume: "onRequestSysVolume", onClickFullScreen: "onClick_FullScreen"},
 
 				{kind: "AppMenu",
 				    components: [
@@ -39,9 +33,7 @@ enyo.kind({
 			{name:"prefsView", kind:"plex.PreferencesView", lazy: true, showing: false, onClose:"closePrefsView"},
 			{name: "videoPlayer", kind: "PlexViewVideo", flex:1, lazy: true, showing: false},
 			{kind: "plex.WelcomeView", name: "welcomeView",lazy: true, showing: false},
-			{name:"vidobject", kind: "plex.VideoObjectView",onBack:'backHandler', showing: false, lazy:true},
 		]},
-		
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -153,11 +145,84 @@ enyo.kind({
     this.$.vidobject.setVideoSrc(src);
     */
 	},
-	startMusicPlayback: function(src, context) {
-		this.$.musicPlayer.setShowing(true);
-		this.$.musicPlayer.setSrc(src);
-		this.$.musicPlayer.setContext(context);
-		this.$.musicPlayer.startPlayback();
 
-	}
+
+	//music player events and stuff
+	startMusicPlayback: function(trackInfo) {
+		this.log();
+		if(trackInfo)
+		{
+			this.$.musicPlayer.setShowing(true);
+			this.$.musicPlayer.setTrackInfo(trackInfo);
+		}
+
+	},
+
+	
+	onRequestCurrTrackInfo: function ()
+	{
+			this.log();	
+			this.sendTrackInfo(false);
+	},
+	
+	
+	onTrackPausePlay: function (sender, boolAudioPlaying)
+	{
+		this.log();
+		
+		this.$.PlayerControl.setPlayPause(boolAudioPlaying);
+		
+		this.$.DashboardManager.setPlayPause(boolAudioPlaying);
+		
+		if(this.boolAlbumArtViewDisplay)
+		{		
+			this.$.AlbumArtView.setPlayPause(boolAudioPlaying);
+		}
+		
+		this.updateBroadcaster({type: "playChanged", boolPlaying: boolAudioPlaying});
+		
+		
+	},	
+	
+	onUpdateTrackInfo: function ()
+	{
+		
+	},
+	
+	onUpdateTrackTime: function (sender, objTrackTimes)
+	{
+		//this.log("objTrackTimes: " + objTrackTimes);
+		this.$.PlayerControl.updateTrackTimeDisplay(objTrackTimes);
+	},
+	
+	
+	//PlayerControl Events
+	
+	
+	onClickNext: function ()
+	{
+		this.$.Playback.nextTrack(true);
+	},
+	
+	onClickPrev: function ()
+	{
+		this.$.Playback.prevTrack(true);
+	},
+	
+	onClickPlayPause: function ()
+	{
+		
+		this.playPause();
+
+		
+	},
+	
+	playPause: function (boolForcePlayPause)
+	{
+		
+		if(this.$.Playback.getBoolPlaybackListSet())
+		{
+			this.$.Playback.pausePlayback(boolForcePlayPause);
+		}	
+	},
 });

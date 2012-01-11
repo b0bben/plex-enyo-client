@@ -1,7 +1,9 @@
 enyo.depends(
 	"external/arrayextras.js",
 	"external/extensions.js",
+	"external/audiomanager.js",
 	//view src
+	"source/Utilities.js",
 	"source/videotest.js",
 	"source/MainView.js",
 	"source/GridView.js",
@@ -21,7 +23,7 @@ enyo.depends(
 	"source/PlexViewVideo.js",
 	"source/MessageDialog.js",
 	"source/StartView.js",
-	"source/PlayerControl.js",
+	"source/MusicPlayerControl.js",
 	"source/MyPlexSectionsView.js",
 	"source/MyPlexSection.js",
 	"source/ResumeDialog.js",

@@ -1,52 +1,52 @@
 enyo.kind({
 	name: "plex.ArtistView", 
-  kind: enyo.Control,
-  className: "enyo-fit enyo-bg",
+  kind: enyo.VFlexBox,
+  className: "enyo-fit",
 	published: {
 		plexMediaObject: undefined,
 		server: undefined,
 	},
 	components: [
-		  
-      {kind: "Scroller", flex: 1, style: "min-height: 100%;", autoHorizontal: false, horizontal: false, components: [ 
-      {kind: enyo.VFlexBox, components: [      
-        {kind: enyo.HFlexBox, components: [
-          {className: "artist-cover", components: [
-  				  {name: "thumb", kind: "Image", className: "artist-thumb"},
-  				]},
-  				{kind: enyo.VFlexBox, components: [
-  				  {kind: enyo.HFlexBox, className: "artist-title_holder", components: [
-  				    {name: "title", className: "artist-title"},
-  				  ]},
-   				  {name: "desc", className: "artist-desc"},
-  				]},
-        ]},
-			{name: "cells", kind: enyo.VFlexBox, style: "min-height: 100%; height: 100%"},
+      {name: "backdrop", className: "backdrop", components: [
+        {name: "backdropImg", kind: "Image", className: "backdrop-img"},
       ]},
-    ]}
+		  {className: "enyo-sliding-view-shadow"},
+      {kind: enyo.Scroller, flex: 1, autoHorizontal: false, horizontal: false, accelerated: true, fpsShowing: true, components: [ 
+      {kind: enyo.VFlexBox, style: "margin: 10px;",className: "enyo-fit", components: [      
+				{kind: enyo.VFlexBox, components: [
+				  {kind: enyo.HFlexBox, className: "artist-title_holder", components: [
+				    {name: "title", className: "artist-title"},
+				  ]},
+          {kind: "enyo.DividerDrawer", caption: "Biography", open: false, components:[
+            {name: "desc", className: "artist-desc"},
+          ]},
+				]}, //title + desc
+		    {name: "cells", kind: enyo.VFlexBox, style: "min-height: 100%; height: 100%"},
+      ]},
+    ]},
+    {kind: "Toolbar", components: [
+      {name: "dragHandle", kind: "GrabButton", onclick: "closeMyself"},
+        {kind: enyo.HFlexBox, components: [
+          {name: "genre", className: "info_text", content: "Heavy metal"},
+        ]}, //genre
+    ]},
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.albums = [];
-		window.PlexReq = "";
 		this.plexMediaObjectChanged();
 	},
 	plexMediaObjectChanged: function() {
 		if (this.plexMediaObject != undefined) {
-			this.log("artist with: " + this.plexMediaObject.title);
-			this.$.thumb.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
+      var backdropUrl = window.PlexReq.getImageTranscodeUrl(this.server,1280,720,this.plexMediaObject.thumb);
+      this.$.backdropImg.setSrc(backdropUrl);
+
 			this.$.title.setContent(this.plexMediaObject.title);
 			this.$.desc.setContent(this.plexMediaObject.summary);
-			
-			if (this.plexMediaObject.type === "show") {
-				this.$.thumb.applyStyle("width", "150px");
-				this.$.thumb.applyStyle("height", "200px");
-			}
-			else if (this.plexMediaObject.type === "artist") {
-				this.$.thumb.applyStyle("width", "200px");
-				this.$.thumb.applyStyle("height", "200px");
-			}
-  		
+
+      var genre = this.collectTags(this.plexMediaObject.Genre);
+      this.$.genre.setContent(genre);
+      			  		
   		//get them albums now
 			window.PlexReq.setCallback(enyo.bind(this,"gotAlbums"));
 			window.PlexReq.dataForUrlAsync(this.server,this.plexMediaObject.key);
@@ -80,8 +80,26 @@ enyo.kind({
 		}
 		
 	},
+  collectTags: function (tagContainer) {
+    var tags = "";
+    if (tagContainer !== undefined) {
+      for (var i = 0; i < tagContainer.length; i++) {
+        if (tags !== "")
+          tags += ", ";
+        tags += tagContainer[i].tag;
+      }
+    }
+    return tags;
+  },
 	gotSongs: function(pmo) {
 			this.buildAlbum(pmo);
 			this.$.cells.render();
 	},
+  showMoreDesc: function() {
+    this.$.desc.applyStyle("height: 100%");
+    this.$.showMore.setCaption($L("Show less"));
+  },
+  closeMyself: function(inSender, inEvent) {
+    this.parent.owner.close(); //should be the toaster
+  },
 })

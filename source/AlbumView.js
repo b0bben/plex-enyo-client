@@ -14,9 +14,9 @@ enyo.kind({
       {kind: enyo.VFlexBox, flex: 1,style: "min-height:100%", components: [  
         {name: "trackList", kind: "VirtualRepeater", onSetupRow: "setupRowItems", components: [ 
           {name:"itemSong", kind: "Item", layoutKind:"HFlexLayout", className:'song', onmousehold: "itemMousehold", onmouserelease: "itemMouserelease", onclick: "onclick_song", ondragstart: "itemDragStart", ondragfinish: "itemDragFinish", ondrag: "onDrag_itemMedia", ondrop: "onDrop_itemMedia", components: [
-        	  {name: "songNumber", content: '1'},
+        	  {name: "songNumber", content: '1', className: "song-number"},
         	  {name: "songTitle", flex: 7, content: "The way of the fist", className: "song-title"}, 
-        	  {name: "songDuration", flex: 1, content: "3:45"}
+        	  {name: "songDuration", flex: 1, content: "3:45", className: "song-length"}
         	]},
       	]},
       ]},
@@ -32,7 +32,8 @@ enyo.kind({
 		if (this.plexMediaObject !== undefined && (this.plexMediaObject.viewGroup == "track" || this.plexMediaObject.viewGroup == "episode")) {
 			//set the general info for the album
 			this.log("albumview with: " + this.plexMediaObject.parentTitle);
-			this.$.cover.setSrc(this.server.baseUrl + this.plexMediaObject.thumb);
+			var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,120,120,this.plexMediaObject.thumb);
+			this.$.cover.setSrc(thumbUrl);
 			this.$.cover.addRemoveClass("album-cover-shows",this.plexMediaObject.viewGroup === "episode");
 			this.$.cover.addRemoveClass("album-cover-album",this.plexMediaObject.viewGroup === "track");
 			
@@ -82,7 +83,22 @@ enyo.kind({
 		onclick_song: function(inSender, inEvent) {
 		  var songItem = this.tracks[inEvent.rowIndex];
 		  if (songItem !== undefined && !this.playing) {
-		  	this.owner.owner.owner.owner.startMusicPlayback(songItem, null);
+		  	var pmo = this.plexMediaObject;
+		  	var objTrackInfo = {strTrackArtist: pmo.title1, 
+			  										strTrackTitle: songItem.title ,
+			  										strTrackAlbum: pmo.title2,
+			  										strTrackGenre: "Hårdrock",
+			  										strTrackImage: pmo.thumb,
+			  										intTrackIndex: parseInt(songItem.index),
+			  										intTrackOrigIndex: parseInt(songItem.index),
+			  										strTrackID: songItem.index,
+			  										intTrackTime: parseInt(songItem.duration),
+			  										intTrackDuration: parseInt(songItem.duration),
+			  										strTrackDuration: songItem.duration,
+			  										context: pmo,
+			  										server: this.server};
+				
+		  	this.owner.owner.owner.owner.startMusicPlayback(objTrackInfo);
 		    //this.$.sound.setSrc(window.PlexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
 		    //this.$.sound.play();
 		    this.playing = true;

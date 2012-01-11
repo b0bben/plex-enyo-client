@@ -105,8 +105,8 @@ enyo.kind({
 			};
 
 			//need to create PlexServer insatnces for reachability to work
-			for (var i = 0; i < this.prefs.servers.length; i++) {
-				var serverObj = this.prefs.servers[i];
+			for (var item in this.prefs.servers) {
+				var serverObj = this.prefs.servers[item];
 				if (serverObj != null && serverObj.hasOwnProperty("host")) {
 					var server = new PlexServer(serverObj.machineIdentifier,serverObj.name,serverObj.host,serverObj.port,serverObj.username,serverObj.password,serverObj.include,serverObj.owned,serverObj.accessToken, true);
 					this.servers.push(server);
@@ -274,7 +274,7 @@ enyo.kind({
 	  //there's no step 9! 
 	  targetUrl += this.authWithUrl(targetUrl);
 	  
-	  //targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=aac{bitrate:160000}");
+	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:31};audioDecoders=aac{bitrate:160000}");
 	  
 	  return server.baseUrl + targetUrl;
 	  
@@ -415,7 +415,13 @@ enyo.kind({
 	getAssetUrl: function(server, asset_key) {
 		var url = server.baseUrl + asset_key;
 		if (server.accessToken) {
-			url += "&X-Plex-Token=" + server.accessToken;
+			var hasManyParams = url.match("(&)");
+			if (hasManyParams) {
+				url += "&X-Plex-Token=" + server.accessToken;	
+			}
+			else {
+				url += "?X-Plex-Token=" + server.accessToken;
+			}
 		}
 		return url;
 	},

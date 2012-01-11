@@ -34,8 +34,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   word-wrap: normal;
-  z-index: 100;
-  color: #666;
+  z-index: 200;
+  color: white;
 }
 
 
@@ -45,11 +45,11 @@
   text-align: left;
   text-overflow: ellipsis;
   white-space: pre-wrap;
-  height: 200px;
+  
   word-wrap: break-word;
   z-index: 200;
 
-  color: #555;
+  color: #BFBFBF;
 }
 
 .item {
