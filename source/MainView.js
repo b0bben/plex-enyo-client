@@ -21,7 +21,8 @@ enyo.kind({
 		 			{flex: 1, name: "right_pane", align: "center", pack: "center",kind: "Pane", onSelectView: "viewSelected", components: [
 						{kind: "plex.GridView", name: "grid_view"},
 						{kind: "plex.StartView", name: "startView"},
-					]}
+					]},
+
 				]},
 
 				{kind: "AppMenu",

@@ -1,5 +1,6 @@
 body {
   /*color: white;*/
+  
 }
 .enyo-bg{
   background-color: #D8D8D8;
@@ -16,8 +17,9 @@ body {
   z-index: 0;
 }
 .cover {
+
   height: 281px;
-  
+  position: relative;
   overflow: visible;
   /*left: 20px;
   position: absolute;
@@ -29,11 +31,11 @@ body {
 }
 .overlay-play-button {
   position: absolute;
-  top: 25%;
-  left: 12%;
+  top: 80px;
+  left: 40px;
   width: 100px;
   height: 100px;
-  margin: -50px 0 0 -50px;
+  /*margin: -50px 0 0 -50px;*/
   background: url(../images/playbtn.png) no-repeat;
 }
 .cover .thumb {
@@ -53,12 +55,13 @@ body {
 
 .title_holder {
   height: 49px;
+  max-height: 55px;
   /*left: 240px;
   overflow: hidden;
   position: absolute;
   top: 20px;*/
   visibility: visible;
-  width: 723px;
+  width: 100%;
   z-index: 0;
   /*border: 1px solid green;*/
 }
@@ -66,7 +69,7 @@ body {
 .title_holder .title {
   font: normal normal bold 40px/normal Arial, sans-serif;
   height: 45px;
-  width: 506px;
+  width: 92%;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -74,9 +77,8 @@ body {
   word-wrap: normal;
   z-index: 200;
 	color: white;
-  /*top: 0px;
-	left: 0px;
-  position: absolute;*/
+
+  /*border: 1px solid yellow;*/
 
 }
 
@@ -112,9 +114,7 @@ body {
    word-wrap: normal;
    z-index: 200;
    color: white;
-  /*position: absolute;
-  top: 74px;
-  left: 240px;*/
+
    /*border: 1px solid green;*/
 }
 
@@ -125,15 +125,11 @@ body {
   color: black;
   text-overflow: clip;
   white-space: pre-wrap;
-  height: 350px;
+  height: 100%;
   word-wrap: break-word;
-  z-index: 200;
-  /*left: 240px;
-  top: 110px;
-  width: 100%;
-  position: absolute;*/
+
   color: white;
-  /*border: 1px solid green;*/
+  /*border: 1px solid blue;*/
 }
 .info_text {
   color: #bfbfbf;
@@ -151,13 +147,11 @@ body {
 }
 .rating_holder {
   display: block;
-  height: 16px;
-  left: 791px;
+  left: 40px;
   overflow: hidden;
   position: absolute;
-  top: 37px;
+  top: 280px;
   visibility: visible;
-  width: 85px;
   z-index: 0;
 }
 

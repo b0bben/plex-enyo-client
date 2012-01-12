@@ -2,6 +2,8 @@ enyo.kind({
 	name: "plex.GridView",
 	kind: enyo.VFlexBox,
 	className: "enyo-fit",
+	flex: 1,
+	width: "100%",
 	published: {
 		parentMediaContainer: undefined,
 		server: undefined,

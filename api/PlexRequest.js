@@ -279,13 +279,6 @@ enyo.kind({
 	  return server.baseUrl + targetUrl;
 	  
 	},
-	getImageTranscodeUrl: function(server,width, height, url) {
-		var transcodeUrl = server.baseUrl + "/photo/:/transcode?width=" + width + "&height=" + height + "&format=jpeg&url=" + encodeURIComponent("http://127.0.0.1:32400" + url);
-		if (server.accessToken) {
-			transcodeUrl += "&X-Plex-Token=" + server.accessToken;
-		}
-		return transcodeUrl;
-	},
 	authWithUrl: function(plexUrl) {
 		var publicKey = "KQMIY6GATPC63AIMC4R2";
 		var privateKey = decode64("k3U6GLkZOoNIoSgjDshPErvqMIFdE0xMTx8kgsrhnC0=");
@@ -424,6 +417,23 @@ enyo.kind({
 			}
 		}
 		return url;
+	},
+	getStudioFlag: function(studio,mediaTag) {
+		//"/system/bundle/media/flags/studio/"+Video[index].getAttribute('studio')+"\?t="+movieMediaTagVersion;
+		var url = "/system/bundle/media/flags/studio/" + encodeURIComponent(studio) + "/?t=1323560689";// + mediaTag;
+
+		return url;
+	},
+	getContentRatingFlag: function(rating,mediaTag) {
+		var url = "/system/bundle/media/flags/contentRating/" + encodeURIComponent(rating) + "/?t=1323560689";// + mediaTag;
+		return url;
+	},
+	getImageTranscodeUrl: function(server,width, height, url) {
+		var transcodeUrl = server.baseUrl + "/photo/:/transcode?width=" + width + "&height=" + height + "&format=jpeg&url=" + encodeURIComponent("http://127.0.0.1:32400" + url);
+		if (server.accessToken) {
+			transcodeUrl += "&X-Plex-Token=" + server.accessToken;
+		}
+		return transcodeUrl;
 	},
 	stopTranscoder: function(server) {
 		if (server.hasOwnProperty("baseUrl")) {

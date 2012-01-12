@@ -2,6 +2,7 @@ enyo.kind({
 	name: "plex.PreplayView", 
   kind: enyo.VFlexBox,
   className: "enyo-fit",
+  /*style: "border: 1px solid red;",*/
 	published: {
 		plexMediaObject: "",
 		server: undefined,
@@ -18,24 +19,29 @@ enyo.kind({
             {name: "playBtn",className: "overlay-play-button"},
     		    {name: "thumb", kind: "Image", className: "thumb"},
     		    /*{kind: "PlexViewVideo", name: "videoView", visible: false, className: "thumb"},*/
-            {kind: enyo.VFlexBox,components: [
+            {kind: enyo.VFlexBox,pack:"center",align:"center",components: [
               {kind: enyo.HFlexBox, className:"rating_holder", components: [
-                {name: "rating_1", kind: "Image"},
-                {name: "rating_2", kind: "Image"},
-                {name: "rating_3", kind: "Image"},
-                {name: "rating_4", kind: "Image"},
-                {name: "rating_5", kind: "Image"},  
+                {name: "rating_1", kind: "Image", className: "star_1"},
+                {name: "rating_2", kind: "Image", className: "star_2"},
+                {name: "rating_3", kind: "Image", className: "star_3"},
+                {name: "rating_4", kind: "Image", className: "star_4"},
+                {name: "rating_5", kind: "Image", className: "star_5"},  
               ]},
+              {name: "studioImg", kind: "Image", height: "80px", width: "80px"},
             ]},
     		  ]},
     		]}, //cover box
         {kind: enyo.VFlexBox, pack: "start", flex: 1, style: "margin: 10px;",name:"details",components: [
-              {kind: enyo.HFlexBox, className: "title_holder", components: [
+              {kind: enyo.HFlexBox, className: "title_holder",pack:"start", align: "center",components: [
                 {name: "title", className: "title"},
-                {name: "pgRating", kind: "Image"},        
+                {kind: enyo.VFlexBox, pack:"center",height: "45px", align:"center", components:[
+                  {name: "pgRating", kind: "Image"},
+                ]}
+                
               ]},//title,pgrating
               {name: "desc", className: "desc"},
-              {kind: enyo.VFlexBox, style: "display:none;",pack:"end", components:[
+              {kind: "Spacer", height: "25px"},
+              {kind: enyo.VFlexBox, pack:"end", components:[
                 {kind: enyo.HFlexBox, components: [
                   {content: "Director: ", className: "details-header"},
                   {name: "directors"},
@@ -82,6 +88,22 @@ enyo.kind({
       var genre = this.collectTags(this.plexMediaObject.Genre);
       this.$.category.setContent(genre);
 
+      //flag images
+      if (this.plexMediaObject.studio !== undefined) {
+        var studioFlagUrl = window.PlexReq.getStudioFlag(this.plexMediaObject.studio);
+        var studioImgUrl = window.PlexReq.getImageTranscodeUrl(this.server,80,80,studioFlagUrl);
+        this.$.studioImg.setSrc(studioImgUrl);
+      }
+      if (this.plexMediaObject.contentRating !== undefined) {
+        var ratingFlagUrl = window.PlexReq.getContentRatingFlag(this.plexMediaObject.contentRating);
+        var ratingImgUrl = window.PlexReq.getImageTranscodeUrl(this.server,40,40,ratingFlagUrl);
+        this.$.pgRating.setSrc(ratingImgUrl);
+      }
+ 
+      //rating
+      if (this.plexMediaObject.rating){
+        this.calculateRating();
+      }
       //duration
 			if (this.plexMediaObject.Media !== undefined) {
         var runtimeCaption = this.runtimeForDisplay(this.plexMediaObject.Media.duration);
@@ -134,6 +156,50 @@ enyo.kind({
   	}
   	return tags;
 	},
+  calculateRating: function() {
+    if (parseInt(this.plexMediaObject.rating) > 9) {
+      this.$.rating_1.setSrc("images/star_full.png");
+      this.$.rating_2.setSrc("images/star_full.png");
+      this.$.rating_3.setSrc("images/star_full.png");
+      this.$.rating_4.setSrc("images/star_full.png");
+      this.$.rating_5.setSrc("images/star_full.png");
+    }
+    else if (parseInt(this.plexMediaObject.rating) > 8) {
+      this.$.rating_1.setSrc("images/star_full.png");
+      this.$.rating_2.setSrc("images/star_full.png");
+      this.$.rating_3.setSrc("images/star_full.png");
+      this.$.rating_4.setSrc("images/star_full.png");
+      this.$.rating_5.setSrc("images/star_half.png");
+    }
+    else if (parseInt(this.plexMediaObject.rating) > 6){
+      this.$.rating_1.setSrc("images/star_full.png");
+      this.$.rating_2.setSrc("images/star_full.png");
+      this.$.rating_3.setSrc("images/star_half.png");
+      this.$.rating_4.setSrc("images/star_empty.png");
+      this.$.rating_5.setSrc("images/star_empty.png");   
+    }
+    else if (parseInt(this.plexMediaObject.rating) > 4) {
+      this.$.rating_1.setSrc("images/star_full.png");
+      this.$.rating_2.setSrc("images/star_full.png");
+      this.$.rating_3.setSrc("images/star_empty.png");
+      this.$.rating_4.setSrc("images/star_empty.png");
+      this.$.rating_5.setSrc("images/star_empty.png");      
+    }
+    else if (parseInt(this.plexMediaObject.rating) > 2) {
+      this.$.rating_1.setSrc("images/star_full.png");
+      this.$.rating_2.setSrc("images/star_empty.png");
+      this.$.rating_3.setSrc("images/star_empty.png");
+      this.$.rating_4.setSrc("images/star_empty.png");
+      this.$.rating_5.setSrc("images/star_empty.png");      
+    }
+    else if (parseInt(this.plexMediaObject.rating) > 0) {
+      this.$.rating_1.setSrc("images/star_half.png");
+      this.$.rating_2.setSrc("images/star_empty.png");
+      this.$.rating_3.setSrc("images/star_empty.png");
+      this.$.rating_4.setSrc("images/star_empty.png");
+      this.$.rating_5.setSrc("images/star_empty.png");      
+    }
+  },
   runtimeForDisplay: function(duration) {
     var x = duration / 1000;
     var secs = Math.floor(x % 60);

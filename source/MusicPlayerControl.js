@@ -1,7 +1,7 @@
 enyo.kind({
 	kind: "VFlexBox",
 	name: "plex.MusicPlayerControl",
-	height: "190px",
+	height: "170px",
 	className: "player-controls",
 	events: {
 		onClickPrev: "",
@@ -41,10 +41,15 @@ enyo.kind({
 				]},
 			]},
 			{kind: "Control", className: "playback", layoutKind: "HFlexLayout", pack: "center", align: "center", components: [
-				{name: "btnRepeat", kind: "Control", className: "toggleMode repeat", onclick: "doRepeatClick"}, //possible class values are off/on/one - let me know if switching classes is harder than say... set styles
+				
 				{name: "btnPrev", kind: "IconButton", className: "prev", icon:"images/btn_controls_prev.png", onclick: "onclick_prev", disabled: true}, // This needs to be changed to switch icons like btnPlay
 				{name: "btnPlay", kind: "IconButton", className: "play paused", icon:"images/btn_controls_play.png", label: " ", onclick: "onclick_playpause", disabled: true},
 				{name: "btnNext", kind: "IconButton", className: "next", icon:"images/btn_controls_next.png", onclick: "onclick_next", disabled: true}, // This needs to be changed to switch icons like btnPlay
+				
+			]},
+			{kind: "Control", layoutKind: "HFlexLayout",components:[
+				{name: "btnRepeat", kind: "Control", className: "toggleMode repeat", onclick: "doRepeatClick"}, //possible class values are off/on/one - let me know if switching classes is harder than say... set styles
+				{kind: "Spacer", flex: 1},
 				{name: "btnShuffle", kind: "Control", className: "toggleMode shuffle", onclick:"onclick_Shuffle"}, //possible class values are off/on - let me know if switching classes is harder than say... set styles
 			]},
 			/*
