@@ -45,7 +45,7 @@ enyo.kind({
 				{name: "btnPrev", kind: "IconButton", className: "prev", icon:"images/btn_controls_prev.png", onclick: "onclick_prev", disabled: true}, // This needs to be changed to switch icons like btnPlay
 				{name: "btnPlay", kind: "IconButton", className: "play paused", icon:"images/btn_controls_play.png", label: " ", onclick: "onclick_playpause", disabled: true},
 				{name: "btnNext", kind: "IconButton", className: "next", icon:"images/btn_controls_next.png", onclick: "onclick_next", disabled: true}, // This needs to be changed to switch icons like btnPlay
-				{name: "btnShuffle", kind: "Control", className: "toggleMode shuffle", onclick:"doShuffleClick"}, //possible class values are off/on - let me know if switching classes is harder than say... set styles
+				{name: "btnShuffle", kind: "Control", className: "toggleMode shuffle", onclick:"onclick_Shuffle"}, //possible class values are off/on - let me know if switching classes is harder than say... set styles
 			]},
 			/*
 			{kind: "Spacer", style:"max-width:15px;"},
@@ -98,16 +98,36 @@ enyo.kind({
 			this.onclick_playpause();
 		}
 		if (this.trackInfo) {
-			this.playSongInContextWithIndex(this.trackInfo.intTrackIndex-1);
+			//need track list with indexes so we can shuffle it etc.
+			this.trackList = [];
+
+			for(var i=0; i<this.trackInfo.context.Track.length;i++) {
+				var track = this.trackInfo.context.Track[i];
+				this.trackList.push(parseInt(track.index));
+			}
+			this.log("track list: " + this.trackList);
+
+			this.intPlayingInTrackList = this.trackInfo.intTrackIndex - 1;
+			this.updateTrackInfoWithNewIndex(this.trackList[this.intPlayingInTrackList]);
+			this.playSongInContextWithIndex(this.trackList[this.intPlayingInTrackList]);
+			
 		}
 	},
-	playSongInContextWithIndex: function(index) {
+	playSongInContextWithIndex: function(plexIndex) {
 		if (!this.objAudio.paused) {
 			this.objAudio.pause();
 		}
 		var server = this.trackInfo.server;
-		var song = this.trackInfo.context.Track[index];
-		var songUrl = window.PlexReq.getAssetUrl(server,song.Media.Part.key);
+		var pmo = this.trackInfo.context; //shortcut
+		var songItem;
+		//find index by using plex-index
+		for (var item in pmo.Track) {
+			var song = pmo.Track[item];
+			if (parseInt(song.index) === plexIndex) {
+				songItem = song;
+			}
+		}
+		var songUrl = window.PlexReq.getAssetUrl(server,songItem.Media.Part.key);
 		this.objAudio.src = songUrl;
 			
 		this.objAudio.play();
@@ -140,17 +160,36 @@ enyo.kind({
 	{
 		return this.objAudio.duration;
 	},
+	playNextInTrackList: function() {
+		this.intPlayingInTrackList += 1;
+		
+		if (this.intPlayingInTrackList > this.trackList.length) {
+			this.intPlayingInTrackList = 0;
+		}
+		
+		this.playSongInContextWithIndex(this.trackList[this.intPlayingInTrackList]);
+		this.updateTrackInfoWithNewIndex(this.trackList[this.intPlayingInTrackList]); //increase which index we're actually playing, so we're not playing the same song again and again			
+	},
+	playPreviousInTrackList: function() {
+		this.intPlayingInTrackList -= 1;
+		
+		if (this.intPlayingInTrackList < 0) {
+			this.intPlayingInTrackList = this.trackList.length-1;
+		}
+		
+		this.playSongInContextWithIndex(this.trackList[this.intPlayingInTrackList]);
+		this.updateTrackInfoWithNewIndex(this.trackList[this.intPlayingInTrackList]); //increase which index we're actually playing, so we're not playing the same song again and again			
+	},
 	onclick_next: function()
 	{
 		console.log("onclick_next");
-		this.playSongInContextWithIndex(this.trackInfo.intTrackIndex + 1);
-		this.updateTrackInfoWithNewIndex(this.trackInfo.intTrackIndex + 1); //increase which index we're actually playing, so we're not playing the same song again and again	
+		this.playNextInTrackList();
 	},
 		
 	onclick_prev: function()
 	{
 		console.log("onclick_prev");
-		this.doClickPrev();
+		this.playPreviousInTrackList();
 	},
 		
 	onclick_playpause: function()
@@ -160,6 +199,9 @@ enyo.kind({
 			this.objAudio.pause();
 			this.boolAudioPlaying = false;
 			this.setPlayPause();
+		}
+		else if (this.boolAudioPaused) {
+			this.objAudio.play();
 		}
 		
 	},
@@ -246,13 +288,13 @@ enyo.kind({
 		
 	},
 	
-	updateTrackInfoWithNewIndex: function(index) {
+	updateTrackInfoWithNewIndex: function(plexIndex) {
 		var pmo = this.trackInfo.context;
 		var songItem;
 		//find index by using plex-index
 		for (var item in pmo.Track) {
 			var song = pmo.Track[item];
-			if (parseInt(song.index) === index) {
+			if (parseInt(song.index) === plexIndex) {
 				songItem = song;
 			}
 		}
@@ -342,16 +384,28 @@ enyo.kind({
 
 	},
 	
-	
-	setShuffleButton: function (boolShuffleOn)
-	{
-		this.log(boolShuffleOn);
-		this.boolShuffleOn = boolShuffleOn;
-		this.$.btnShuffle.addRemoveClass("on", boolShuffleOn);
-		
+	onclick_Shuffle: function(sender,event) {
+		this.boolShuffleOn = !this.boolShuffleOn;
+		this.$.btnShuffle.addRemoveClass("on", this.boolShuffleOn);
+
+		if (this.boolShuffleOn) {
+			this.sortRandom(this.trackList);
+			this.log("shufflad: " + this.trackList);
+
+			//this.updateTrackInfoWithNewIndex(this.trackList[0]);
+			//this.playSongInContextWithIndex(this.trackList[0]);
+			this.intPlayingInTrackList = 0;			
+		}
+		else {
+			this.trackInfoChanged(); //this will restore the order 
+		}
+
 
 	},
-	
+	sortRandom: function(arSongList)
+	{
+		arSongList.sort(function (){return (Math.round(Math.random())-0.5)})
+	},
 	setRepeatButton: function (strRepeatMode)
 	{
 		this.log(strRepeatMode);
@@ -427,14 +481,8 @@ enyo.kind({
 	onAudioEnded: function (event)
 	{
 		this.log();
-		if (this.boolShuffleOn) {
-			//TODO: shuffle
-		}
-		else {
-			//play next track in index
-			this.playSongInContextWithIndex(this.trackInfo.intTrackIndex);
-			this.trackInfo.intTrackIndex += 1; //increase which index we're actually playing, so we're not playing the same song again and again
-		}		
+		//play next track in index
+		this.playNextInTrackList();
 	
 	},
 	destroy: function() {
