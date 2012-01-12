@@ -1,7 +1,30 @@
 enyo.depends(
+	//css
+	"css/PlayerControls.css",
+	"css/SectionsView.css",
+	"css/GridView.css",
+	"css/PreplayView.css",
+	"css/ArtistView.css",
+	"css/AlbumView.css",
+	"css/SongList.css",
+	"css/EmptyToaster.css",
+	"css/PreferencesView.css",
+	"css/WelcomeView.css",
+	"css/VideoControl.css",
+	"css/MessageDialog.css",
+
+	//plex api
+	"api/PlexRequest.js",
+	"api/base64.js",
+	"api/jssha256.js",
+
+
+	//external modules
+	"external/jkl-parsexml.js",
 	"external/arrayextras.js",
 	"external/extensions.js",
 	"external/audiomanager.js",
+
 	//view src
 	"source/Utilities.js",
 	"source/videotest.js",
@@ -26,25 +49,5 @@ enyo.depends(
 	"source/MusicPlayerControl.js",
 	"source/MyPlexSectionsView.js",
 	"source/MyPlexSection.js",
-	"source/ResumeDialog.js",
-
-	//plex api
-	"api/PlexRequest.js",
-	"api/base64.js",
-	"api/jssha256.js",
-	//css
-	"css/SectionsView.css",
-	"css/GridView.css",
-	"css/PreplayView.css",
-	"css/ArtistView.css",
-	"css/AlbumView.css",
-	"css/SongList.css",
-	"css/EmptyToaster.css",
-	"css/PreferencesView.css",
-	"css/WelcomeView.css",
-	"css/VideoControl.css",
-	"css/MessageDialog.css",
-	"css/PlayerControl.css",
-	//external modules
-	"external/jkl-parsexml.js"
+	"source/ResumeDialog.js"
 );

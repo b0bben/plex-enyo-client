@@ -1,8 +1,8 @@
 enyo.kind({
-	kind: "Control",
+	kind: "VFlexBox",
 	name: "plex.MusicPlayerControl",
 	height: "190px",
-	className: "enyo-vflexbox controls",
+	className: "player-controls",
 	events: {
 		onClickPrev: "",
 		onClickPlayPause: "",
@@ -18,7 +18,7 @@ enyo.kind({
 	components: [
 
 			
-			{kind: "Sound", audioClass: "media"},
+			/*{kind: "Sound", audioClass: "media"},*/
 			{kind: "Control", flex:1, layoutKind: "VFlexLayout", align: "center", pack:"justify", components: [
 				{kind: "HFlexBox", align: "center", className: "current", pack: "justify", components: [
 					
@@ -57,7 +57,7 @@ enyo.kind({
 				{name: "btnFullscreen", kind: "Control", style: "position: relative; left: 140px;", className: "toggleMode fullscreen", onclick: "onclick_FullScreen"},				
 				{name: "sliderVolume", kind: "ProgressSlider", lockBar: true, position:0, width:"142px", className: "volume", onChange: "onChange_sliderVolume", onChanging: "onChanging_sliderVolume"}
 			]}*/
-			{name: "backdropImg", kind: "Image", className: "backdrop-player"},
+			
 	],
 	
 	
@@ -75,14 +75,22 @@ enyo.kind({
 		
 		this.doRequestVolume(enyo.bind(this,this.onGetVolume));
 
-		this.$.sound.audio.addEventListener('load', enyo.bind(this, this.onAudioLoaded), false);
-		this.$.sound.audio.addEventListener('play', enyo.bind(this, this.onAudioPlayed), false);
-		this.$.sound.audio.addEventListener('playing', enyo.bind(this, this.onAudioPlaying), false);
-		this.$.sound.audio.addEventListener('ended', enyo.bind(this, this.onAudioEnded), false);
-		this.$.sound.audio.addEventListener('pause', enyo.bind(this, this.onAudioPaused), false);
+		if (this.objAudio === undefined)
+		{
+			this.objAudio = new Audio();
+			this.objAudio.setAttribute("x-palm-media-audio-class", "media");
+			
+			this.objAudio.addEventListener('load', enyo.bind(this, this.onAudioLoaded), false);
+			this.objAudio.addEventListener('play', enyo.bind(this, this.onAudioPlayed), false);
+			this.objAudio.addEventListener('playing', enyo.bind(this, this.onAudioPlaying), false);
+			this.objAudio.addEventListener('ended', enyo.bind(this, this.onAudioEnded), false);
+			this.objAudio.addEventListener('pause', enyo.bind(this, this.onAudioPaused), false);
+			
+			this.objAudio.addEventListener('error', enyo.bind(this, this.onError_Play), false);
+			this.objAudio.addEventListener('stalled', enyo.bind(this, this.onError_Stall), false);
 		
-		this.$.sound.audio.addEventListener('error', enyo.bind(this, this.onError_Play), false);
-		this.$.sound.audio.addEventListener('stalled', enyo.bind(this, this.onError_Stall), false);
+			
+		}	
 	},
 	
 	trackInfoChanged: function() {
@@ -90,18 +98,21 @@ enyo.kind({
 			this.onclick_playpause();
 		}
 		if (this.trackInfo) {
-			this.updateTrackInfoDisplay();
-			var server = this.trackInfo.server;
-			var song = this.trackInfo.context.Track[this.trackInfo.intTrackIndex-1];
-			var songUrl = window.PlexReq.getAssetUrl(server,song.Media.Part.key);
-			this.$.sound.setSrc(songUrl);
-			
-			this.$.sound.play();
-			this.playedIntervalId = setInterval(enyo.bind(this,"updateTrackTimes"), 1000);
-
-      var backdropUrl = window.PlexReq.getImageTranscodeUrl(this.trackInfo.server,640,640,this.trackInfo.strTrackImage);
-			this.$.backdropImg.setSrc(backdropUrl);
+			this.playSongInContextWithIndex(this.trackInfo.intTrackIndex-1);
 		}
+	},
+	playSongInContextWithIndex: function(index) {
+		if (!this.objAudio.paused) {
+			this.objAudio.pause();
+		}
+		var server = this.trackInfo.server;
+		var song = this.trackInfo.context.Track[index];
+		var songUrl = window.PlexReq.getAssetUrl(server,song.Media.Part.key);
+		this.objAudio.src = songUrl;
+			
+		this.objAudio.play();
+		this.playedIntervalId = setInterval(enyo.bind(this,"updateTrackTimes"), 1000);
+		this.updateTrackInfoDisplay();
 	},
 
 	updateTrackTimes: function ()
@@ -113,7 +124,7 @@ enyo.kind({
 		{
 			var objTrackTimes = {floatTrackCurrentTime: this.getTrackCurrentTime(), floatTrackDuration: this.getTrackDuration()};
 			this.updateTrackTimeDisplay(objTrackTimes);
-			if (!this.$.sound.audio.paused) {
+			if (!this.objAudio.paused) {
 				this.onAudioPlaying();
 			}
 			else {
@@ -123,16 +134,17 @@ enyo.kind({
 	},
 	getTrackCurrentTime: function ()
 	{
-		return this.$.sound.audio.currentTime;
+		return this.objAudio.currentTime;
 	},
 	getTrackDuration: function()
 	{
-		return this.$.sound.audio.duration;
+		return this.objAudio.duration;
 	},
 	onclick_next: function()
 	{
 		console.log("onclick_next");
-		this.doClickNext();
+		this.playSongInContextWithIndex(this.trackInfo.intTrackIndex + 1);
+		this.updateTrackInfoWithNewIndex(this.trackInfo.intTrackIndex + 1); //increase which index we're actually playing, so we're not playing the same song again and again	
 	},
 		
 	onclick_prev: function()
@@ -145,7 +157,7 @@ enyo.kind({
 	{
 		console.log("onclick_playpause");
 		if (this.boolAudioPlaying) {
-			this.$.sound.audio.pause();
+			this.objAudio.pause();
 			this.boolAudioPlaying = false;
 			this.setPlayPause();
 		}
@@ -165,7 +177,7 @@ enyo.kind({
 		
 		//this.log(boolAudioPlaying);
 		this.$.btnPlay.addRemoveClass("paused", !boolAudioPlaying);
-		this.$.btnPlay.setDisabled(!boolAudioPlaying);
+		this.$.btnPlay.setDisabled(false);
 		//this.$.btnPlay.srcChanged();
 		
 	},
@@ -234,7 +246,38 @@ enyo.kind({
 		
 	},
 	
-	
+	updateTrackInfoWithNewIndex: function(index) {
+		var pmo = this.trackInfo.context;
+		var songItem;
+		//find index by using plex-index
+		for (var item in pmo.Track) {
+			var song = pmo.Track[item];
+			if (parseInt(song.index) === index) {
+				songItem = song;
+			}
+		}
+
+		if (!songItem) {
+			return;
+		}
+
+  	var objTrackInfo = {strTrackArtist: pmo.title1, 
+										strTrackTitle: songItem.title ,
+										strTrackAlbum: pmo.title2,
+										strTrackGenre: "Hårdrock",
+										strTrackImage: pmo.thumb,
+										intTrackIndex: parseInt(songItem.index),
+										intTrackOrigIndex: parseInt(songItem.index),
+										strTrackID: songItem.index,
+										intTrackTime: parseInt(songItem.duration),
+										intTrackDuration: parseInt(songItem.duration),
+										strTrackDuration: songItem.duration,
+										context: pmo,
+										server: this.trackInfo.server};
+
+		this.trackInfo = objTrackInfo;									
+		this.updateTrackInfoDisplay();
+	},
 	onClick_sliderSongTime: function (sender, event)
 	{
 		
@@ -269,11 +312,11 @@ enyo.kind({
 	{
 		
 		this.log("intPos: " + intPos);
-		this.log("src: ", this.$.sound.audio.src);
+		this.log("src: ", this.objAudio.src);
 		
-		if (this.$.sound.audio.src)
+		if (this.objAudio.src)
 		{
-			this.$.sound.audio.currentTime = this.getTrackDuration() * (intPos / 100);
+			this.objAudio.currentTime = this.getTrackDuration() * (intPos / 100);
 		}
 		
 		//this._boolUpdateSlider = true;
@@ -303,6 +346,7 @@ enyo.kind({
 	setShuffleButton: function (boolShuffleOn)
 	{
 		this.log(boolShuffleOn);
+		this.boolShuffleOn = boolShuffleOn;
 		this.$.btnShuffle.addRemoveClass("on", boolShuffleOn);
 		
 
@@ -383,8 +427,20 @@ enyo.kind({
 	onAudioEnded: function (event)
 	{
 		this.log();
-		this.doEnded();
+		if (this.boolShuffleOn) {
+			//TODO: shuffle
+		}
+		else {
+			//play next track in index
+			this.playSongInContextWithIndex(this.trackInfo.intTrackIndex);
+			this.trackInfo.intTrackIndex += 1; //increase which index we're actually playing, so we're not playing the same song again and again
+		}		
 	
 	},
+	destroy: function() {
+		this.inherited(arguments);
+		this.objAudio.pause();
+		delete this.objAudio;
+	}
 	
 });
