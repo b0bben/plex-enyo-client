@@ -461,6 +461,10 @@ enyo.kind({
 	onAudioPlayed: function (event)
 	{
 		this.log();
+		//STATS LOGGING
+		if (window.Metrix) {
+			window.Metrix.customCounts("Music", "StartSong",1);
+		}
 	},
 	
 	onAudioPlaying: function (event)
@@ -486,6 +490,10 @@ enyo.kind({
 	onAudioEnded: function (event)
 	{
 		this.log();
+		//STATS LOGGING
+		if (window.Metrix) {
+			window.Metrix.customCounts("Music", "EndSong",1);
+		}		
 		//play next track in index
 		this.playNextInTrackList();
 	

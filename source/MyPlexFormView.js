@@ -20,7 +20,7 @@ enyo.kind({
       {kind: "Image", src: "images/MyPlexLarge.png", style: "padding: 20px; width: 256px;height:256px;display: block; margin-left: auto;margin-right: auto"},
       {kind: "Control", className:"enyo-preferences-box", components: [
         {name: "loginTitle", caption: "Login details", kind: "RowGroup", components: [
-          {kind: "Input", name: "username", hint: $L("Type your username"), autocorrect: false, spellcheck: false, changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"},
+          {kind: "Input", name: "username", hint: $L("Type your username or e-mail"), autocorrect: false,inputType: "email", spellcheck: false, changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"},
           {kind: "PasswordInput", name: "password", hint: $L("Type your password"),changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"}
         ]},
         {content:$L('Type your myPlex username (or your email address) and your password'), className: "prefs-body-text", style:"margin-bottom:8px"},
@@ -85,6 +85,9 @@ enyo.kind({
     console.log("myPlexLoginResponse: " + userData); //.user["authentication-token"]);
     if (userData === undefined) {
       this.$.loginFailureDialog.openAtCenter();
+      this.$.loginButton.setActive(false);
+      this.$.loginButton.setDisabled(false);
+      this.$.logoutButton.setDisabled(true);
     }
     else {
       this.$.loginButton.setActive(false);

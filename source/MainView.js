@@ -13,7 +13,7 @@ enyo.kind({
 								{kind: "plex.MyPlexSectionsView", name: "localSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy: true},
 								{kind: "plex.MyPlexSectionsView", name: "myPlexSectionsView",flex:1, onSelectedSection: "showGridView", showing: false, lazy:true},
 							]},
-							/*{kind: "Button", onclick: "openAppMenuHandler", caption: "appmenu"},*/
+							{kind: "Button", onclick: "openAppMenuHandler", caption: "appmenu"},
 							{name: "musicPlayer", kind: 'plex.MusicPlayerControl', showing: false, onClickNext: "onClickNext", onClickPrev: "onClickPrev" , onClickPlayPause: "onClickPlayPause", onSetPlaybackTime:"onSetPlaybackTime", onShuffleClick: "onShuffleClick_PlayModeControls", onRepeatClick: "onRepeatClick_PlayModeControls", onSetVolume: "onSetPlaybackVolume" , onRequestVolume: "onRequestSysVolume", onClickFullScreen: "onClick_FullScreen"},
 					]},
 				]},
@@ -38,6 +38,9 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
+		window.Metrix = new Metrix();
+
+		window.Metrix.postDeviceData(); //collect some stats
 		this.$.pane.selectViewByName("mainBrowsingView");
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
@@ -49,6 +52,11 @@ enyo.kind({
 		//start getting local sections, response from this will start getting myplex sections as well...
 		window.PlexReq.librarySections();		
 		this.log();
+	},
+	checkIfBetaExpired: function() {
+		if (window.Metrix.isExpired(30)) {
+			//TODO: show dialog or something telling user this version has expired
+		}	
 	},
 	gotLocalSections: function(pmc) {
 		if (pmc !== undefined && pmc.length > 0) {
@@ -133,18 +141,18 @@ enyo.kind({
 	},
 	startVideoPlayer: function(src, pmo, server, resume) {
 		window.PlexReq.stopReachabilityChecking();
-	 this.$.pane.selectViewByName("videoPlayer");
-	  //src = "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8";
-    //src = "http://video.nationalgeographic.com/video/player/media-mp4/frog_bull/mp4/variant-playlist.m3u8";
-    this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
-  	this.$.videoPlayer.setResume(resume);
-  	this.$.videoPlayer.setPmo(pmo);
-    this.$.videoPlayer.setVideoSrc(src);
+	 	this.$.pane.selectViewByName("videoPlayer");
+	 	//src = "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8";
+	    //src = "http://video.nationalgeographic.com/video/player/media-mp4/frog_bull/mp4/variant-playlist.m3u8";
+	    this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
+	  	this.$.videoPlayer.setResume(resume);
+	  	this.$.videoPlayer.setPmo(pmo);
+	    this.$.videoPlayer.setVideoSrc(src);
 
-    /* TEST STUFF
-    this.$.pane.selectViewByName("vidobject");
-    this.$.vidobject.setVideoSrc(src);
-    */
+		//STATS LOGGING
+		if (window.Metrix) {
+			window.Metrix.customCounts("Video", "StartVideo",1);
+		}
 	},
 
 
@@ -157,73 +165,5 @@ enyo.kind({
 			this.$.musicPlayer.setTrackInfo(trackInfo);
 		}
 
-	},
-
-	
-	onRequestCurrTrackInfo: function ()
-	{
-			this.log();	
-			this.sendTrackInfo(false);
-	},
-	
-	
-	onTrackPausePlay: function (sender, boolAudioPlaying)
-	{
-		this.log();
-		
-		this.$.PlayerControl.setPlayPause(boolAudioPlaying);
-		
-		this.$.DashboardManager.setPlayPause(boolAudioPlaying);
-		
-		if(this.boolAlbumArtViewDisplay)
-		{		
-			this.$.AlbumArtView.setPlayPause(boolAudioPlaying);
-		}
-		
-		this.updateBroadcaster({type: "playChanged", boolPlaying: boolAudioPlaying});
-		
-		
-	},	
-	
-	onUpdateTrackInfo: function ()
-	{
-		
-	},
-	
-	onUpdateTrackTime: function (sender, objTrackTimes)
-	{
-		//this.log("objTrackTimes: " + objTrackTimes);
-		this.$.PlayerControl.updateTrackTimeDisplay(objTrackTimes);
-	},
-	
-	
-	//PlayerControl Events
-	
-	
-	onClickNext: function ()
-	{
-		this.$.Playback.nextTrack(true);
-	},
-	
-	onClickPrev: function ()
-	{
-		this.$.Playback.prevTrack(true);
-	},
-	
-	onClickPlayPause: function ()
-	{
-		
-		this.playPause();
-
-		
-	},
-	
-	playPause: function (boolForcePlayPause)
-	{
-		
-		if(this.$.Playback.getBoolPlaybackListSet())
-		{
-			this.$.Playback.pausePlayback(boolForcePlayPause);
-		}	
 	},
 });

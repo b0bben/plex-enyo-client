@@ -24,6 +24,7 @@ enyo.depends(
 	"external/arrayextras.js",
 	"external/extensions.js",
 	"external/audiomanager.js",
+	"external/metrix.js",
 
 	//view src
 	"source/Utilities.js",
