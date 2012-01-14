@@ -11,15 +11,17 @@ enyo.kind({
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
 		{kind: "Header",className: "enyo-header-dark", components: [
-			{kind: "Button", name: "backBtn", showing: false, onclick: "goBack", className: "enyo-button-dark", style: "padding: 0px 5px 0 0;", layoutKind: "HFlexLayout", pack: "start", align: "center",components: [
+			{kind: "Button", name: "backBtn", showing: false, onclick: "goBack", className: "enyo-button-dark", style: "padding: 0px 5px 0px 0px;", layoutKind: "HFlexLayout", pack: "start", align: "center",components: [
     			{kind: enyo.Image, src: "images/icn-back.png", style: "height:24px; width:24px;"},
     			{name: "backBtnCaption", content: ""},
 			]},
 			{kind: enyo.Spacer},
 			{name: "grid_header", content: "Welcome to Plex", style: '-webkit-box-align: center !important',pack: 'center'},
 			{kind: enyo.Spacer},
-			{kind: "ToolButton", caption: "Filter", onclick: "sectionFilterClick"},
-			{kind: "Menu", name: "filterMenu", defaultKind: "MenuCheckItem"},
+			{kind: "Button", name: "filterButton", className: "enyo-button-dark", style: "padding: 0;", caption: $L("Sorting"),components: [
+				{kind: "CustomListSelector", value: 1, onChange: "sectionFilterChanged", name: "filterMenu", style: "padding-left: 5px;"},
+			]},
+			
 		]},
 
 		{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
@@ -52,40 +54,43 @@ enyo.kind({
 	reloadSectionWithFilterLevel: function(level) {
   	if (this.parentMediaContainer !== undefined) {
   		//get the section details
-  	  window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
+  		window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
   		this.server = this.parentMediaContainer.server;
-  	  window.PlexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
+  		var key = this.parentMediaContainer.section.path ? this.parentMediaContainer.section.path : this.parentMediaContainer.section.key;
+  	  	window.PlexReq.getSectionForKey(this.server,key,level);
   	}
 	},
 	parentMediaContainerChanged: function() {
 	  if (this.parentMediaContainer !== undefined) {
-			//get the section details
-	    window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
-			this.server = this.parentMediaContainer.server;
-			var key = this.parentMediaContainer.section.path ? this.parentMediaContainer.section.path : this.parentMediaContainer.section.key;
-  		window.PlexReq.getSectionForKey(this.parentMediaContainer.server,key);
+		//get different filtering options for this section, once that's received it's gonna ask for media containers
+		window.PlexReq.setCallback(enyo.bind(this,"gotFiltersForSection"));
+		if (this.parentMediaContainer.section.path) {
+			window.PlexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.path);
+		} else {
+			window.PlexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);	
+		}
 	    
-			//get different filtering options for this section
-			//window.PlexReq.setCallback(enyo.bind(this,"gotFiltersForSection"));
-			//window.PlexReq.getFiltersForSectionAndKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key);
-	    
-			this.$.grid_header.setContent(this.parentMediaContainer.section.title);
+		this.$.grid_header.setContent(this.parentMediaContainer.section.title);
 	  }
 	},
 	gotFiltersForSection: function(pmc) {
 		for (var i=0; i < pmc.Directory.length; i++) {
 			var filter = pmc.Directory[i];
 			
-			this.$.filterMenu.createComponent({kind: enyo.MenuItem, caption: filter.title, value: filter.key, owner: this});
+			this.$.filterMenu.items.push({caption: filter.title, value: filter.key});
 		};
-		this.$.toolButton.setCaption(pmc.Directory[0].title);
+		this.$.filterMenu.setValue(1);
+		this.$.filterButton.setCaption("");
 		
-		//this.$.filterMenu.
+		//get the section details
+	    window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
+		this.server = this.parentMediaContainer.server;
+		var key = this.parentMediaContainer.section.path ? this.parentMediaContainer.section.path : this.parentMediaContainer.section.key;
+  		window.PlexReq.getSectionForKey(this.parentMediaContainer.server,key);
 	},
-	menuItemClick: function(inSender) {
-	  console.log(inSender);
-	  this.$.toolButton.setCaption(inSender.caption);
-	  this.filterLevel = inSender.value;
+	sectionFilterChanged: function(inSender,inValue, inOldValue) {
+	  this.log(inValue);
+	  this.filterLevel = inValue;
 	  this.reloadSectionWithFilterLevel(this.filterLevel);
 	  
 	},

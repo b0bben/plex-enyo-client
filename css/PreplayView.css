@@ -32,7 +32,7 @@ body {
 .overlay-play-button {
   position: absolute;
   top: 80px;
-  left: 40px;
+  left: 45px;
   width: 100px;
   height: 100px;
   /*margin: -50px 0 0 -50px;*/
@@ -101,6 +101,7 @@ body {
 .details-header {
   color: orange;
   margin-right: 10px;
+  text-align: center;
 }
 
 .tagline {
@@ -149,7 +150,7 @@ body {
   display: block;
   left: 40px;
   overflow: hidden;
-  position: absolute;
+  /*position: absolute;*/
   top: 280px;
   visibility: visible;
   z-index: 0;

@@ -403,14 +403,22 @@ enyo.kind({
 		
 	},
 	getFiltersForSectionAndKey: function(server,key) {
-		var url = "/library/sections/" + key;
-		this.dataForUrlAsync(server,url);
+		var url = this.getAssetUrl(server,key);
+		this.dataForUrlAsync(undefined,url);
 	},
 	getFullUrlForPlexUrl: function(server,url) {
 	  return server.baseUrl + url;
 	},
 	getAssetUrl: function(server, asset_key) {
-		var url = server.baseUrl + asset_key;
+		var url = "";
+		
+		//myplex url with server + key
+		if (asset_key.startsWith("http")) {
+			url = asset_key;
+		} else {
+			url = server.baseUrl + asset_key;
+		}
+
 		if (server.accessToken) {
 			var hasManyParams = url.match("(&)");
 			if (hasManyParams) {
@@ -503,10 +511,9 @@ enyo.kind({
 		if (addedNewServers) {
 			this.savePrefs();
 			this.log("added myplex server: " + server.name);
-
 			//refresh shit
 			this.loadPrefsFromCookie();
-			this.serversRefreshedCallback.call();
+			this.serversRefreshedCallback.call();			
 		}
 	},
 	myPlexSections: function() {
@@ -515,8 +522,8 @@ enyo.kind({
 			return;
 		}
 		var authToken = this.myplexUser["authentication-token"];
-	  var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
-  	var xml = new JKL.ParseXML(url);
+	  	var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
+  		var xml = new JKL.ParseXML(url);
 	 	xml.async(enyo.bind(this,"processMyPlexSections"));
 	 	xml.parse();
 	},
@@ -545,17 +552,17 @@ enyo.kind({
 	},
 	arrangeMyPlexServersAndSections: function(pmc) {
 		this.listedServers = [];
-    if (pmc !== undefined) {
-      for (var i = 0; i < pmc.size; i++) {
-        var serverAndSection = pmc.Directory[i];
-        var newServer = { serverName: serverAndSection.serverName,
-                          machineIdentifier: serverAndSection.machineIdentifier,
-                          sections: [serverAndSection]};
-        
-        this.addOrInsertNewServer(newServer);
-      }
-    }
-    return this.listedServers;
+	    if (pmc !== undefined) {
+	      for (var i = 0; i < pmc.size; i++) {
+	        var serverAndSection = pmc.Directory[i];
+	        var newServer = { serverName: serverAndSection.serverName,
+	                          machineIdentifier: serverAndSection.machineIdentifier,
+	                          sections: [serverAndSection]};
+	        
+	        this.addOrInsertNewServer(newServer);
+	      }
+	    }
+	    return this.listedServers;
   },
   addOrInsertNewServer: function(newServer) {
     if (this.listedServers.length == 0) {

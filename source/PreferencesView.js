@@ -33,8 +33,9 @@ enyo.kind({
 						//myplex PMSes
 						{kind: "RowGroup", caption: $L("Servers shared via myPlex"), style: "margin-bottom: 10px", components: [
 							{name: "myPlexServerList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listMyPlexSetupRow",components: [
-								{kind: enyo.Item, className: "server-list-item", components: [
-									{kind: "LabeledContainer", name: "myPlexServerName",label: "Server nr 1"},
+								{kind: enyo.Item, className: "server-list-item", tapHighlight: true, layoutKind: "HFlexLayout", components: [
+									{kind: "LabeledContainer", flex: 1, name: "myPlexServerName",label: "Server nr 1"},
+									{name: "onlineStatus", content: "", className: "enyo-label"},
 								]}
 							]}
 						]},
@@ -110,7 +111,7 @@ enyo.kind({
 			this.$.videoQuality.setValue(window.PlexReq.videoQuality);	
 		}
 		else {
-			this.$.videoQuality.setValue(8);
+			this.$.videoQuality.setValue(6);
 		}
 		
 		this.render();
@@ -183,8 +184,9 @@ enyo.kind({
     // check if the row is selected
 		if (window.PlexReq.myplexServers !== undefined && inIndex < window.PlexReq.myplexServers.length) {
 			var myplexServer = window.PlexReq.myplexServers[inIndex];
-			var reachabilityStatus = myplexServer.online ? $L("(online)") : $L("(offline)");
-			this.$.myPlexServerName.setLabel(myplexServer.name + reachabilityStatus);
+			var reachabilityStatus = myplexServer.online ? $L("online") : $L("offline");
+			this.$.myPlexServerName.setLabel(myplexServer.name)
+			this.$.onlineStatus.setContent(reachabilityStatus);
 			if (!myplexServer.online) {
 				this.$.item.setDisabled(true);
 			}

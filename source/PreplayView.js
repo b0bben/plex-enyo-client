@@ -40,19 +40,19 @@ enyo.kind({
                 
               ]},//title,pgrating
               {name: "desc", className: "desc"},
-              {kind: "Spacer", height: "25px"},
+              {kind: "Spacer", style:"min-height: 25px;"},
               {kind: enyo.VFlexBox, pack:"end", components:[
-                {kind: enyo.HFlexBox, components: [
+                {kind: enyo.HFlexBox, align: "baseline", components: [
                   {content: "Director: ", className: "details-header"},
-                  {name: "directors"},
+                  {name: "directors", className: "desc"},
                 ]},              
-                {kind: enyo.HFlexBox, components: [
+                {kind: enyo.HFlexBox, align: "baseline", components: [
                   {content: "Writer: ", className: "details-header"},
-                  {name: "writers"},
+                  {name: "writers", className: "desc"},
                 ]},
-                {kind: enyo.HFlexBox, components: [
+                {kind: enyo.HFlexBox, align: "baseline", components: [
                   {content: "Cast: ", className: "details-header"},
-                  {name: "cast"},
+                  {name: "cast", className: "desc"},
                 ]},
               ]},
         ]}, //descr box
@@ -117,15 +117,15 @@ enyo.kind({
 
 			//collect directors
 			var directors = this.collectTags(this.plexMediaObject.Director);
-		  this.$.directors.createComponent({content: directors, className: "info_text"});
+		  this.$.directors.setContent(directors);
 
 			//collect writers		  
 		  var writers = this.collectTags(this.plexMediaObject.Writer);
-		  this.$.writers.createComponent({content: writers, className: "info_text"});
+      this.$.writers.setContent(writers);
 
 			//collect cast
       var cast = this.collectTags(this.plexMediaObject.Role);
-      this.$.cast.createComponent({content: cast, className: "info_text"});
+      this.$.cast.setContent(cast);
 		  
 			
 

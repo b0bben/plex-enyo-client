@@ -44,6 +44,9 @@ enyo.kind({
 		this.$.pane.selectViewByName("mainBrowsingView");
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
+		this.startLookingForServers();
+	},
+	startLookingForServers: function() {
 		//local networks sections
 		window.PlexReq.setCallback(enyo.bind(this,"gotLocalSections"));
 		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersRefreshed"));
@@ -51,7 +54,7 @@ enyo.kind({
 		window.PlexReq.searchNearbyServerWithBonjour();
 		//start getting local sections, response from this will start getting myplex sections as well...
 		window.PlexReq.librarySections();		
-		this.log();
+		this.log();			
 	},
 	checkIfBetaExpired: function() {
 		if (window.Metrix.isExpired(30)) {
@@ -97,7 +100,7 @@ enyo.kind({
 	},
 	showGridView: function(inSender, inSection) {
 		this.selectedSection = inSection; //actually both the section AND the server it belongs to
-    this.$.right_pane.selectViewByName("grid_view");
+    	this.$.right_pane.selectViewByName("grid_view");
 	},
 	gotRecentlyAdded: function(pmc) {
 		this.$.startView.setServer(pmc[0].server);
@@ -133,10 +136,11 @@ enyo.kind({
 		this.$.pane.back();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
-		window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
-		window.PlexReq.loadPrefsFromCookie();
+		//window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
+		//window.PlexReq.loadPrefsFromCookie();
 		//window.PlexReq.librarySections();
-		window.PlexReq.myPlexSections();
+		//window.PlexReq.myPlexSections();
+		this.startLookingForServers();
 		
 	},
 	startVideoPlayer: function(src, pmo, server, resume) {
