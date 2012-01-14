@@ -34,8 +34,9 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 		if (data !== undefined) {
 			this.online = true;
 			console.log(data.MediaContainer.friendlyName + " is online and running version: " + data.MediaContainer.version);
-			if (window.Metrix) {
-				window.Metrix.customCounts("PMS", data.MediaContainer.version, 1);
+			if (window.Metrix && !this.statsRegistered) {
+				window.Metrix.customCounts("PMS", encodeURIComponent(data.MediaContainer.version), 1);
+				this.statsRegistered = true;
 			}
 		}
 		else {
@@ -352,7 +353,7 @@ enyo.kind({
 	processPlexData: function(data) {
 		var pmc = data.MediaContainer;
 		//this.log(pmc);
-		this.callback(pmc);	
+		this.callback(pmc,true);	
 	},
 	librarySections: function() {
 		var url = "";

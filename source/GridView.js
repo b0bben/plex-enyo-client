@@ -11,6 +11,10 @@ enyo.kind({
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
 		{kind: "Header",className: "enyo-header-dark", components: [
+			{kind: "Button", name: "backBtn", showing: false, onclick: "goBack", className: "enyo-button-dark", style: "padding: 0px 5px 0 0;", layoutKind: "HFlexLayout", pack: "start", align: "center",components: [
+    			{kind: enyo.Image, src: "images/icn-back.png", style: "height:24px; width:24px;"},
+    			{name: "backBtnCaption", content: ""},
+			]},
 			{kind: enyo.Spacer},
 			{name: "grid_header", content: "Welcome to Plex", style: '-webkit-box-align: center !important',pack: 'center'},
 			{kind: enyo.Spacer},
@@ -29,6 +33,7 @@ enyo.kind({
 		this.count = 0;
 		this.filterLevel = "";
 		this.mediaContainer="";
+		this.viewStack = [];
 		this.inherited(arguments);
 		this.parentMediaContainerChanged();
 	},
@@ -47,7 +52,7 @@ enyo.kind({
 	reloadSectionWithFilterLevel: function(level) {
   	if (this.parentMediaContainer !== undefined) {
   		//get the section details
-  	  window.PlexReq.setCallback(enyo.bind(this,"gotMediaObject"));
+  	  window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
   		this.server = this.parentMediaContainer.server;
   	  window.PlexReq.getSectionForKey(this.parentMediaContainer.server,this.parentMediaContainer.section.key,level);
   	}
@@ -84,20 +89,37 @@ enyo.kind({
 	  this.reloadSectionWithFilterLevel(this.filterLevel);
 	  
 	},
-	gotMediaContainer: function(pmc) {
+	gotMediaContainer: function(pmc, saveInStack) {
 		this.log();
+		if (saveInStack && pmc) {
+			this.viewStack.push(pmc); //save for later user
+			this.stackPosition = this.viewStack.length-1;
+		}
+		
 		this.mediaContainer = pmc;
 		this.count = parseInt(this.mediaContainer.size); //size is always there
 		//start building the grid now
 		this.buildCells();
 		this.$.selection.clear();
 		this.$.grid_list.punt();
+
+		//set grid title to something we care about
+		if (this.mediaContainer.title2) {
+			this.$.grid_header.setContent(this.mediaContainer.title2);
+		}
+		else {
+			this.$.grid_header.setContent(this.mediaContainer.title1);	
+		}
 		
+		this.$.backBtn.setShowing(false); //reset this incase we're going back in the view stack
+
 		switch(pmc.viewGroup) {
 
 	    case "season":
 	    case "episode":
 	      this.log("grid showing tvshows");
+	      this.$.backBtnCaption.setContent(pmc.title1);
+	      this.$.backBtn.setShowing(true);
 	      //var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,900,60,pmc.banner);
 		  	//this.$.header.applyStyle("background-image", "url(" + thumbUrl + ")");
 		  	
@@ -235,11 +257,18 @@ enyo.kind({
       this.$.emptyToaster.open();
 	},
 	refreshGridWithMediaContainer: function(pmc) {
-		this.gotMediaContainer(pmc);
+		this.gotMediaContainer(pmc,true);
 	},
 	getChildren: function(pmo) {
 		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
 		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
+	},
+	goBack: function() {
+		this.log();
+		this.viewStack.pop(); //remove the last (current) view from the stack, we don't want it in there cause that would be weird
+		this.stackPosition -= 1;
+
+		this.gotMediaContainer(this.viewStack[this.stackPosition],false); //render previous view without saving it in the view stack
 	},
 
 });
