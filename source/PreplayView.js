@@ -1,7 +1,9 @@
 enyo.kind({
 	name: "plex.PreplayView", 
-  kind: enyo.VFlexBox,
-  className: "enyo-fit",
+  kind: enyo.SlidingView,
+  dismissible: true,
+  dragAnywhere: false,
+  /*className: "enyo-fit",*/
   /*style: "border: 1px solid red;",*/
 	published: {
 		plexMediaObject: "",
@@ -61,7 +63,7 @@ enyo.kind({
 		]}, //scroller end
     { name: "resumeDialog", onResume: "resumeVideoHandler", onFromStart: "fromStartVideoHandler", kind: "plex.ResumeDialog",  width: "400px", message: $L("It looks like you have already watched a part of this video.\r\n\r\nWould you like to resume from where you left off, or play from the start?") },
 		{kind: "Toolbar", align: "center", components: [
-  		{name: "dragHandle", kind: "GrabButton", onclick: "closeMyself"},
+  		{name: "dragHandle", kind: "GrabButton", onclick: "closeMyself", slidingHandler: true},
                     {kind: enyo.HFlexBox, components: [
                 {name: "released", className: "info_text", content: "Released 2009-11-11"},
                 {name: "runtime", className: "info_text", content: "118 minutes"},
