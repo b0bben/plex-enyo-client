@@ -1,26 +1,24 @@
 enyo.kind({
 	name: "plex.PreplayView", 
-  kind: enyo.SlidingView,
-  dismissible: true,
+  kind: "enyo.VFlexBox",
   dragAnywhere: false,
   /*className: "enyo-fit",*/
   /*style: "border: 1px solid red;",*/
 	published: {
-		plexMediaObject: "",
+		plexMediaObject: undefined,
 		server: undefined,
 	},
 	components: [
 		{name: "backdrop", className: "backdrop", components: [
 			{name: "backdropImg", kind: "Image", className: "backdrop-img"},
 		]},
-		{className: "enyo-sliding-view-shadow"},
+
 		{kind: enyo.Scroller, flex: 1, autoHorizontal: false, horizontal: false, accelerated: true, fpsShowing: true, components: [ //scroller
   		{kind: enyo.HFlexBox, className: "enyo-fit", components: [
     		{kind: enyo.VFlexBox, pack: "start", style: "margin: 10px;", components: [
     			{className: "cover", onclick: "clickPlay",components: [
             {name: "playBtn",className: "overlay-play-button"},
     		    {name: "thumb", kind: "Image", className: "thumb"},
-    		    /*{kind: "PlexViewVideo", name: "videoView", visible: false, className: "thumb"},*/
             {kind: enyo.VFlexBox,pack:"center",align:"center",components: [
               {kind: enyo.HFlexBox, className:"rating_holder", components: [
                 {name: "rating_1", kind: "Image", className: "star_1"},
@@ -62,23 +60,24 @@ enyo.kind({
 		
 		]}, //scroller end
     { name: "resumeDialog", onResume: "resumeVideoHandler", onFromStart: "fromStartVideoHandler", kind: "plex.ResumeDialog",  width: "400px", message: $L("It looks like you have already watched a part of this video.\r\n\r\nWould you like to resume from where you left off, or play from the start?") },
-		{kind: "Toolbar", align: "center", components: [
+		
+    {kind: "Toolbar", align: "center", components: [
   		{name: "dragHandle", kind: "GrabButton", onclick: "closeMyself", slidingHandler: true},
-                    {kind: enyo.HFlexBox, components: [
-                {name: "released", className: "info_text", content: "Released 2009-11-11"},
-                {name: "runtime", className: "info_text", content: "118 minutes"},
-                {name: "category", className: "info_text", content: "Sci-fi"},
-              ]}, //released, runtime, category
+        {kind: enyo.HFlexBox, components: [
+          {name: "released", className: "info_text", content: "Released 2009-11-11"},
+          {name: "runtime", className: "info_text", content: "118 minutes"},
+          {name: "category", className: "info_text", content: "Sci-fi"},
+        ]}, //released, runtime, category
   	]},
-  /*	{kind: "Toaster", name: "videoToast", style: "top: 0px;width: 1024px;height: 768px",flyInFrom: "right", components: [ 
-  	  {name: "videoPlayer", kind: "PlexViewVideo", flex:1},
-  	]},*/
-  	//{name: "videoPlayer", kind: "PlexViewVideo", flex:1, style: "top: 0px;width: 1024px;height: 768px", lazy: true, showing: false},
+    
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.plexMediaObjectChanged();
 	},
+  serverChanged: function() {
+    
+  },
 	plexMediaObjectChanged: function() {
 		if (this.plexMediaObject !== undefined) {
 		  //this.$.videoView.setPmo(this.plexMediaObject);

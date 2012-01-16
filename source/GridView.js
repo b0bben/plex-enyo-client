@@ -1,8 +1,6 @@
 enyo.kind({
 	name: "plex.GridView",
 	kind: "enyo.SlidingView",
-	/*className: "enyo-fit",*/
-	flex: 1,
 	dragAnywhere: false,
 	published: {
 		parentMediaContainer: undefined,
@@ -12,6 +10,9 @@ enyo.kind({
 		onShowPreplay:"",
 	},
 	components: [
+		{kind: "Scrim", onclick: "scrimClick", components: [
+			{kind: "enyo.SpinnerLarge", name: "spinner", showing: true, style: '-webkit-box-align: center !important;position: absolute;top:30%;right:45%',pack: 'center'},
+		]},
 		{kind: "Header",className: "enyo-header-dark", components: [
 			{kind: "Button", name: "backBtn", showing: false, onclick: "goBack", className: "enyo-button-dark", style: "padding: 0px 5px 0px 0px;", layoutKind: "HFlexLayout", pack: "start", align: "center",components: [
 				{kind: enyo.Image, src: "images/icn-back.png", style: "height:24px; width:24px;"},
@@ -21,7 +22,7 @@ enyo.kind({
 		{name: "grid_header", content: "Welcome to Plex", style: '-webkit-box-align: center !important',pack: 'center'},
 		{kind: enyo.Spacer},
 		{kind: "Button", name: "filterButton", className: "enyo-button-dark", style: "padding: 0;", caption: $L("Sorting"),components: [
-			{kind: "CustomListSelector", value: 1, onChange: "sectionFilterChanged", name: "filterMenu", style: "padding-left: 5px;"},
+			{kind: "CustomListSelector", onChange: "sectionFilterChanged", name: "filterMenu", style: "padding-left: 5px;"},
 		]},
 
 		]},
@@ -66,6 +67,7 @@ enyo.kind({
 	},
 	parentMediaContainerChanged: function() {
 		if (this.parentMediaContainer !== undefined) {
+			this.$.scrim.show();
 			//get different filtering options for this section, once that's received it's gonna ask for media containers
 			window.PlexReq.setCallback(enyo.bind(this,"gotFiltersForSection"));
 			if (this.parentMediaContainer.section.path) {
@@ -78,6 +80,7 @@ enyo.kind({
 		}
 	},
 	gotFiltersForSection: function(pmc) {
+		//this.$.filterMenu.items = [];
 		for (var i=0; i < pmc.Directory.length; i++) {
 			var filter = pmc.Directory[i];
 			
@@ -134,6 +137,8 @@ enyo.kind({
 
 			break;
 		}
+
+		this.$.scrim.hide();
 	},
 	getPlexMediaObject: function(index) {
 		if (this.mediaContainer.Video != null) {
