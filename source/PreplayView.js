@@ -7,6 +7,7 @@ enyo.kind({
 	published: {
 		plexMediaObject: undefined,
 		server: undefined,
+    art: undefined,
 	},
 	components: [
 		{name: "backdrop", className: "backdrop", components: [
@@ -16,7 +17,7 @@ enyo.kind({
 		{kind: enyo.Scroller, flex: 1, autoHorizontal: false, horizontal: false, accelerated: true, fpsShowing: true, components: [ //scroller
   		{kind: enyo.HFlexBox, className: "enyo-fit", components: [
     		{kind: enyo.VFlexBox, pack: "start", style: "margin: 10px;", components: [
-    			{className: "cover", onclick: "clickPlay",components: [
+    			{className: "cover", name: "cover", onclick: "clickPlay",components: [
             {name: "playBtn",className: "overlay-play-button"},
     		    {name: "thumb", kind: "Image", className: "thumb"},
             {kind: enyo.VFlexBox,pack:"center",align:"center",components: [
@@ -82,8 +83,18 @@ enyo.kind({
 		if (this.plexMediaObject !== undefined) {
 		  //this.$.videoView.setPmo(this.plexMediaObject);
 			//this.log("preplay with: " + enyo.json.stringify(this.plexMediaObject));
-      var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,194,273,this.plexMediaObject.thumb);
-			this.$.thumb.setSrc(thumbUrl);
+      var thumbUrl = "";
+      if (this.plexMediaObject.type === "episode") {
+        thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,200,180,this.plexMediaObject.thumb);
+        this.$.cover.setStyle("height: 185px;");
+        this.$.thumb.setStyle("width: 200px;height: 180px;");
+        this.$.playBtn.setStyle("top: 23%;left: 23%;")
+        
+      } else {
+        thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,194,273,this.plexMediaObject.thumb);
+        this.$.thumb.setSrc(thumbUrl);
+      }
+      this.$.thumb.setSrc(thumbUrl);
 			this.$.title.setContent(this.plexMediaObject.title);
 			this.$.released.setContent(this.plexMediaObject.year);
       var genre = this.collectTags(this.plexMediaObject.Genre);
@@ -134,7 +145,8 @@ enyo.kind({
 			//this.$.video.setSrc(this.server.baseUrl + this.plexMediaObject.Media.Part.key);
 			
 			//this.$.thumb.setSrc("images/BlankPoster.png");
-      var backdropUrl = window.PlexReq.getImageTranscodeUrl(this.server,1280,720,this.plexMediaObject.art);
+      this.art = this.plexMediaObject.art ? this.plexMediaObject.art : this.art;
+      var backdropUrl = window.PlexReq.getImageTranscodeUrl(this.server,1280,720,this.art);
 			this.$.backdropImg.setSrc(backdropUrl);
 
 			//finally render the shit out of this...

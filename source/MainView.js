@@ -18,16 +18,14 @@ enyo.kind({
 						{name: "musicPlayer", kind: 'plex.MusicPlayerControl', showing: false, onClickNext: "onClickNext", onClickPrev: "onClickPrev" , onClickPlayPause: "onClickPlayPause", onSetPlaybackTime:"onSetPlaybackTime", onShuffleClick: "onShuffleClick_PlayModeControls", onRepeatClick: "onRepeatClick_PlayModeControls", onSetVolume: "onSetPlaybackVolume" , onRequestVolume: "onRequestSysVolume", onClickFullScreen: "onClick_FullScreen"},
 				]},
 
-				{name: "middle", flex: 1, peekWidth: 55, components: [
+				{name: "middle", flex: 1, components: [
 					{kind: "plex.GridView", name: "grid_view", onShowPreplay: "showPreplay"},
 				]},
 
 			]},
-			{kind: "AppMenu",
-			    components: [
-			        {caption: "Preferences & Servers", onclick: "showPreferences"},
-			    ]
-			},
+			{kind: "AppMenu", stlye: "max-height: 60px;max-width:250px;", components: [
+				{caption: "Preferences & Servers...", onclick: "showPreferences"},
+			]},
 			{name:"prefsView", kind:"plex.PreferencesView", lazy: true, showing: false, onClose:"closePrefsView"},
 			{name: "videoPlayer", kind: "PlexViewVideo", flex:1, lazy: true, showing: false},
 			{kind: "plex.WelcomeView", name: "welcomeView",lazy: true, showing: false},
@@ -117,7 +115,7 @@ enyo.kind({
 		this.$.pane.selectViewByName("prefsView");
 	},
 	preferencesCanceled: function(inSender) {
-	    this.$.mainBrowsingView.back();
+	    this.$.pane.back();
 	},
 	openAppMenuHandler: function() {
 	    this.$.appMenu.open();
@@ -127,7 +125,7 @@ enyo.kind({
 	},
 	closePrefsView: function(inView) {
 		clearInterval(this.$.prefsView.intervarlTimerId);
-		this.$.mainBrowsingView.back();
+		this.$.pane.back();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
 		//window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
@@ -142,10 +140,10 @@ enyo.kind({
 	 	this.$.pane.selectViewByName("videoPlayer");
 	 	//src = "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8";
 	    //src = "http://video.nationalgeographic.com/video/player/media-mp4/frog_bull/mp4/variant-playlist.m3u8";
-	    this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
-	  	this.$.videoPlayer.setResume(resume);
-	  	this.$.videoPlayer.setPmo(pmo);
-	    this.$.videoPlayer.setVideoSrc(src);
+    this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
+  	this.$.videoPlayer.setResume(resume);
+  	this.$.videoPlayer.setPmo(pmo);
+    this.$.videoPlayer.setVideoSrc(src);
 
 		//STATS LOGGING
 		if (window.Metrix) {

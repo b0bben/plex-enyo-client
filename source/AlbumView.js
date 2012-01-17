@@ -80,79 +80,75 @@ enyo.kind({
 		      this.tracks[0] = pmc.Track;
 		  }
 	},
-		onclick_song: function(inSender, inEvent) {
-		  var songItem = this.tracks[inEvent.rowIndex];
-		  if (songItem !== undefined && !this.playing) {
-		  	var pmo = this.plexMediaObject;
-		  	var objTrackInfo = {strTrackArtist: pmo.title1, 
-			  										strTrackTitle: songItem.title ,
-			  										strTrackAlbum: pmo.title2,
-			  										strTrackGenre: "Hårdrock",
-			  										strTrackImage: pmo.thumb,
-			  										intTrackIndex: parseInt(songItem.index),
-			  										intTrackOrigIndex: parseInt(songItem.index),
-			  										strTrackID: songItem.index,
-			  										intTrackTime: parseInt(songItem.duration),
-			  										intTrackDuration: parseInt(songItem.duration),
-			  										strTrackDuration: songItem.duration,
-			  										context: pmo,
-			  										server: this.server};
-				
-		  	this.owner.owner.owner.owner.startMusicPlayback(objTrackInfo);
-		    //this.$.sound.setSrc(window.PlexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
-		    //this.$.sound.play();
-		    this.playing = true;
-		  }
-		  else if (this.playing) {
-		    //this.$.sound.audio.pause();
-		    this.playing = false;
-		  }
-		},
-		setupRowItems: function (sender, intIndex)	{
-				try
-				{
-					
-					
-					//intIndex = intIndex  + this.intJumpRowOffset;
-		
-					if(this.tracks !== undefined)
-					{				
-						if(this.tracks[intIndex] !== undefined)
-						{
-						  var track = this.tracks[intIndex];
-							//this.log("title: " + this.arSongs[intIndex].title);
-							//this.log(this.arSongs[intIndex].title);
-							var secs = Math.floor(track.duration / 1000);
-							var mins = Math.floor(secs / 60);
-							secs = secs % 60;
-							if (secs <= 9)
-							  secs = "0" + secs; //formating minutes to :00 format
-							  
-							this.$.songNumber.content = track.index;
-							this.$.songNumber.setStyle("width: " + (this.tracks.length+'').length * 0.8 + "em");
-							this.$.songTitle.content = track.title;
-							this.$.songDuration.content = mins + ":" + secs;
-							
-							//if (this.arSongs[intIndex].origIndex === this.intCurrTrackOrigIndex) Discontinued use of origIndex to match for highlight
-							
-							//this.$.itemMedia.addRemoveClass("playing", (this.arSongs[intIndex]._id === this.strCurrTrackID));
-							//this.$.itemMedia.addRemoveClass("odd", (intIndex % 2 === 0 ));
-							this.log("created song: " + track.title);
-							//this.$.itemMedia.setContent("-----");
-							return true
-						}
-					//return true;
-					}
-		
+	onclick_song: function(inSender, inEvent) {
+	  var songItem = this.tracks[inEvent.rowIndex];
+	  if (songItem !== undefined && !this.playing) {
+	  	var pmo = this.plexMediaObject;
+	  	var objTrackInfo = {strTrackArtist: pmo.title1, 
+		  										strTrackTitle: songItem.title ,
+		  										strTrackAlbum: pmo.title2,
+		  										strTrackGenre: "Hårdrock",
+		  										strTrackImage: pmo.thumb,
+		  										intTrackIndex: parseInt(songItem.index),
+		  										intTrackOrigIndex: parseInt(songItem.index),
+		  										strTrackID: songItem.index,
+		  										intTrackTime: parseInt(songItem.duration),
+		  										intTrackDuration: parseInt(songItem.duration),
+		  										strTrackDuration: songItem.duration,
+		  										context: pmo,
+		  										server: this.server};
 			
+	  	this.owner.owner.owner.owner.startMusicPlayback(objTrackInfo);
+	    //this.$.sound.setSrc(window.PlexReq.getFullUrlForPlexUrl(this.server,songItem.Media.Part.key));
+	    //this.$.sound.play();
+	    this.playing = true;
+	  }
+	  else if (this.playing) {
+	    //this.$.sound.audio.pause();
+	    this.playing = false;
+	  }
+	},
+	setupRowItems: function (sender, intIndex)	{
+			try
+			{
+				if(this.tracks !== undefined)
+				{				
+					if(this.tracks[intIndex] !== undefined)
+					{
+					  var track = this.tracks[intIndex];
+						//this.log("title: " + this.arSongs[intIndex].title);
+						//this.log(this.arSongs[intIndex].title);
+						var secs = Math.floor(track.duration / 1000);
+						var mins = Math.floor(secs / 60);
+						secs = secs % 60;
+						if (secs <= 9)
+						  secs = "0" + secs; //formating minutes to :00 format
+						  
+						this.$.songNumber.content = track.index ? track.index : " - ";
+						this.$.songNumber.setStyle("width: " + (this.tracks.length+'').length * 0.8 + "em");
+						this.$.songTitle.content = track.title;
+						this.$.songDuration.content = mins + ":" + secs;
+						
+						//if (this.arSongs[intIndex].origIndex === this.intCurrTrackOrigIndex) Discontinued use of origIndex to match for highlight
+						
+						//this.$.itemMedia.addRemoveClass("playing", (this.arSongs[intIndex]._id === this.strCurrTrackID));
+						//this.$.itemMedia.addRemoveClass("odd", (intIndex % 2 === 0 ));
+						this.log("created song: " + track.title);
+						//this.$.itemMedia.setContent("-----");
+						return true
+					}
+				//return true;
 				}
-				catch(err)
-				{
-					this.log("error: " + err)
-				}		
-				
-				return false;	
+	
 		
-			},
+			}
+			catch(err)
+			{
+				this.log("error: " + err)
+			}		
+			
+			return false;	
+	
+		},
 	
 })

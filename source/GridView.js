@@ -33,7 +33,7 @@ enyo.kind({
 			{name: "cells", kind: "HFlexBox", pack: "start"}
 		]},
 		{kind: "Selection"},
-		{kind: "plex.EmptyToaster", name: "emptyToaster", flex: 1},
+		{kind: "plex.EmptyToaster", name: "emptyToaster", width: "75%"},
 		{kind: "Toolbar", components: [
 			{kind: "GrabButton", slidingHandler: true},
 		]}
@@ -280,7 +280,7 @@ enyo.kind({
 	},
 	showPreplay: function(pmo) {
 		this.$.emptyToaster.$.client.destroyControls();
-		this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server}]);
+		this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server, art: this.mediaContainer.art}]);
 		this.$.emptyToaster.open();
 		//this.doShowPreplay(this.server,pmo);
 	},

@@ -199,9 +199,11 @@ enyo.kind({
         /*{kind: "HtmlContent", name: "video", srcId: "myHtml5Video"},*/
         { name: "headerBar", kind: "HFlexBox", className: "vid-header-bar show-vid-header-bar",
           components: [
-            {kind: "Button", name: "backButton", onclick: "onBackClicked", className: "enyo-button-dark", caption: "Back", style: "font-size: 14px; padding-top: 0px;"},
-              { name: "videoTitle", className: "vid-title", flex: 1 },
-              {name: "test1", kind: enyo.Button, caption: "test", onclick: "test1Clicked"},
+            {kind: "Button", name: "backBtn", onclick: "onBackClicked", className: "enyo-button-dark", style: "margin-top: 0px; height: 35px; padding: 0px 5px 0px 0px;", layoutKind: "HFlexLayout", pack: "start", align: "center",components: [
+                {kind: enyo.Image, src: "images/icn-back.png", style: "height:24px; width:24px;"},
+                {name: "backBtnCaption", content: $L("Go back")},
+            ]},
+            { name: "videoTitle", className: "vid-title", flex: 1 },
           ]
         },
         //{ name: "controlBar", kind: "Control", className: "vid-ctrl-bar show-vid-ctrl-bar",
@@ -247,6 +249,7 @@ enyo.kind({
         },
         { name: "mediaserver", kind: "PalmService", onFailure: "mediaserverRequestFailHandler" },
         { name: "msgDialog", kind: "MessageDialog" },
+        {kind: "ApplicationEvents", onWindowRotated: "adjustSize"},
     ],
     published: {
       pmo: undefined,
@@ -259,7 +262,7 @@ enyo.kind({
     type: "local",
     mediaType: "video",
     dragSession: undefined,     // { clientX, clientY }
-    defaultHideControlTimeout: 6000,
+    defaultHideControlTimeout: 4000,
     viewSizeCode: 1,       // 1:FIT, 2:FILL  (a class scoped property)
     playedStates: { },
     IS_NOT_LOADED: 1,
@@ -425,7 +428,8 @@ enyo.kind({
                 console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.loadedmetadata(): on "'+thisInst.pmo.title+'", videoWidth='+this.videoWidth+', videoHeight='+this.videoHeight);
                 thisInst.loadState = thisInst.IS_LOADED;
                 thisInst.onVideoLoad(ev);
-                thisInst.adjustVideoSize();
+                thisInst.adjustSize();
+                //thisInst.adjustVideoSize();
                 postProcess && postProcess();
             },
             seeked: function (ev) {
@@ -434,22 +438,25 @@ enyo.kind({
                 //thisInst.onVideoSeekedEventNotify(ev);
             },
             ended: function (ev) {
-//console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.ended(): video end ACK, instanceId='+thisInst.instanceId+' on "'+thisInst.dbEntry.path+'"');
+                console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.ended(): video end ACK, instanceId='+thisInst.instanceId+' on "'+thisInst.pmo.title+'"');
                 delete thisInst.seekToPosition;   // to avoid a retract due to slow seeking from mediaserver
                 thisInst.setPlayButtonState(false);
                 thisInst.pauseVideo();
-                thisInst.video.currentTime = 0.1;
+                thisInst.video.currentTime = 0;
                 thisInst.updateTimePlayedTally();
                 thisInst.updateTimeRemainTally();
                 thisInst.updateSeeker();
                 // show the controlbars again once the playback is done
                 setTimeout(function() { thisInst.showControlbars(); }, 100);
+                thisInst.onLeaveView();
             },
             pause: function (ev) {
                 console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.pause(): pause ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.pmo.title+'", node.paused='+thisInst.video.paused);
                 thisInst.mediaplayerInitiatedPauseHandler();
             },
             play: function (ev) {
+                thisInst.adjustSize();
+                thisInst.hideControlsWithTimeout();
                 console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.play(): play ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.pmo.title+'", node.paused='+thisInst.video.paused+' at '+thisInst.video.currentTime);
                 if (thisInst.isInFocused && !thisInst.isCarded) { return; }
                 console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.play(): play ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.pmo.title+'", isInFocused='+thisInst.isInFocused+', isCarded='+thisInst.isCarded+', node.paused='+thisInst.video.paused+' at '+thisInst.video.currentTime+', prepare to pause...');
