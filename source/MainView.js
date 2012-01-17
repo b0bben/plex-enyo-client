@@ -3,6 +3,9 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 
 	components: [
+		{kind: "AppMenu", components: [
+				{caption: "Preferences & Servers...", onclick: "showPreferences"},
+		]},
 		{kind: "ApplicationEvents", onWindowRotated: "windowRotated"},
 		{kind:enyo.Pane, flex: 1,components: [
 			{name: "mainBrowsingView", kind: enyo.SlidingPane,className: "enyo-bg", flex: 1, onSelectView: "viewSelected", components:[
@@ -22,9 +25,6 @@ enyo.kind({
 					{kind: "plex.GridView", name: "grid_view", onShowPreplay: "showPreplay"},
 				]},
 
-			]},
-			{kind: "AppMenu", stlye: "max-height: 60px;max-width:250px;", components: [
-				{caption: "Preferences & Servers...", onclick: "showPreferences"},
 			]},
 			{name:"prefsView", kind:"plex.PreferencesView", lazy: true, showing: false, onClose:"closePrefsView"},
 			{name: "videoPlayer", kind: "PlexViewVideo", flex:1, lazy: true, showing: false},
