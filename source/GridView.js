@@ -1,6 +1,8 @@
 enyo.kind({
 	name: "plex.GridView",
-	kind: "enyo.SlidingView",
+	kind: "enyo.VFlexBox",
+	/*className: "enyo-fit",*/
+	flex: 1,
 	dragAnywhere: false,
 	published: {
 		parentMediaContainer: undefined,
@@ -22,7 +24,7 @@ enyo.kind({
 		{name: "grid_header", content: "Welcome to Plex", style: '-webkit-box-align: center !important',pack: 'center'},
 		{kind: enyo.Spacer},
 		{kind: "Button", name: "filterButton", className: "enyo-button-dark", style: "padding: 0;", caption: $L("Sorting"),components: [
-			{kind: "CustomListSelector", onChange: "sectionFilterChanged", name: "filterMenu", style: "padding-left: 5px;"},
+			{kind: "CustomListSelector", value: 1, onChange: "sectionFilterChanged", name: "filterMenu", style: "padding-left: 5px;"},
 		]},
 
 		]},
@@ -31,7 +33,7 @@ enyo.kind({
 			{name: "cells", kind: "HFlexBox", pack: "start"}
 		]},
 		{kind: "Selection"},
-		{kind: "plex.EmptyToaster", name: "emptyToaster"},
+		{kind: "plex.EmptyToaster", name: "emptyToaster", flex: 1},
 		{kind: "Toolbar", components: [
 			{kind: "GrabButton", slidingHandler: true},
 		]}
@@ -277,10 +279,10 @@ enyo.kind({
 		this.$.emptyToaster.open();
 	},
 	showPreplay: function(pmo) {
-		/*this.$.emptyToaster.$.client.destroyControls();
+		this.$.emptyToaster.$.client.destroyControls();
 		this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server}]);
-		this.$.emptyToaster.open();*/
-		this.doShowPreplay(this.server,pmo);
+		this.$.emptyToaster.open();
+		//this.doShowPreplay(this.server,pmo);
 	},
 	refreshGridWithMediaContainer: function(pmc) {
 		this.gotMediaContainer(pmc,true);

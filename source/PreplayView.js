@@ -1,8 +1,8 @@
 enyo.kind({
 	name: "plex.PreplayView", 
-  kind: "enyo.VFlexBox",
+  kind: enyo.VFlexBox,
   dragAnywhere: false,
-  /*className: "enyo-fit",*/
+  className: "enyo-fit",
   /*style: "border: 1px solid red;",*/
 	published: {
 		plexMediaObject: undefined,
