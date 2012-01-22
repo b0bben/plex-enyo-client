@@ -1,10 +1,10 @@
 {
-	"id": "com.plexapp.webos-client",
-	"version": "0.6.5",
+	"id": "com.plexapp.webos-client.beta",
+	"version": "0.6.7",
 	"vendor": "Plex Inc.",
 	"type": "web",
 	"main": "index.html",
-	"title": "Plex client",
+	"title": "Plex client (beta)",
 	"icon": "icon.png",
 	"splashicon": "PlexMobile_512x512.png",
 	"uiRevision": 2

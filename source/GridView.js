@@ -166,8 +166,9 @@ enyo.kind({
 		var numberOfGridItems = this.cellCount > this.count ? this.count : this.cellCount;
 		for (var i=0; i<numberOfGridItems; i++) {
 			var c = this.$.cells.createComponent({flex: 1, kind: "VFlexBox", idx: i, onclick: "cellClick", style: "padding: 8px;width: 175px;", owner: this});
-			var imgDiv = c.createComponent({name: "coverDiv", className: "cover-shadow"});
+			var imgDiv = c.createComponent({name: "coverDiv", className: "cover-shadow", style: "position:relative;"});
 			var cover = imgDiv.createComponent({kind: "Image", name: "coverImg"});
+			var seenFlag = imgDiv.createComponent({name: "seenFlag", content: "", className: "seenFlag", pack: "start", align: "center"});
 			c.createComponent({name: "cover_label", className: "cover-label"});
 			c.createComponent({name: "cover_sublabel", className: "cover-sublabel"});
 			this.cells.push(c);
@@ -208,8 +209,7 @@ enyo.kind({
 						}
 						else {
 							c.$.cover_sublabel.setContent($L("Episode ") + pmo.index);
-						}
-						
+						}						
 					}
 					else {
 						c.$.coverDiv.$.coverImg.addRemoveClass("cover-image",true);
@@ -217,12 +217,40 @@ enyo.kind({
 						c.$.cover_sublabel.setContent(pmo.year);
 					}
 					
-					
-					if (pmo.viewOffset) {
-						var d = c.$.coverDiv.createComponent({content: ""})
-						d.addRemoveClass("watched_flag",true);
+					c.$.cover_label.setContent(lbl);
+
+					switch (pmo.type) {
+						case "episode":
+						case "movie":
+							if (pmo.type === "movie") {
+								c.$.coverDiv.$.seenFlag.setStyle("top: -9%");
+							}
+							//watched/unwatched falgs
+							if (pmo.viewOffset > 0) {
+								//partly watched, mark with image
+								c.$.coverDiv.$.seenFlag.setClassName("seenFlag partly_watched");
+							}
+							else if (!pmo.viewCount) {
+								//unwatched, mark with image
+								c.$.coverDiv.$.seenFlag.setClassName("seenFlag unwatched");
+							}
+							else {
+								//watched, remove any marker
+								c.$.coverDiv.$.seenFlag.setClassName("");
+							}
+							break;
+						case "show":
+						case "season":
+							if (pmo.leafCount && pmo.viewedLeafCount) {
+								var unwatchedItems = pmo.leafCount - pmo.viewedLeafCount;
+								c.$.coverDiv.$.seenFlag.setContent(unwatchedItems);
+								c.$.coverDiv.$.seenFlag.setClassName("unwatched_count");	
+							}
+							
+						default:
+							break;
 					}
-					c.$.cover_label.setContent(lbl);					
+
 					//this.log("returning cover");
 				} else {
 					//this.log("NOT returning cover");

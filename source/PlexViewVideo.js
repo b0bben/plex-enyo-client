@@ -195,6 +195,9 @@ enyo.kind({
     kind: 'enyo.ViewImage',
     style: "background-color: #000000;",
     components: [
+        {kind: "Scrim", onclick: "onScrimClick", components: [
+            {kind: "enyo.SpinnerLarge", name: "spinner", showing: true, style: '-webkit-box-align: center !important;position: absolute;top:30%;right:45%',pack: 'center'},
+        ]},    
         { name: "video", kind: "enyo.Video", className: "video-default", showControls: ""},
         /*{kind: "HtmlContent", name: "video", srcId: "myHtml5Video"},*/
         { name: "headerBar", kind: "HFlexBox", className: "vid-header-bar show-vid-header-bar",
@@ -329,9 +332,8 @@ enyo.kind({
         }
       
 	},
-    test1Clicked: function() {
-        this.log("stupid seek to 350");
-        this.video.currentTime = 350.1;
+    onScrimClick: function() {
+        //this.$.scrim.hide();
     },
 	setFullScreen: function (boolFullScreen) {
 		  if (window.PalmSystem) {
@@ -353,6 +355,7 @@ enyo.kind({
 	},   
     pmoChanged: function() {
        if (this.pmo !== undefined) {
+        this.$.scrim.show();
         var durationInSecs = this.pmo.duration / 1000;
         var viewOffsetInSecs = this.pmo.viewOffset / 1000;
         this.duration = Math.floor(durationInSecs);
@@ -455,6 +458,7 @@ enyo.kind({
                 thisInst.mediaplayerInitiatedPauseHandler();
             },
             play: function (ev) {
+                thisInst.$.scrim.hide();
                 thisInst.adjustSize();
                 thisInst.hideControlsWithTimeout();
                 console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.play(): play ACK, instanceId='+thisInst.instanceId+'/'+thisInst.mediadService+' on "'+thisInst.pmo.title+'", node.paused='+thisInst.video.paused+' at '+thisInst.video.currentTime);
@@ -1093,6 +1097,7 @@ enyo.kind({
     onVideoError: function () {
         if (!this.video) { return; }
         var msg = null;
+        this.log("VIDEO ERROR: " + this.video.error);
         switch (this.video.error.code) {
             case 1:  // MEDIA_ERR_ABORTED
                 break;

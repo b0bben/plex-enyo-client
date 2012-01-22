@@ -2,16 +2,16 @@ enyo.kind({
 	name: "plex.WelcomeView",
 	kind: enyo.VFlexBox,
 	pack: "center",
-	className: "enyo-fit enyo-bg",
+	className: "enyo-fit",
+	style: "background: white;",
 	components: [
-		{name: "shadow", className: "enyo-sliding-view-shadow"},
-		
-		{kind: "PageHeader", name: "grid_header", className: "center-stuff",pack: 'center',content: "Welcome to Plex", className: "enyo-header-dark"},
 		{kind: enyo.HFlexBox, flex: 1, components: [
-			{kind: enyo.Spacer},
-			{flex: 1, layoutKind: "VFlexLayout", pack: "center", className: "center-stuff",  components: [
-				{kind: enyo.Image, pack: 'center',flex: 1,src: "PlexMobile_512x512.png", style: "width: 256px; height: 256px; padding-bottom: 40px"},
-				{kind: enyo.Button, pack: 'center',caption: "Preferences & Servers", width: "200px", onclick: "buttonClick", className: "enyo-button-dark"},	
+			{flex: 1, layoutKind: "VFlexLayout", pack: "center", align: "center", className: "center-stuff",  components: [
+				{kind: enyo.Spacer},
+				{kind: enyo.Image, pack: 'center',flex: 1, src: "images/sad_panda.png", style: "width: 508px; height: 399px;padding-bottom: 40px"},
+				{content: "This BETA version of Plex for webOS has expired."},
+				{content: "Please go to the App Catalog and look for a real version, or goto forums.plexapp.com and look for a new BETA."},
+				{content: "Thank you for your interest. //plex team"},
 			  {kind: enyo.Spacer},
 	
 			  

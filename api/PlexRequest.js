@@ -17,7 +17,30 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 	else {
 		this.baseUrl = "http://" + this.host + ":" + this.port;
 	}
-
+	this.collectMoreInfo = function() {
+		if (this.baseUrl) {
+			console.log("collecting more info about: " + this.baseUrl);
+			try {
+				var xml = new JKL.ParseXML(this.baseUrl);
+				var data = xml.parse();
+				this.gotServerResponse(data);				
+			}
+			catch (error)	{
+				console.log("error when trying to reach server for info: " + error);
+			}
+		}
+	},
+	this.gotServerResponse = function(data) {
+		if (data) {
+			console.log("received server info: " + data.MediaContainer);
+			if (data.MediaContainer.machineIdentifier) {
+				this.machineIdentifier = data.MediaContainer.machineIdentifier;
+			}
+			if (this.name === undefined || this.name === "") {
+				this.name = data.MediaContainer.friendlyName;
+			}
+		}
+	},
 	this.checkIfReachable = function() {
 		var url = this.baseUrl;
 		if (this.accessToken) {
@@ -36,6 +59,8 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 			console.log(data.MediaContainer.friendlyName + " is online and running version: " + data.MediaContainer.version);
 			if (window.Metrix && !this.statsRegistered) {
 				window.Metrix.customCounts("PMS", encodeURIComponent(data.MediaContainer.version), 1);
+				window.Metrix.customCounts("PMS_PLATFORM", encodeURIComponent(data.MediaContainer.platform), 1);
+				window.Metrix.customCounts("PMS_PLATFORM_VERSION", encodeURIComponent(data.MediaContainer.platformVersion), 1);
 				this.statsRegistered = true;
 			}
 		}
@@ -62,12 +87,15 @@ enyo.kind({
 	  this.inherited(arguments);
 		this.callback = callback;
 		this.serversRefreshedCallback = undefined;
+		this.myplexRefreshedCallback = undefined;
+		this.localRefreshedCallback = undefined;
 		var self = this;
 		this.servers = [];
 		this.myplexServers = [];
 		this.localSections = [];
 		this.myplexSections = [];
-		this.videoQuality = "8";
+		this.foundBonjourServers = [];
+		this.videoQuality = "6";
 		this.plex_access_key = "";
 		this.prefs = undefined;
 		this.loadPrefsFromCookie();
@@ -82,6 +110,12 @@ enyo.kind({
   },
   setCallback: function(callback){
   	this.callback = callback;
+  },
+  setMyPlexRefreshedCallback: function(callback) {
+  	this.myplexRefreshedCallback = callback;
+  },
+  setLocalRefreshedCallback: function(callback) {
+  	this.localRefreshedCallback = callback;
   },
   setServersRefreshedCallback: function(callback) {
   	this.serversRefreshedCallback = callback;
@@ -129,6 +163,22 @@ enyo.kind({
 	  this.log("saved prefs: " + enyo.json.stringify(this.prefs));
 	},
 
+	addServer: function(newServer) {
+		if (newServer) {
+			if (!this.urlIsInLocalServers(newServer.host)) {
+				this.servers.push(newServer);
+
+			this.savePrefs();
+	    this.log("added server manually: " + newServer.name);
+
+	    //refresh shit
+			this.loadPrefsFromCookie();
+			this.serversRefreshedCallback.call();
+			this.librarySections();
+			}
+		}
+	},
+
 	//BONJOUR START
 	searchNearbyServerWithBonjour: function() {
 		this.log("looking for servers via bonjour...");
@@ -151,14 +201,15 @@ enyo.kind({
   	  return;
   	}
 	
-		this.log("RESOLVE>: " + JSON.stringify(inResponse.targetName));
+		this.log("RESOLVE>: " + JSON.stringify(inResponse));
 
     //add found server to server list
     var serverName = inResponse.targetName;
     var serverUrl = "http://" + inResponse.IPv4Address; //no http included when found via bonjour
-    
-    var existingServer = this.serverForUrl(serverUrl);
+    var machineId = inResponse.textRecord[2].substring(18);
+    var existingServer = this.getServerWithMachineId(machineId); //this.serverForUrl(serverUrl);
     if (!existingServer) {
+    	this.foundBonjourServers.push({name: serverName, address: inResponse.IPv4Address, machineIdentifier: machineId});
     	serverUrl += ":32400/servers";
    		var xml = new JKL.ParseXML(serverUrl);
 		 	xml.async(enyo.bind(this,"processLocalServerViaBonjour"));
@@ -178,11 +229,13 @@ enyo.kind({
 			foundServers = data.MediaContainer.Server;
 		}
 
+		this.log("found bonjour servers: " + this.foundBonjourServers.length);
   	for(var i=0; i < foundServers.length; i++){
   		var server = foundServers[i];
-  		
-	    if (!this.isInLocalServers(server.machineIdentifier)) {
-	    	this.log("creating local plexserver: " + server.name + " address: " + server.address);
+  
+  		//servers found via bonjour and called for on windows are missing address sometimes, they suck!
+	    if (!this.isInLocalServers(server.machineIdentifier) && server.address) {
+	    	this.log("creating local plexserver: " + server.name + " host: " + server.address);
 	    	var foundServer = new PlexServer(server.machineIdentifier,
 	    				server.name,
     		  		server.address, 
@@ -205,6 +258,7 @@ enyo.kind({
 	    //refresh shit
 			this.loadPrefsFromCookie();
 			this.serversRefreshedCallback.call();
+			this.librarySections();
   	}
 
 	},
@@ -221,6 +275,14 @@ enyo.kind({
 	  }
 	  return false;		
 	},
+	urlIsInLocalServers: function(url){
+	  //this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
+	  for (var i = 0; i < this.servers.length; i++) {
+	    if (this.servers[i].host === url)
+	      return true;
+	  }
+	  return false;		
+	},
 		
 	serverForUrl: function(serverUrl) {
 	  this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
@@ -229,6 +291,28 @@ enyo.kind({
 	      return this.servers[i];
 	  }
 	  return null;
+	},
+	serverForMachineId: function(machineId) {
+	  this.loadPrefsFromCookie(); //refresh list of servers incase we've added some without saving
+	  for (var i = 0; i < this.servers.length; i++) {
+	    if (this.servers[i].machineIdentifier == machineId)
+	      return this.servers[i];
+	  }
+	  return null;
+	},
+	removeServerWithMachineId: function(machineId) {
+	  for (var i = 0; i < this.servers.length; i++) {
+	    if (this.servers[i].machineIdentifier == machineId)
+	      this.servers.remove(this.servers[i]);
+	      this.savePrefs();
+	  }
+	},
+	removeServerWithHost: function(host) {
+	  for (var i = 0; i < this.servers.length; i++) {
+	    if (this.servers[i].host == host)
+	      this.servers.remove(this.servers[i]);
+	      this.savePrefs();
+	  }
 	},
 	checkServerReachability: function() {
 		var allServers = this.servers.concat(this.myplexServers);
@@ -250,6 +334,10 @@ enyo.kind({
 		}
 	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl, offset) {
+		var deviceInfo = enyo.fetchDeviceInfo();
+		this.log("serialNumber: "+ deviceInfo.serialNumber);
+		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
+
 	  //Step 1: general transcoding URL + server URL
 	  var transcodingUrl = "/video/:/transcode/segmented/start.m3u8";
 	  var fakeUrl = "http://localhost:32400"
@@ -267,7 +355,7 @@ enyo.kind({
 	  targetUrl += "&quality=" + this.videoQuality;
 	  //step 8: key
 	  targetUrl += "&key=" + encodeURIComponent(fakeUrl + pmo.key);
-	  targetUrl += "&session=" + "1111"; //enyo.fetchDeviceInfo().serialNumber
+	  targetUrl += "&session=" + session;
 	  //step 9: 3G flag
 	  targetUrl += "&3g=0" //no 3G on teh touchpad
 
@@ -356,19 +444,24 @@ enyo.kind({
 		this.callback(pmc,true);	
 	},
 	librarySections: function() {
+		this.log();
 		var url = "";
 		var sectionsUrl = "/system/library/sections";
 		var mediaObjs = [];
 		for(var i=0; i < this.servers.length; i++) {
 			var server = this.servers[i];
+			
 			url = server.baseUrl + sectionsUrl;
+			if (server.online) {
+				break;
+			}
 		}
 		var xml = new JKL.ParseXML(url);
  		xml.async(enyo.bind(this,"processLocalSections"));
  		xml.parse();
 	},
 	processLocalSections: function(data) {
-		console.log(data);
+		this.log();
 		this.localSections = [];
 		if (data !== undefined && data.MediaContainer.Directory.length > 0) {
 			for (var i = 0; i < data.MediaContainer.Directory.length; i++) {
@@ -378,7 +471,7 @@ enyo.kind({
 				//} 
 			};
 		}
-		this.callback(this.localSections);
+		this.localRefreshedCallback(this.localSections);
 	},	
 	recentlyAdded: function() {
 		var url = "/library/recentlyAdded";
@@ -448,8 +541,12 @@ enyo.kind({
 		return transcodeUrl;
 	},
 	stopTranscoder: function(server) {
+		var deviceInfo = enyo.fetchDeviceInfo();
+		this.log("serialNumber: "+ deviceInfo.serialNumber);
+		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
+		
 		if (server.hasOwnProperty("baseUrl")) {
-			var url = "/video/:/transcode/segmented/stop?session=" + "1111";
+			var url = "/video/:/transcode/segmented/stop?session=" + session;
 			var response = this.dataForUrlSync(server,url);
 			console.log("stopped transcoder, resp: " + response);
 		}
@@ -518,17 +615,17 @@ enyo.kind({
 	},
 	myPlexSections: function() {
 		if (this.myplexUser === undefined){
-			this.callback(undefined); //nothing to see here, move along
+			this.myplexRefreshedCallback.call(undefined);
 			return;
 		}
 		var authToken = this.myplexUser["authentication-token"];
-	  	var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
-  		var xml = new JKL.ParseXML(url);
+  	var url = "https://my.plexapp.com/pms/system/library/sections?X-Plex-Token=" + authToken;
+		var xml = new JKL.ParseXML(url);
 	 	xml.async(enyo.bind(this,"processMyPlexSections"));
 	 	xml.parse();
 	},
 	processMyPlexSections: function(data) {
-		console.log(data);
+		this.log();
 		this.myplexSections = [];
 		if (data.MediaContainer.Directory.length > 0) {
 			this.processMyPlexServers(data); //section list contains servers as well...
@@ -536,10 +633,11 @@ enyo.kind({
 				var item = data.MediaContainer.Directory[i];
 				if (!this.isInLocalSections(item)) {
 					this.myplexSections.push(item);
+					this.log("added myplex section: " + item);
 				} 
 			};
 		}
-		this.callback(this.myplexSections);
+		this.myplexRefreshedCallback(this.myplexSections);
 	},
 	isInLocalSections: function(item) {
 		for (var i = this.localSections.length - 1; i >= 0; i--) {

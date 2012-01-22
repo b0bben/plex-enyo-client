@@ -30,11 +30,11 @@ enyo.kind({
 		this.inherited(arguments);
 		this.serverChanged();
 	},
-	saveServer: function(inSender, inServerDetails) {
-		this.doSave(inServerDetails);
+	saveServer: function(inSender) {
+		this.doSave();
 	},
-	deleteServer: function(inSender, inServerIndex) {
-		this.doDelete(inServerIndex);
+	deleteServer: function(inSender) {
+		this.doDelete();
 	},
 	serverChanged: function() {
 		this.$.form.setServer(this.server);
@@ -53,14 +53,14 @@ enyo.kind({
 		server: undefined,
 	},
 	components: [
-		{name: "getServerStatus", kind: "WebService", onSuccess: "gotServerStatus", onFailure: "gotServerFailure"},
 		{name: "nameTitle", caption:$L("Server nickname"), kind: "RowGroup", components: [
 			{kind: "Input", name: "servername", hint: $L("Give this server a friendly name"), spellcheck: false, autocorrect:false},
 		]},
 		
 		{name: "serverTitle", caption:"Server location", kind: "RowGroup", components: [
-			{kind: "Input", name: "serverurl", hint: $L("Type your server URL address"), spellcheck: false, autocorrect:false, autoCapitalize: "lowercase", inputType:"url"},
+			{kind: "Input", name: "serverurl", hint: $L("Type your servers IP address"), spellcheck: false, autocorrect:false, autoCapitalize: "lowercase", inputType:"url"},
 		]},
+		{content:$L('IP address to your Plex Media Server, like this: 192.168.1.100'), className: "prefs-body-text", style:"margin-bottom:8px"},
 		
 		{name: "loginTitle", caption: "Login details", kind: "RowGroup", components: [
 			{kind: "Input", name: "username", hint: $L("Type your username"), autocorrect: false, spellcheck: false, changeOnInput: true, onchange: "keyTapped", onkeydown:"checkForEnter"},
@@ -74,7 +74,7 @@ enyo.kind({
 		]},
 		{name:"addServerButton", kind: "ActivityButton", caption: $L("Add server"),className:"enyo-button-affirmative accounts-btn", onclick: "addServerTapped"},
 		{name:"removeServerButton", kind: "ActivityButton", caption: $L("Remove this server"), active: false, className:"enyo-button-negative accounts-btn", onclick: "removeServerTapped"},
-			
+		{ name: "serverFailureDialog", kind: "MessageDialog", message: $L("Could not reach this server. Make sure it's online before adding it.") }	
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -106,51 +106,55 @@ enyo.kind({
 		
 	},
 	addServerTapped: function(inSender, inEvent) {
+	    this.$.addServerButton.setActive(true);
+      this.$.addServerButton.setDisabled(true);
       var serverName = this.$.servername.getValue();
       var serverUrl = this.$.serverurl.getValue();
       var username = this.$.username.getValue();
       var password = this.$.password.getValue();
 
-      		  var existingServer = window.PlexReq.serverForUrl(serverUrl);
-      if (existingServer != null) {
+      var existingServer = window.PlexReq.serverForUrl(serverUrl);
+      if (!existingServer) {
+	    	var addedServer = new PlexServer(undefined,
+		    				serverName,
+	    		  		serverUrl,
+	    		  		32400, //always 32400 for local servers
+	    		  		undefined,
+	    		  		undefined,
+	    		  		true,
+	    		  		"1",
+	    		  		undefined,
+	    		  		"1");
 
-        existingServer.name = serverName;
-        existingServer.username = username;
-        existingServer.password = password;
-        
-        window.PlexReq.savePrefs();
-        this.owner.owner.$.pane.back();
+	    	addedServer.collectMoreInfo(); //we need machineIdentifier and other cool stuff, so collect that by reaching out to the server
+        if (addedServer.machineIdentifier) {
+        	window.PlexReq.addServer(addedServer);
+        	window.PlexReq.savePrefs();
+        	this.$.addServerButton.setActive(false);
+      		this.$.addServerButton.setDisabled(false);
+        	
+        	this.doSave();
+        }
+        else
+        	this.$.serverFailureDialog.openAtCenter();
+        	this.$.addServerButton.setActive(false);
+      		this.$.addServerButton.setDisabled(false);
       } else {  
-	      this.$.getServerStatus.setUrl(serverUrl + ":32400/servers");
-	      this.$.getServerStatus.call();
+	      //this server is already in list
+	      this.doSave();
     }
 	},
 	removeServerTapped: function(inSender, inEvent) {
-		var prefCookie = enyo.getCookie("prefs");
-		
-		if (prefCookie !== undefined) {
-			var serverList = enyo.json.parse(prefCookie);
-			for (var i = serverList.length - 1; i >= 0; i--){
-				var serverAsJson = serverList[i];
-				if (serverAsJson.name == this.server.name && serverAsJson.host == this.server.host && serverAsJson.port == this.server.port){
-					this.doDelete(i);
-				}	
-			};
+		if (this.server && this.server.machineIdentifier) {
+			window.PlexReq.removeServerWithMachineId(this.server.machineIdentifier);
+			this.doDelete();
 		}
-	},
-	gotServerStatus: function(inSender, inResponse, inRequest) {
-  	this.log(inResponse);
-    /*    this.serverDetails = {name:serverName,
-        		  		host:serverUrl,
-        		  		port:32400, //always 32400
-        		  		user:username,
-        		  		pass:password,
-        		  		include: true};
-        
-        this.doSave(this.serverDetails);*/
-	},
-	gotServerFailure: function(inSender, inResponse, inRequest) {
-		this.log(inResponse);
+		else if (this.server && this.server.host) {
+			//something weird has happened, we don't have a machine ID
+			window.PlexReq.removeServerWithHost(this.server.host);
+			this.doDelete();
+
+		}
 	},
 	gotNothing: function() {
 	//placeholder

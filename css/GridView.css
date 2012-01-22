@@ -37,6 +37,7 @@
 	text-align: center;
 }
 .cover-shadow{
+	position: relative;
 	width:100px;
 	height:149px;	
 	border-image:url(../images/plexShadow.png) 10 round round;
@@ -75,5 +76,31 @@
 	margin-top: 10px;
 	
 }
-
+.seenFlag {
+	position: absolute;
+  top: -3%;
+  left: 30%;
+  width: 29px;
+  height: 26px;
+  z-index: -1;
+  opacity: 0.5;
+  -moz-opacity: 0.5;
+  filter:alpha(opacity=5);
+}
+.unwatched {
+  background: url(../images/unwatched.png) no-repeat;
+}
+.partly_watched {
+  background: url(../images/partly_watched.png) no-repeat;
+}
+.unwatched_count {
+	position: absolute;
+  top: -12%;
+  left: 40%;
+	font: normal normal bold 9px/normal Arial, sans-serif; 
+	color: white;
+	-webkit-border-image: url(../images/number-bubble.png) 12 12 11 11 stretch stretch;
+	-webkit-box-sizing: border-box;
+	border-width: 3px 5px 3px 5px;	
+}
 

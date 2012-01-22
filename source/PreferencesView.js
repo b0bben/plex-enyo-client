@@ -44,13 +44,14 @@ enyo.kind({
 						//local PMSes
 						{kind: "RowGroup", caption: $L("Servers on your network"), style: "margin-bottom: 10px", components: [
 							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
-								{kind: enyo.Item, onclick: "listItemTap", className: "server-list-item",layoutKind: "HFlexLayout", components: [
-									{name: "serverName", label: "Server nr 1", flex: 1},
+								{kind: enyo.Item, name: "localItem", onclick: "listItemTap", showing: false, className: "server-list-item",layoutKind: "HFlexLayout", components: [
+									{kind: "LabeledContainer", flex: 1, name: "serverName",label: "Server nr 1"},
+									{name: "localOnlineStatus", content: "", className: "enyo-label"},
 								]},
 							]},
-							//{kind: enyo.Item, className: "server-list-item", layoutKind: "HFlexLayout", components: [
-								//{content: $L("Add new network server ..."), onclick: "showAddServerForm"},
-							//]},
+							{kind: enyo.Item, className: "server-list-item", layoutKind: "HFlexLayout", components: [
+								{content: $L("Add new network server ..."), onclick: "showAddServerForm"},
+							]},
 						]},
 						{content:$L("All servers set to 'Show' will be available for browsing."), className: "prefs-body-text", style:"margin:none;"},
 
@@ -90,13 +91,14 @@ enyo.kind({
 		this.reloadPrefs();
 		this.$.pane.selectViewByName("mainPrefs");
 		//refresher that watches the server list for reachability
-		this.intervarlTimerId = setInterval(enyo.bind(this, this.checkServerReachability), 5000);
+		this.intervarlTimerId = setInterval(enyo.bind(this, this.checkServerReachability), 2000);
 	},
 	reloadPrefs: function() {
 		window.PlexReq.loadPrefsFromCookie();
 		if (window.PlexReq.myplexUser) {
 			this.$.loginButton.setShowing(false);
 			this.$.myplexLoginItem.setShowing(true);
+			this.$.myplexLoginItem.destroyControls();
 			this.$.myplexLoginItem.createComponent({name: "loggedInButton", 
 																content: $L("Logged in as ") + window.PlexReq.myplexUser.username + " (" +window.PlexReq.myplexUser.email + ")"});
 		}
@@ -106,6 +108,12 @@ enyo.kind({
 			this.$.loginButton.setShowing(true);
 		}
 
+		if (window.PlexReq.servers.length > 0) {
+			this.$.localItem.setShowing(true);
+		}
+		else {
+			this.$.localItem.setShowing(false);
+		}
 		//quality selector sanity check
 		if (window.PlexReq.videoQuality >= 3 && window.PlexReq.videoQuality <= 11) {
 			this.$.videoQuality.setValue(window.PlexReq.videoQuality);	
@@ -132,19 +140,15 @@ enyo.kind({
 	},
 
 	// new local servers
-	newServerAdded: function(inSender, inServer) {
-		window.PlexReq.servers.push(inServer);
-		window.PlexReq.savePrefs();
+	newServerAdded: function(inSender) {
+		this.reloadPrefs(); //force refresh of settings
 		this.$.pane.back();
 		
-		this.reloadPrefs(); //force refresh of settings
+		
 	},
 	serverRemoved: function(inSender, inServerIndex) {
-		window.PlexReq.servers.remove(inServerIndex);
-		window.PlexReq.savePrefs();
+		this.reloadPrefs(); //force refresh of settings
 		this.$.pane.back();
-		
-		window.PlexReq.reloadPrefs(); //force refresh of settings
 	},
 	//myplex
 	loggedInToMyPlex: function(inSender, myPlexUserData) {
@@ -161,6 +165,7 @@ enyo.kind({
 		//plexReq is constantly watching the servers and updating their .online flag when reachability changes,
 		//so we just need to refresh the list to show the current reachability status
 		this.$.myPlexServerList.render();
+		this.$.serverList.render();
 	},
 	logoutFromMyPlex: function(inSender, myPlexUserData) {
 		if (myPlexUserData !== undefined) {
@@ -193,21 +198,24 @@ enyo.kind({
 			return true;
 		}
 	},
-	myplexLoginItemTap: function(inSender, inEvent) {
-		this.$.pane.selectViewByName("myPlexForm");
-		this.$.myPlexForm.setMyPlexDetails(window.PlexReq.myplexUser);
-	},
-	backHandler: function(inSender) {
-		this.$.pane.back();
-	},
 	listSetupRow: function(inSender, inIndex) {
 		this.log("listar servers");
 		
     // check if the row is selected
 		if (window.PlexReq.servers !== undefined && inIndex < window.PlexReq.servers.length) {
-			this.$.serverName.setContent(window.PlexReq.servers[inIndex].name);
+			var localServer = window.PlexReq.servers[inIndex];
+			var reachabilityStatus = localServer.online ? $L("online") : $L("offline");
+			this.$.serverName.setLabel(localServer.name);
+			this.$.localOnlineStatus.setContent(reachabilityStatus);
+			if (!localServer.online) {
+				this.$.localItem.setDisabled(true);
+			}			
 			return true;
 		}
+	},
+	myplexLoginItemTap: function(inSender, inEvent) {
+		this.$.pane.selectViewByName("myPlexForm");
+		this.$.myPlexForm.setMyPlexDetails(window.PlexReq.myplexUser);
 	},
 	listItemTap: function(inSender, inEvent) {
 		selectedRow = inEvent.rowIndex;
@@ -217,6 +225,9 @@ enyo.kind({
 			this.$.serverForm.setServer(server);
 			
 		}
+	},
+	backHandler: function(inSender) {
+		this.$.pane.back();
 	},
 	togglePreferenceClick: function(inSender, inState) {
 	    this.log("Toggled to state" + inState + " for server:"+inSender);

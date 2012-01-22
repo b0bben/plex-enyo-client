@@ -24,8 +24,8 @@ enyo.kind({
     this.objCurrNavItem = "";
     this.selectedRow = -1;
     this.log("created MyPlexSectionView");
-    //this.$.cells.destroyControls();
-    //this.$.serverList.render();
+    this.$.cells.destroyControls();
+    this.$.serverList.render();
     
   },
   headerContentChanged: function() {
@@ -34,10 +34,14 @@ enyo.kind({
   },
   localMediaContainerChanged: function() {
     this.isLocal = true;
+    this.created = false;
+    this.sectionsUi = [];
     this.buildSections();
   },
   myplexMediaContainerChanged: function() {
     this.isMyPlex = true;
+    this.created = false;
+    this.sectionsUi = [];
     this.buildSections();
   },
   buildSections: function() {
