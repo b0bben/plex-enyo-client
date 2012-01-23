@@ -371,6 +371,29 @@ enyo.kind({
 	  return server.baseUrl + targetUrl;
 	  
 	},
+	postProgressForVideo: function(server,key,timeInMs) {
+		var deviceInfo = enyo.fetchDeviceInfo();
+		this.log("serialNumber: "+ deviceInfo.serialNumber);
+		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
+		
+		if (server.baseUrl && key && timeInMs) {
+			var url = "/:/progress?key="+ key + "&identifier=com.plexapp.plugins.library&time=" + timeInMs;
+			var response = this.dataForUrlAsync(server,url);
+			console.log("posting progress: " + timeInMs);
+		}
+
+	},
+	stopTranscoder: function(server) {
+		var deviceInfo = enyo.fetchDeviceInfo();
+		this.log("serialNumber: "+ deviceInfo.serialNumber);
+		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
+		
+		if (server.hasOwnProperty("baseUrl")) {
+			var url = "/video/:/transcode/segmented/stop?session=" + session;
+			var response = this.dataForUrlSync(server,url);
+			console.log("stopped transcoder, resp: " + response);
+		}
+	},
 	authWithUrl: function(plexUrl) {
 		var publicKey = "KQMIY6GATPC63AIMC4R2";
 		var privateKey = decode64("k3U6GLkZOoNIoSgjDshPErvqMIFdE0xMTx8kgsrhnC0=");
@@ -540,17 +563,7 @@ enyo.kind({
 		}
 		return transcodeUrl;
 	},
-	stopTranscoder: function(server) {
-		var deviceInfo = enyo.fetchDeviceInfo();
-		this.log("serialNumber: "+ deviceInfo.serialNumber);
-		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
-		
-		if (server.hasOwnProperty("baseUrl")) {
-			var url = "/video/:/transcode/segmented/stop?session=" + session;
-			var response = this.dataForUrlSync(server,url);
-			console.log("stopped transcoder, resp: " + response);
-		}
-	},
+
 
 
 	// MYPLEX START

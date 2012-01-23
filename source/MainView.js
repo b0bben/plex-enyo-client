@@ -154,7 +154,7 @@ enyo.kind({
 	},
 	closePrefsView: function(inView) {
 		this.log();
-		//clearInterval(this.$.prefsView.intervarlTimerId);
+		clearInterval(this.$.prefsView.intervarlTimerId);
 		this.$.pane.back();
 		this.$.prefsView.hide();
 		//enyo.scrim.show();

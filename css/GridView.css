@@ -96,11 +96,19 @@
 .unwatched_count {
 	position: absolute;
   top: -12%;
-  left: 40%;
+  left: 35%;
 	font: normal normal bold 9px/normal Arial, sans-serif; 
 	color: white;
+	background: black;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	-webkit-border-radius: 4px;
+	/*
 	-webkit-border-image: url(../images/number-bubble.png) 12 12 11 11 stretch stretch;
 	-webkit-box-sizing: border-box;
 	border-width: 3px 5px 3px 5px;	
+	*/
 }
 

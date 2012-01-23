@@ -105,6 +105,10 @@ enyo.kind({
 	},
 	gotMediaContainer: function(pmc, saveInStack) {
 		this.log();
+		this.count = 0;
+		this.$.selection.clear();
+		//this.$.grid_list.punt();
+
 		if (saveInStack && pmc) {
 			this.viewStack.push(pmc); //save for later user
 			this.stackPosition = this.viewStack.length-1;
@@ -114,8 +118,7 @@ enyo.kind({
 		this.count = parseInt(this.mediaContainer.size); //size is always there
 		//start building the grid now
 		this.buildCells();
-		this.$.selection.clear();
-		this.$.grid_list.punt();
+
 
 		//set grid title to something we care about
 		if (this.mediaContainer.title2) {
@@ -174,23 +177,35 @@ enyo.kind({
 			this.cells.push(c);
 		}
 		this.log("cells: " + this.cells.length);
+	
+		
+		this.$.grid_list.punt();
 		this.$.grid_list.refresh();
+
 	},
 	listSetupRow: function(inSender, inIndex) {
 		var idx = inIndex * this.cellCount;
-		
+		this.log("idx: " + idx);
+		this.log("count: " + this.count);
+		this.log("cells: " + this.cellCount);
 		if (idx >= 0 && idx < this.count) {
 			for (var i=0, c; c=this.cells[i]; i++, idx++) {
+				var gridItemsLeft = this.count - idx;
+				this.log("gridItemsLeft: " + gridItemsLeft);
+				this.log("i: " + i);
 				if (idx < this.count) {
 					var pmo = this.getPlexMediaObject(idx);
-					//this.log("idx: " + idx);
 					if (pmo === undefined) {
-						return true;
+						this.log("den tomma");
+						break;
 					}
 					if (pmo.thumb !== undefined) {
 						var thumbUrl = window.PlexReq.getImageTranscodeUrl(this.server,200,200,pmo.thumb);
 						//coverart img and properties
 						c.$.coverDiv.$.coverImg.setSrc(thumbUrl);						
+					}
+					else {
+						c.$.coverDiv.$.coverImg.setSrc("");	
 					}
 
 					var lbl = pmo.title;
@@ -250,16 +265,19 @@ enyo.kind({
 						default:
 							break;
 					}
-
-					//this.log("returning cover");
 				} else {
-					//this.log("NOT returning cover");
-					return false;
+					c.$.coverDiv.hide();
+					c.$.cover_label.hide();
+					c.$.cover_sublabel.hide();
+					this.log("break");
+					//break;
 				}
 
 			}
+			this.log("returning " + idx);
 			return true;
 		}
+		this.log("NOT returning " + idx);
 		return false;
 	},
 	cellClick: function(inSender, inEvent, inRowIndex) {
