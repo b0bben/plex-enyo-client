@@ -54,14 +54,14 @@ enyo.kind({
 							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
 								{kind: enyo.Item, name: "localItem", onclick: "listItemTap", tapHighlight: true, className: "server-list-item",layoutKind: "HFlexLayout", components: [
 									{kind: "LabeledContainer", flex: 1, name: "serverName",label: "Server nr 1"},
-									{name: "localOnlineStatus", content: "", className: "enyo-label"},
+									{name: "localOnlineStatus", content: "", style: "color: green;", className: "enyo-label"},
 								]},
 							]},
 							{kind: enyo.Item, className: "server-list-item", layoutKind: "HFlexLayout", components: [
 								{content: $L("Add new network server ..."), onclick: "showAddServerForm"},
 							]},
 						]},
-
+						/*{kind: "Button", caption: $L("Add new network server ..."), onclick: "showAddServerForm"},	*/
 						{kind: "RowGroup", caption: $L("Video quality"), components: [
 							{kind: "ListSelector", name: "videoQuality", value: 1, onChange: "videoQualityChanged", items: [
 								{caption: $L("10 Mbps, 1080p"), value: 11},
@@ -87,13 +87,13 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
+		window.PlexReq.loadPrefsFromCookie();
 		this.reloadPrefs();
 		this.$.pane.selectViewByName("mainPrefs");
 		//refresher that watches the server list for reachability
 		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersUpdate"));
 	},
 	reloadPrefs: function() {
-		window.PlexReq.loadPrefsFromCookie();
 		if (window.PlexReq.myplexUser) {
 			this.$.loginButton.setShowing(false);
 			this.$.myplexLoginItem.setShowing(true);
@@ -121,10 +121,11 @@ enyo.kind({
 			this.$.videoQuality.setValue(6);
 		}
 		
-		this.render();
-		
-		this.$.serverList.render();; //force-refresh local server list
-		this.$.myPlexServerList.render(); //force-refresh myplex server list
+		//this.render();
+		//this.$.serverList.punt();
+		//this.$.serverList.render();
+		//this.$.serverList.render();; //force-refresh local server list
+		//this.$.myPlexServerList.render(); //force-refresh myplex server list
 		
 	},
 	showAddServerForm: function(inSender) {
@@ -140,13 +141,15 @@ enyo.kind({
 
 	// new local servers
 	newServerAdded: function(inSender) {
-		this.reloadPrefs(); //force refresh of settings
+		//this.reloadPrefs(); //force refresh of settings
+		this.$.serverList.render();
 		this.$.pane.back();
 		
 		
 	},
 	serverRemoved: function(inSender, inServerIndex) {
-		this.reloadPrefs(); //force refresh of settings
+		//this.reloadPrefs(); //force refresh of settings
+		this.$.serverList.render();
 		this.$.pane.back();
 	},
 	//myplex
@@ -163,6 +166,7 @@ enyo.kind({
 		this.log("got servers updated event, refresing both myplex and local server list");
 		//plexReq is constantly watching the servers and updating their .online flag when reachability changes,
 		//so we just need to refresh the list to show the current reachability status
+		this.reloadPrefs();
 		this.$.myPlexServerList.render();
 		this.$.serverList.render();
 	},
@@ -203,8 +207,10 @@ enyo.kind({
 			this.$.serverName.setLabel(localServer.name);
 			this.$.localOnlineStatus.setContent(reachabilityStatus);
 			if (!localServer.online) {
-				this.$.localItem.setDisabled(true);
-			}			
+				this.$.localOnlineStatus.setStyle("color: red;");
+				//this.$.localItem.setDisabled(true);
+			}
+			this.$.localItem.show();			
 			return true;
 		}
 	},
@@ -222,6 +228,7 @@ enyo.kind({
 		}
 	},
 	backHandler: function(inSender) {
+		window.PlexReq.loadPrefsFromCookie();
 		this.$.pane.back();
 	},
 	videoQualityChanged: function(inSender, inValue, inOldValue) {

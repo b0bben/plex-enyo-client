@@ -41,6 +41,11 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 			}
 		}
 	},
+
+	this.setReachabilityCallback = function(callback) {
+		this.reachabilityCallback = callback;
+	};
+
 	this.checkIfReachable = function() {
 		var url = this.baseUrl;
 		if (this.accessToken) {
@@ -54,6 +59,8 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 	};
 	this.reachCheckResponse = function(data) {
 		//console.log("reachabiliityCheckResp: " + data);
+		var oldState = this.online;
+
 		if (data !== undefined) {
 			this.online = true;
 			console.log(data.MediaContainer.friendlyName + " is online and running version: " + data.MediaContainer.version);
@@ -69,6 +76,14 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 			this.include = false;
 			console.log(this.name + " is offline");
 		}
+
+		//if (oldState !== this.online) {
+			//state has changed, notify those that care
+			if (this.reachabilityCallback) {
+				this.reachabilityCallback.call();
+				console.log("sent new reachability status");		
+			}
+		//}
 	};
 
 	//check (async-ly) if server is reachable at this point
@@ -121,6 +136,15 @@ enyo.kind({
   setServersRefreshedCallback: function(callback) {
   	this.serversRefreshedCallback = callback;
   },
+  checkServerReachability: function() {
+		var allServers = this.servers.concat(this.myplexServers);
+		for (var i = 0; i < allServers.length; i++) {
+			var server = allServers[i];
+			server.setReachabilityCallback(enyo.bind(this,"serversRefreshedCallback"));
+			server.checkIfReachable();
+			this.log("started reachability check on " + server.name);
+		};
+	},
 	loadPrefsFromCookie: function() {
 		var prefCookie = enyo.getCookie("prefs");
 		
@@ -169,6 +193,7 @@ enyo.kind({
 	addServer: function(newServer) {
 		if (newServer) {
 			if (!this.serverForMachineId(newServer.machineIdentifier)) {
+				newServer.setReachabilityCallback(enyo.bind(this,"serversRefreshedCallback"));
 				this.servers.push(newServer);
 
 			this.savePrefs();
@@ -280,14 +305,6 @@ enyo.kind({
 	      this.servers.remove(this.servers[i]);
 	      this.savePrefs();
 	  }
-	},
-	checkServerReachability: function() {
-		var allServers = this.servers.concat(this.myplexServers);
-		for (var i = 0; i < allServers.length; i++) {
-			var server = allServers[i];
-			server.checkIfReachable();
-			this.log("started reachability check on " + server.name);
-		};
 	},
 	getServerWithMachineId: function(machineid) {
 		if (machineid !== undefined) {

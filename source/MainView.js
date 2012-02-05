@@ -165,10 +165,8 @@ enyo.kind({
 		this.$.prefsView.hide();
 		//enyo.scrim.show();
 		//refresh sections after being in prefs
-		//window.PlexReq.setCallback(enyo.bind(this,"gotMyPlexSections"));
-		//window.PlexReq.loadPrefsFromCookie();
-		//window.PlexReq.librarySections();
-		//window.PlexReq.myPlexSections();
+		this.$.localSectionsView.render();
+		this.$.myPlexSectionsView.render();
 		this.startLookingForServers();
 		
 	},
