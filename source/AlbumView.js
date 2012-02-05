@@ -133,7 +133,7 @@ enyo.kind({
 						
 						//this.$.itemMedia.addRemoveClass("playing", (this.arSongs[intIndex]._id === this.strCurrTrackID));
 						//this.$.itemMedia.addRemoveClass("odd", (intIndex % 2 === 0 ));
-						this.log("created song: " + track.title);
+						//this.log("created song: " + track.title);
 						//this.$.itemMedia.setContent("-----");
 						return true
 					}

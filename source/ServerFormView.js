@@ -130,6 +130,7 @@ enyo.kind({
         if (addedServer.machineIdentifier) {
         	window.PlexReq.addServer(addedServer);
         	window.PlexReq.savePrefs();
+        	window.PlexReq.librarySections(); //force refresh of sections (and servers, since that endpoint finds nearby servers)
         	this.$.addServerButton.setActive(false);
       		this.$.addServerButton.setDisabled(false);
         	

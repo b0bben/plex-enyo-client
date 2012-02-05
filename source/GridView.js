@@ -185,18 +185,18 @@ enyo.kind({
 	},
 	listSetupRow: function(inSender, inIndex) {
 		var idx = inIndex * this.cellCount;
-		this.log("idx: " + idx);
-		this.log("count: " + this.count);
-		this.log("cells: " + this.cellCount);
+		//this.log("idx: " + idx);
+		//this.log("count: " + this.count);
+		//this.log("cells: " + this.cellCount);
 		if (idx >= 0 && idx < this.count) {
 			for (var i=0, c; c=this.cells[i]; i++, idx++) {
 				var gridItemsLeft = this.count - idx;
-				this.log("gridItemsLeft: " + gridItemsLeft);
-				this.log("i: " + i);
+				//this.log("gridItemsLeft: " + gridItemsLeft);
+				//this.log("i: " + i);
 				if (idx < this.count) {
 					var pmo = this.getPlexMediaObject(idx);
 					if (pmo === undefined) {
-						this.log("den tomma");
+						//this.log("den tomma");
 						break;
 					}
 					if (pmo.thumb !== undefined) {
@@ -269,15 +269,15 @@ enyo.kind({
 					c.$.coverDiv.hide();
 					c.$.cover_label.hide();
 					c.$.cover_sublabel.hide();
-					this.log("break");
+					//this.log("break");
 					//break;
 				}
 
 			}
-			this.log("returning " + idx);
+			//this.log("returning " + idx);
 			return true;
 		}
-		this.log("NOT returning " + idx);
+		//this.log("NOT returning " + idx);
 		return false;
 	},
 	cellClick: function(inSender, inEvent, inRowIndex) {

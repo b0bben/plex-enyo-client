@@ -71,7 +71,7 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 		}
 	};
 
-	//check (asyncl-y) if server is reachable at this point
+	//check (async-ly) if server is reachable at this point
 	this.checkIfReachable();
 	
 	
@@ -96,6 +96,7 @@ enyo.kind({
 		this.myplexSections = [];
 		this.foundBonjourServers = [];
 		this.videoQuality = "6";
+		this.useAutoDiscovery = true;
 		this.plex_access_key = "";
 		this.prefs = undefined;
 		this.loadPrefsFromCookie();
@@ -129,8 +130,8 @@ enyo.kind({
 			this.prefs = enyo.mixin(this.prefs, enyo.json.parse(prefCookie));
 			//this.log("loaded prefs: " + enyo.json.stringify(this.prefs));
 			this.myplexUser = this.prefs.myplexUser;
-			this.videoQuality = this.prefs.videoQuality;
-
+			this.videoQuality = this.prefs.videoQuality || "6";
+			this.useAutoDiscovery = this.prefs.useAutoDiscovery || true;
 			this.servers = [];
 			this.myplexServers = [];
 			//need to create PlexServer insatnces for reachability to work
@@ -158,14 +159,16 @@ enyo.kind({
 			myplexServers: this.myplexServers,
 			myplexUser: this.myplexUser,
 			videoQuality: this.videoQuality,
+			useAutoDiscovery: this.useAutoDiscovery,
 		};
 	  enyo.setCookie("prefs", enyo.json.stringify(this.prefs));
-	  this.log("saved prefs: " + enyo.json.stringify(this.prefs));
+	  //this.log("saved prefs: " + enyo.json.stringify(this.prefs));
+	  this.log();
 	},
 
 	addServer: function(newServer) {
 		if (newServer) {
-			if (!this.urlIsInLocalServers(newServer.host)) {
+			if (!this.serverForMachineId(newServer.machineIdentifier)) {
 				this.servers.push(newServer);
 
 			this.savePrefs();
@@ -174,7 +177,6 @@ enyo.kind({
 	    //refresh shit
 			this.loadPrefsFromCookie();
 			this.serversRefreshedCallback.call();
-			this.librarySections();
 			}
 		}
 	},
@@ -208,59 +210,24 @@ enyo.kind({
     var serverUrl = "http://" + inResponse.IPv4Address; //no http included when found via bonjour
     var machineId = inResponse.textRecord[2].substring(18);
     var existingServer = this.getServerWithMachineId(machineId); //this.serverForUrl(serverUrl);
+    
     if (!existingServer) {
-    	this.foundBonjourServers.push({name: serverName, address: inResponse.IPv4Address, machineIdentifier: machineId});
-    	serverUrl += ":32400/servers";
-   		var xml = new JKL.ParseXML(serverUrl);
-		 	xml.async(enyo.bind(this,"processLocalServerViaBonjour"));
-		 	xml.parse();
-	  	
+	  	this.log("creating local (bonjour) plexserver: " + serverName + " host: " + serverUrl);
+    	var foundServer = new PlexServer(machineId,
+    				serverName,
+  		  		serverUrl, 
+  		  		32400,
+  		  		undefined,
+  		  		undefined,
+  		  		true,
+  		  		"1",
+  		  		undefined,
+  		  		"1");
+
+      //this will force server to refresh it's library sections, which will give us nearby-servers as well
+      this.addServer(foundServer);
+      this.librarySections();
     }
-	},
-	processLocalServerViaBonjour: function(data) {
-		this.log();
-		var foundServers = [];
-		var addedNewServers = false;
-
-		if (data.MediaContainer.size === "1") {
-			foundServers.push(data.MediaContainer.Server);
-		}
-		else if (data.MediaContainer.size > 1) {
-			foundServers = data.MediaContainer.Server;
-		}
-
-		this.log("found bonjour servers: " + this.foundBonjourServers.length);
-  	for(var i=0; i < foundServers.length; i++){
-  		var server = foundServers[i];
-  
-  		//servers found via bonjour and called for on windows are missing address sometimes, they suck!
-	    if (!this.isInLocalServers(server.machineIdentifier) && server.address) {
-	    	this.log("creating local plexserver: " + server.name + " host: " + server.address);
-	    	var foundServer = new PlexServer(server.machineIdentifier,
-	    				server.name,
-    		  		server.address, 
-    		  		server.port,
-    		  		undefined,
-    		  		undefined,
-    		  		true,
-    		  		"1",
-    		  		undefined,
-    		  		"1");		
-	      this.servers.push(foundServer);
-	      addedNewServers = true;
-	    }
-  	}
-
-  	if (addedNewServers) {
-	    this.savePrefs();
-	    this.log("added bonjour server: " + server.name);
-
-	    //refresh shit
-			this.loadPrefsFromCookie();
-			this.serversRefreshedCallback.call();
-			this.librarySections();
-  	}
-
 	},
 	genericFailure: function(inSender, inResponse) {
 		this.log("failure: " + JSON.stringify(inResponse));
@@ -335,9 +302,8 @@ enyo.kind({
 	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl, offset) {
 		var deviceInfo = enyo.fetchDeviceInfo();
-		this.log("serialNumber: "+ deviceInfo.serialNumber);
 		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
-
+		this.log("session_id/serialNumber: "+ session);
 	  //Step 1: general transcoding URL + server URL
 	  var transcodingUrl = "/video/:/transcode/segmented/start.m3u8";
 	  var fakeUrl = "http://localhost:32400"
@@ -479,6 +445,10 @@ enyo.kind({
 				break;
 			}
 		}
+		if (url === "") {
+			return;
+		}
+
 		var xml = new JKL.ParseXML(url);
  		xml.async(enyo.bind(this,"processLocalSections"));
  		xml.parse();
@@ -486,15 +456,44 @@ enyo.kind({
 	processLocalSections: function(data) {
 		this.log();
 		this.localSections = [];
-		if (data !== undefined && data.MediaContainer.Directory.length > 0) {
-			for (var i = 0; i < data.MediaContainer.Directory.length; i++) {
-				var item = data.MediaContainer.Directory[i];
+		if (data !== undefined && data.MediaContainer.size > 0) {
+			for (var i = 0; i < data.MediaContainer.size; i++) {
+				var item;
+
+				if (data.MediaContainer.size == 1) {
+					item = data.MediaContainer.Directory;		
+				}
+				else {
+					item = data.MediaContainer.Directory[i];	
+				}
+				
 				//if (!this.isInLocalSections(item)) {
-					this.localSections.push(item);
+				this.localSections.push(item);
+				
+				//sections are found on all local servers (nearby servers too), we collect the servers from there as well, it's teh best!
+				var existingServer = this.getServerWithMachineId(item.machineIdentifier);
+				
+				if (!existingServer) {
+			  	this.log("creating local (via sections) plexserver: " + item.serverName + " host: " + item.host);
+		    	var foundServer = new PlexServer(item.machineIdentifier,
+		    				item.serverName,
+		  		  		item.host, 
+		  		  		item.port,
+		  		  		undefined,
+		  		  		undefined,
+		  		  		true,
+		  		  		"1",
+		  		  		undefined,
+		  		  		"1");		
+		      this.servers.push(foundServer);
+		      this.serversRefreshedCallback.call();
+		    }
 				//} 
 			};
 		}
+		this.log("collected local sections: " + this.localSections);
 		this.localRefreshedCallback(this.localSections);
+		this.savePrefs();
 	},	
 	recentlyAdded: function() {
 		var url = "/library/recentlyAdded";

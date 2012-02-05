@@ -41,10 +41,12 @@ enyo.kind({
 		if (!enyo.fetchDeviceInfo()) {
 			this.$.browserMenuButton.show();
 		}
-		 
+		else {
 		 //collect some stats
-		window.Metrix.postDeviceData();
-		
+			window.Metrix.postDeviceData();
+			
+		}
+		 	
 		this.$.pane.selectViewByName("mainBrowsingView");
 		this.rootMediaContainer = "";
 		this.selectedSection = "";
@@ -55,7 +57,9 @@ enyo.kind({
 		else
 		{
 			//start collecting servers
-			window.PlexReq.searchNearbyServerWithBonjour();
+			if (window.PlexReq.useAutoDiscovery) {
+				window.PlexReq.searchNearbyServerWithBonjour();	
+			}
 			this.startLookingForServers();	
 		}	
 		
@@ -89,6 +93,7 @@ enyo.kind({
     window.close();
   },
 	gotLocalSections: function(pmc) {
+		this.log("sections: " + pmc);
 		if (pmc !== undefined && pmc.length > 0) {
 			this.log(pmc);
 			
@@ -129,6 +134,7 @@ enyo.kind({
 	showGridView: function(inSender, inSection) {
 		this.selectedSection = inSection; //actually both the section AND the server it belongs to
     this.$.grid_view.setParentMediaContainer(this.selectedSection);
+    //this.$.mainBrowsingView.selectViewByName("middle");
 	},
 	gotRecentlyAdded: function(pmc) {
 		this.$.startView.setServer(pmc[0].server);
@@ -154,7 +160,7 @@ enyo.kind({
 	},
 	closePrefsView: function(inView) {
 		this.log();
-		clearInterval(this.$.prefsView.intervarlTimerId);
+		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersRefreshed")); //need to reset this, since it was modified in prefs
 		this.$.pane.back();
 		this.$.prefsView.hide();
 		//enyo.scrim.show();

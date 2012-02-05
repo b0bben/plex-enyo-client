@@ -79,7 +79,7 @@
 .seenFlag {
 	position: absolute;
   top: -3%;
-  left: 30%;
+  left: 35%;
   width: 29px;
   height: 26px;
   z-index: -1;

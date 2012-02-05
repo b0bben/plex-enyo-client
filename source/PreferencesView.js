@@ -42,9 +42,17 @@ enyo.kind({
 						{content:$L("Use myPlex to access servers shared with you"), className: "prefs-body-text", style:"margin:none;"},
 						
 						//local PMSes
+						/*
+						{kind: "RowGroup", caption: $L("Server discovery"), components: [
+							{kind: "LabeledContainer", caption: $L("Discover local network servers"), components: [
+								{kind: "ToggleButton", name: "rememberPasswords", style: "padding: 0px;", onChange: "toggleAutoDiscovery", state: true},
+							]},
+						]},
+						{content:$L("If enabled, Plex will try to auto-discover servers on your network"), className: "prefs-body-text", style:"margin:none;"},
+						*/
 						{kind: "RowGroup", caption: $L("Servers on your network"), style: "margin-bottom: 10px", components: [
 							{name: "serverList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listSetupRow",components: [
-								{kind: enyo.Item, name: "localItem", onclick: "listItemTap", showing: false, className: "server-list-item",layoutKind: "HFlexLayout", components: [
+								{kind: enyo.Item, name: "localItem", onclick: "listItemTap", tapHighlight: true, className: "server-list-item",layoutKind: "HFlexLayout", components: [
 									{kind: "LabeledContainer", flex: 1, name: "serverName",label: "Server nr 1"},
 									{name: "localOnlineStatus", content: "", className: "enyo-label"},
 								]},
@@ -53,16 +61,7 @@ enyo.kind({
 								{content: $L("Add new network server ..."), onclick: "showAddServerForm"},
 							]},
 						]},
-						{content:$L("All servers set to 'Show' will be available for browsing."), className: "prefs-body-text", style:"margin:none;"},
 
-						/*
-						{kind: "RowGroup", caption: $L("Autofill"), components: [
-							{kind: "LabeledContainer", caption: $L("Names and Passwords"), components: [
-								{kind: "ToggleButton", name: "rememberPasswords", onChange: "togglePreferenceClick", preference: "rememberPasswords"}
-							]}
-						]},
-						{kind: "Button", caption: $L("Clear Autofill Information"), onclick: "", dialog: ""},
-						*/
 						{kind: "RowGroup", caption: $L("Video quality"), components: [
 							{kind: "ListSelector", name: "videoQuality", value: 1, onChange: "videoQualityChanged", items: [
 								{caption: $L("10 Mbps, 1080p"), value: 11},
@@ -91,7 +90,7 @@ enyo.kind({
 		this.reloadPrefs();
 		this.$.pane.selectViewByName("mainPrefs");
 		//refresher that watches the server list for reachability
-		this.intervarlTimerId = setInterval(enyo.bind(this, this.checkServerReachability), 2000);
+		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersUpdate"));
 	},
 	reloadPrefs: function() {
 		window.PlexReq.loadPrefsFromCookie();
@@ -160,8 +159,8 @@ enyo.kind({
 		this.reloadPrefs();
 		this.$.pane.back();
 	},
-	checkServerReachability: function() {
-		this.log("checking servers");
+	gotServersUpdate: function() {
+		this.log("got servers updated event, refresing both myplex and local server list");
 		//plexReq is constantly watching the servers and updating their .online flag when reachability changes,
 		//so we just need to refresh the list to show the current reachability status
 		this.$.myPlexServerList.render();
@@ -178,10 +177,6 @@ enyo.kind({
 			this.reloadPrefs();
 		}
 		this.$.pane.back();
-	},
-	gotMyPlexServers: function(pmc) {
-		//don't need to do anything with in-param since the serverlist will read the servers from plexreq when asked to refresh
-		this.$.myPlexServerList.render();
 	},
 	listMyPlexSetupRow: function(inSender, inIndex) {
 		this.log("listar myplex servers");
@@ -229,14 +224,16 @@ enyo.kind({
 	backHandler: function(inSender) {
 		this.$.pane.back();
 	},
-	togglePreferenceClick: function(inSender, inState) {
-	    this.log("Toggled to state" + inState + " for server:"+inSender);
-	},
 	videoQualityChanged: function(inSender, inValue, inOldValue) {
     if (inValue != inOldValue) {
     	window.PlexReq.videoQuality = inValue;
 			window.PlexReq.savePrefs();
 		}
+	},
+	toggleAutoDiscovery: function(inSender, inState) {
+		this.log("Toggled auto-discovery to state: " + inState);
+		window.PlexReq.useAutoDiscovery = inState;
+		window.PlexReq.savePrefs();
 	},
 	
 });
