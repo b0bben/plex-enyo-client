@@ -42,10 +42,6 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 		}
 	},
 
-	this.setReachabilityCallback = function(callback) {
-		this.reachabilityCallback = callback;
-	};
-
 	this.checkIfReachable = function() {
 		var url = this.baseUrl;
 		if (this.accessToken) {
@@ -77,13 +73,10 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 			console.log(this.name + " is offline");
 		}
 
-		//if (oldState !== this.online) {
+		if (oldState !== this.online) {
 			//state has changed, notify those that care
-			if (this.reachabilityCallback) {
-				this.reachabilityCallback.call();
-				console.log("sent new reachability status");		
-			}
-		//}
+			pubsubz.publish( 'SERVER_UPDATED', this);
+		}
 	};
 
 	//check (async-ly) if server is reachable at this point
@@ -101,7 +94,6 @@ enyo.kind({
   create: function(callback) {
 	  this.inherited(arguments);
 		this.callback = callback;
-		this.serversRefreshedCallback = undefined;
 		this.myplexRefreshedCallback = undefined;
 		this.localRefreshedCallback = undefined;
 		var self = this;
@@ -122,6 +114,7 @@ enyo.kind({
   	clearInterval(this.reachIntervalId);
   },
   startReachabilityChecking: function() {
+  	this.checkServerReachability(); //inital request to start watching server, after this we'll check them regulary
   	this.reachIntervalId = setInterval(enyo.bind(this,"checkServerReachability"), 30000);
   },
   setCallback: function(callback){
@@ -133,14 +126,10 @@ enyo.kind({
   setLocalRefreshedCallback: function(callback) {
   	this.localRefreshedCallback = callback;
   },
-  setServersRefreshedCallback: function(callback) {
-  	this.serversRefreshedCallback = callback;
-  },
   checkServerReachability: function() {
 		var allServers = this.servers.concat(this.myplexServers);
 		for (var i = 0; i < allServers.length; i++) {
 			var server = allServers[i];
-			server.setReachabilityCallback(enyo.bind(this,"serversRefreshedCallback"));
 			server.checkIfReachable();
 			this.log("started reachability check on " + server.name);
 		};
@@ -193,15 +182,14 @@ enyo.kind({
 	addServer: function(newServer) {
 		if (newServer) {
 			if (!this.serverForMachineId(newServer.machineIdentifier)) {
-				newServer.setReachabilityCallback(enyo.bind(this,"serversRefreshedCallback"));
 				this.servers.push(newServer);
 
-			this.savePrefs();
-	    this.log("added server manually: " + newServer.name);
+				this.savePrefs();
+		    this.log("added server manually: " + newServer.name);
 
-	    //refresh shit
-			this.loadPrefsFromCookie();
-			this.serversRefreshedCallback.call();
+		    //refresh shit
+				this.loadPrefsFromCookie();
+				pubsubz.publish( 'SERVER_ADDED', newServer);
 			}
 		}
 	},
@@ -503,12 +491,12 @@ enyo.kind({
 		  		  		undefined,
 		  		  		"1");		
 		      this.servers.push(foundServer);
-		      this.serversRefreshedCallback.call();
+		      pubsubz.publish( 'SERVER_ADDED', foundServer);
 		    }
 				//} 
 			};
 		}
-		this.log("collected local sections: " + this.localSections);
+		this.log("collected local sections: " + this.localSections.length);
 		this.localRefreshedCallback(this.localSections);
 		this.savePrefs();
 	},	
@@ -632,14 +620,14 @@ enyo.kind({
     		  		"0");
 				this.myplexServers.push(foundServer);
 				addedNewServers = true;
+				pubsubz.publish( 'SERVER_ADDED', foundServer);
 			}
 		}
 		if (addedNewServers) {
 			this.savePrefs();
 			this.log("added myplex server: " + server.name);
 			//refresh shit
-			this.loadPrefsFromCookie();
-			this.serversRefreshedCallback.call();			
+			this.loadPrefsFromCookie();	
 		}
 	},
 	myPlexSections: function() {

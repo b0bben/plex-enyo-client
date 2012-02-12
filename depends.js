@@ -13,18 +13,19 @@ enyo.depends(
 	"css/VideoControl.css",
 	"css/MessageDialog.css",
 
-	//plex api
-	"api/PlexRequest.js",
-	"api/base64.js",
-	"api/jssha256.js",
-
-
 	//external modules
+	"external/pubsubz.js",
 	"external/jkl-parsexml.js",
 	"external/arrayextras.js",
 	"external/extensions.js",
 	"external/audiomanager.js",
 	"external/metrix.js",
+
+	//plex api
+	"api/PlexRequest.js",
+	"api/base64.js",
+	"api/jssha256.js",
+
 
 	//view src
 	"source/Utilities.js",

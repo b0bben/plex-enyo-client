@@ -24,7 +24,7 @@ enyo.kind({
 		{name: "grid_header", content: "Welcome to Plex", style: '-webkit-box-align: center !important',pack: 'center'},
 		{kind: enyo.Spacer},
 		{kind: "Button", name: "filterButton", className: "enyo-button-dark", style: "padding: 0;", caption: $L("Sorting"),components: [
-			{kind: "CustomListSelector", value: 1, onChange: "sectionFilterChanged", name: "filterMenu", style: "padding-left: 5px;"},
+			{kind: "ListSelector", name: "filterMenu", value: 1, onChange: "sectionFilterChanged", style: "padding-left: 5px;"},
 		]},
 
 		]},
@@ -49,6 +49,7 @@ enyo.kind({
 	rendered: function() {
 		this.inherited(arguments);
 		this.buildCells();
+		this.$.filterMenu.setValue(1);
 	},
 	resizeHandler: function() {
 		this.buildCells();
@@ -82,15 +83,18 @@ enyo.kind({
 		}
 	},
 	gotFiltersForSection: function(pmc) {
-		//this.$.filterMenu.items = [];
+
+		this.$.filterMenu.items = [];
 		for (var i=0; i < pmc.Directory.length; i++) {
 			var filter = pmc.Directory[i];
 			
 			this.$.filterMenu.items.push({caption: filter.title, value: filter.key});
 		};
-		this.$.filterMenu.setValue(1);
-		this.$.filterButton.setCaption("");
 		
+		this.$.filterMenu.itemsChanged();
+		this.$.filterMenu.render();
+		this.$.filterMenu.setValue(1);
+
 		//get the section details
 		window.PlexReq.setCallback(enyo.bind(this,"gotMediaContainer"));
 		this.server = this.parentMediaContainer.server;
@@ -101,7 +105,6 @@ enyo.kind({
 		this.log(inValue);
 		this.filterLevel = inValue;
 		this.reloadSectionWithFilterLevel(this.filterLevel);
-
 	},
 	gotMediaContainer: function(pmc, saveInStack) {
 		this.log();

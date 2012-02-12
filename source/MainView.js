@@ -74,8 +74,9 @@ enyo.kind({
 		window.PlexReq.setLocalRefreshedCallback(enyo.bind(this,"gotLocalSections"));
 		//start getting local sections, response from this will start getting myplex sections as well...
 		window.PlexReq.librarySections();	
-		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersRefreshed"));
-
+		//subscribe to server reachability changes
+		this.serverUpdatedSub = pubsubz.subscribe('SERVER_UPDATED',enyo.bind(this,"gotServersRefreshed"));
+		this.serverAddedSub = pubsubz.subscribe('SERVER_ADDED',enyo.bind(this,"gotServersRefreshed"));
 		//myplex sections
 		window.PlexReq.setMyPlexRefreshedCallback(enyo.bind(this,"gotMyPlexSections"));
 		window.PlexReq.myPlexSections();
@@ -93,16 +94,10 @@ enyo.kind({
     window.close();
   },
 	gotLocalSections: function(pmc) {
-		this.log("sections: " + pmc);
+		this.log("sections: " + pmc.length);
 		if (pmc !== undefined && pmc.length > 0) {
-			this.log(pmc);
-			
-			//this.$.left_pane.selectViewByName("localSectionsView");
-			//this.$.myPlexSectionsView.setShowing(true);
 			this.$.localSectionsView.show();	
 			this.$.localSectionsView.setLocalMediaContainer(pmc);
-			
-			
 		}
 		else {
 			//TODO: this.$.pane.selectViewByName("welcomeView");
@@ -160,7 +155,6 @@ enyo.kind({
 	},
 	closePrefsView: function(inView) {
 		this.log();
-		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersRefreshed")); //need to reset this, since it was modified in prefs
 		this.$.pane.back();
 		this.$.prefsView.hide();
 		//enyo.scrim.show();
@@ -196,5 +190,12 @@ enyo.kind({
 			this.$.musicPlayer.setTrackInfo(trackInfo);
 		}
 
+	},
+	destroy: function() {
+		this.log("destroying main view, removing subscribtions");
+		pubsubz.unsubscribe(this.serverUpdatedSub);
+		pubsubz.unsubscribe(this.serverAddedSub);
+		//call inherited for GC marking
+		this.inherited(arguments);
 	},
 });

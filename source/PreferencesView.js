@@ -35,7 +35,7 @@ enyo.kind({
 							{name: "myPlexServerList", kind:enyo.VirtualRepeater, style: "margin: -10px;", onSetupRow: "listMyPlexSetupRow",components: [
 								{kind: enyo.Item, className: "server-list-item", tapHighlight: true, layoutKind: "HFlexLayout", components: [
 									{kind: "LabeledContainer", flex: 1, name: "myPlexServerName",label: "Server nr 1"},
-									{name: "onlineStatus", content: "", className: "enyo-label"},
+									{name: "onlineStatus", content: "", style: "color: green;", className: "enyo-label"},
 								]}
 							]}
 						]},
@@ -91,7 +91,9 @@ enyo.kind({
 		this.reloadPrefs();
 		this.$.pane.selectViewByName("mainPrefs");
 		//refresher that watches the server list for reachability
-		window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersUpdate"));
+		//window.PlexReq.setServersRefreshedCallback(enyo.bind(this,"gotServersUpdate"));
+		this.serverUpdatedSub = pubsubz.subscribe('SERVER_UPDATED',enyo.bind(this,"gotServersUpdate"));
+		this.serverAddedSub = pubsubz.subscribe('SERVER_ADDED',enyo.bind(this,"gotServersUpdate"));
 	},
 	reloadPrefs: function() {
 		if (window.PlexReq.myplexUser) {
@@ -160,13 +162,14 @@ enyo.kind({
 			window.PlexReq.myPlexSections(); //force-refresh myplex servers (via sections)
 		}
 		this.reloadPrefs();
+		this.$.myPlexServerList.render(); //force-refresh myplex server list
 		this.$.pane.back();
 	},
 	gotServersUpdate: function() {
 		this.log("got servers updated event, refresing both myplex and local server list");
 		//plexReq is constantly watching the servers and updating their .online flag when reachability changes,
 		//so we just need to refresh the list to show the current reachability status
-		this.reloadPrefs();
+		//this.reloadPrefs();
 		this.$.myPlexServerList.render();
 		this.$.serverList.render();
 	},
@@ -193,6 +196,7 @@ enyo.kind({
 			this.$.onlineStatus.setContent(reachabilityStatus);
 			if (!myplexServer.online) {
 				this.$.item.setDisabled(true);
+				this.$.onlineStatus.setStyle("color: red;");
 			}
 			return true;
 		}
@@ -241,6 +245,13 @@ enyo.kind({
 		this.log("Toggled auto-discovery to state: " + inState);
 		window.PlexReq.useAutoDiscovery = inState;
 		window.PlexReq.savePrefs();
+	},
+	destroy: function() {
+		this.log("destroying prefs, removing subscribtions");
+		pubsubz.unsubscribe(this.serverUpdatedSub);
+		pubsubz.unsubscribe(this.serverAddedSub);
+		//call inherited for GC marking
+		this.inherited(arguments);
 	},
 	
 });
