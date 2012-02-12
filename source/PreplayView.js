@@ -28,7 +28,7 @@ enyo.kind({
                 {name: "rating_4", kind: "Image", className: "star_4"},
                 {name: "rating_5", kind: "Image", className: "star_5"},  
               ]},
-              {name: "studioImg", kind: "Image", height: "80px", width: "80px"},
+              {name: "studioImg", kind: "Image"},
             ]},
     		  ]},
     		]}, //cover box
@@ -103,7 +103,7 @@ enyo.kind({
       //flag images
       if (this.plexMediaObject.studio !== undefined) {
         var studioFlagUrl = window.PlexReq.getStudioFlag(this.plexMediaObject.studio);
-        var studioImgUrl = window.PlexReq.getImageTranscodeUrl(this.server,80,80,studioFlagUrl);
+        var studioImgUrl = window.PlexReq.getImageTranscodeUrl(this.server,112,80,studioFlagUrl);
         this.$.studioImg.setSrc(studioImgUrl);
       }
       if (this.plexMediaObject.contentRating !== undefined) {
@@ -161,11 +161,16 @@ enyo.kind({
 	collectTags: function (tagContainer) {
 	  var tags = "";
 	  if (tagContainer !== undefined) {
-  	  for (var i = 0; i < tagContainer.length; i++) {
-    	  if (tags !== "")
-    	    tags += ", ";
-    	  tags += tagContainer[i].tag;
-    	}
+      if (tagContainer.length) {
+        for (var i = 0; i < tagContainer.length; i++) {
+          if (tags !== "")
+            tags += ", ";
+          tags += tagContainer[i].tag;
+        }
+      }
+      else {
+        tags += tagContainer.tag;
+      }
   	}
   	return tags;
 	},

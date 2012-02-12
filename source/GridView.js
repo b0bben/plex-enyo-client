@@ -312,20 +312,22 @@ enyo.kind({
 
 		switch(pmo.type) {
 			case "artist":
-			this.log("artist chosen");
-			this.showArtist(pmo);
+				this.log("artist chosen");
+				this.showArtist(pmo);
 			break;
 			case "movie":
 			case "episode":
-			this.showPreplay(pmo);
+				this.$.scrim.show();
+				window.PlexReq.setCallback(enyo.bind(this,"showPreplay"))
+				window.PlexReq.dataForUrlAsync(this.server, pmo.key);
 			break;
 			case "show":
-			this.log("show chosen, get seasons");
-			this.getChildren(pmo);
+				this.log("show chosen, get seasons");
+				this.getChildren(pmo);
 			break;
 			case "season":
-			this.log("season chosen, get episodes");
-			this.getChildren(pmo);
+				this.log("season chosen, get episodes");
+				this.getChildren(pmo);
 		}
 	},
 	showArtist: function(pmo) {
@@ -335,7 +337,8 @@ enyo.kind({
 	},
 	showPreplay: function(pmo) {
 		this.$.emptyToaster.$.client.destroyControls();
-		this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo, server: this.server, art: this.mediaContainer.art}]);
+		this.$.emptyToaster.$.client.createComponents([{kind: "plex.PreplayView", owner: this, plexMediaObject:pmo.Video, server: this.server, art: this.mediaContainer.art}]);
+		this.$.scrim.hide();
 		this.$.emptyToaster.open();
 		//this.doShowPreplay(this.server,pmo);
 	},
