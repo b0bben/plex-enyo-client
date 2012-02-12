@@ -103,6 +103,7 @@ enyo.kind({
 		this.myplexSections = [];
 		this.foundBonjourServers = [];
 		this.videoQuality = "6";
+		this.audioBoost = "100";
 		this.useAutoDiscovery = true;
 		this.plex_access_key = "";
 		this.prefs = undefined;
@@ -144,6 +145,7 @@ enyo.kind({
 			//this.log("loaded prefs: " + enyo.json.stringify(this.prefs));
 			this.myplexUser = this.prefs.myplexUser;
 			this.videoQuality = this.prefs.videoQuality || "6";
+			this.audioBoost = this.prefs.audioBoost || "100";
 			this.useAutoDiscovery = this.prefs.useAutoDiscovery || true;
 			this.servers = [];
 			this.myplexServers = [];
@@ -172,6 +174,7 @@ enyo.kind({
 			myplexServers: this.myplexServers,
 			myplexUser: this.myplexUser,
 			videoQuality: this.videoQuality,
+			audioBoost: this.audioBoost,
 			useAutoDiscovery: this.useAutoDiscovery,
 		};
 	  enyo.setCookie("prefs", enyo.json.stringify(this.prefs));
@@ -317,7 +320,7 @@ enyo.kind({
 	  //Step 3: add subtitle size
 	  //targetUrl += "&subtitleSize=" + 100 //TODO: get from settings
 	  //Step 4: add audioboost
-	  targetUrl += "&audioBoost=" + 100 //TODO: get from settings
+	  targetUrl += "&audioBoost=" + this.audioBoost;
 	  //step 5: rating key
 	  targetUrl += "&ratingKey=" + pmo.ratingKey;
 	  //step 6: identifier

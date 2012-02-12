@@ -243,6 +243,9 @@ enyo.kind({
 							if (pmo.type === "movie") {
 								c.$.coverDiv.$.seenFlag.setStyle("top: -9%");
 							}
+							else if (pmo.type === "episode"){
+								c.$.coverDiv.$.seenFlag.setStyle("left: 30%");	
+							}
 							//watched/unwatched falgs
 							if (pmo.viewOffset > 0) {
 								//partly watched, mark with image
@@ -261,8 +264,11 @@ enyo.kind({
 						case "season":
 							if (pmo.leafCount && pmo.viewedLeafCount) {
 								var unwatchedItems = pmo.leafCount - pmo.viewedLeafCount;
-								c.$.coverDiv.$.seenFlag.setContent(unwatchedItems);
-								c.$.coverDiv.$.seenFlag.setClassName("unwatched_count");	
+								if (unwatchedItems > 0) {
+									c.$.coverDiv.$.seenFlag.setContent(unwatchedItems);
+									c.$.coverDiv.$.seenFlag.setClassName("unwatched_count");	
+								}
+								
 							}
 							
 						default:

@@ -76,6 +76,16 @@ enyo.kind({
 							]}
 						]},
 						{content:$L('Higher quality settings provide better looking video, but require more network bandwith.'), className: "prefs-body-text", style:"margin-bottom:8px"},
+					
+						{kind: "RowGroup", caption: $L("Audio boost"), components: [
+							{kind: "ListSelector", name: "audioBoostLevel", value: 1, onChange: "audioBoostChanged", items: [
+								{caption: $L("No boost"), value: 100},
+								{caption: $L("Small boost"), value: 170},
+								{caption: $L("Big boost"), value: 230},
+								{caption: $L("Huge boost"), value: 300},
+							]}
+						]},
+						{content:$L('Tells the Plex server to provide even higher audio volume then the original video provides.'), className: "prefs-body-text", style:"margin-bottom:8px"},
 					]},
 					{name: "console", kind: "HtmlContent", style: "font-size: 10pt; background-color: white; display:none;"},
 				]},
@@ -122,6 +132,8 @@ enyo.kind({
 		else {
 			this.$.videoQuality.setValue(6);
 		}
+
+		this.$.audioBoostLevel.setValue(window.PlexReq.audioBoost);
 		
 		//this.render();
 		//this.$.serverList.punt();
@@ -245,6 +257,13 @@ enyo.kind({
 		this.log("Toggled auto-discovery to state: " + inState);
 		window.PlexReq.useAutoDiscovery = inState;
 		window.PlexReq.savePrefs();
+	},
+	audioBoostChanged: function(inSender, inValue, inOldValue) {
+		this.log("audio boost: " + inValue);
+    if (inValue != inOldValue) {
+    	window.PlexReq.audioBoost = inValue;
+			window.PlexReq.savePrefs();
+		}
 	},
 	destroy: function() {
 		this.log("destroying prefs, removing subscribtions");
