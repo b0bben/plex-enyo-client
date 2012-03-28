@@ -128,7 +128,7 @@ body {
   white-space: pre-wrap;
   height: 100%;
   word-wrap: break-word;
-
+  width: 95%;
   color: white;
   /*border: 1px solid blue;*/
 }

@@ -347,9 +347,9 @@ enyo.kind({
 	},
 	postProgressForVideo: function(server,key,timeInMs) {
 		var deviceInfo = enyo.fetchDeviceInfo();
-		this.log("serialNumber: "+ deviceInfo.serialNumber);
 		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
-		
+		this.log("session_id: "+ session);
+				
 		if (server.baseUrl && key && timeInMs) {
 			var url = "/:/progress?key="+ key + "&identifier=com.plexapp.plugins.library&time=" + timeInMs;
 			var response = this.dataForUrlAsync(server,url);
@@ -359,15 +359,36 @@ enyo.kind({
 	},
 	stopTranscoder: function(server) {
 		var deviceInfo = enyo.fetchDeviceInfo();
-		this.log("serialNumber: "+ deviceInfo.serialNumber);
-		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
 		
+		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
+		this.log("session_id: "+ session);
+
 		if (server.hasOwnProperty("baseUrl")) {
 			var url = "/video/:/transcode/segmented/stop?session=" + session;
 			var response = this.dataForUrlSync(server,url);
 			console.log("stopped transcoder, resp: " + response);
 		}
 	},
+	selectAudioStream: function(server, partId, streamId) {
+		if (server.hasOwnProperty("baseUrl")) {
+			if (streamId === 0) {
+				streamId = ""; //PMS recognizes empty string as "None"
+			}
+			var url = "/library/parts/" + partId + "?audioStreamID=" + streamId;
+			var response = this.dataForUrlAsync(server,url, "PUT");
+			console.log("changed audio stream to: " + streamId + " for part: " + partId);
+		}		
+	},
+	selectSubtitleStream: function(server, partId, streamId) {
+		if (server.hasOwnProperty("baseUrl")) {
+			if (streamId === 0) {
+				streamId = ""; //PMS recognizes empty string as "None"
+			}
+			var url = "/library/parts/" + partId + "?subtitleStreamID=" + streamId;
+			var response = this.dataForUrlAsync(server,url, "PUT");
+			console.log("changed subtitle stream to: " + streamId + " for part: " + partId);
+		}		
+	},	
 	authWithUrl: function(plexUrl) {
 		var publicKey = "KQMIY6GATPC63AIMC4R2";
 		var privateKey = decode64("k3U6GLkZOoNIoSgjDshPErvqMIFdE0xMTx8kgsrhnC0=");
@@ -398,14 +419,17 @@ enyo.kind({
 		    return "&X-Plex-Access-Key=" + publicKey + "&X-Plex-Access-Time=" + time + "&X-Plex-Access-Code=" + url;
 		
 	},
-	dataForUrlAsync: function(server,plexUrl) {
+	dataForUrlAsync: function(server,plexUrl, method) {
 		//need both server AND url
 		if (server !== undefined && plexUrl !== undefined) { 
 			var url = server.baseUrl + plexUrl;
 			if (server.accessToken) {
 				url += "?X-Plex-Token=" + server.accessToken;
 			}
-		 	var xml = new JKL.ParseXML(url);
+			if (!method) {
+				method = "GET";
+			}
+		 	var xml = new JKL.ParseXML(url,"", method, null);
 		 	xml.async(enyo.bind(this,"processPlexData"));
 		 	xml.parse();	
 		}

@@ -41,12 +41,12 @@ enyo.kind({
     ],
     rendered: function () {
         this.inherited(arguments);
-        //this.resize();
+        this.resize();
     },
 
     /**
      * overriding enyo.slider.clickHandler() catching the true coordinate before enyo.Slider
-     * losing it after playing its animation.
+     * losing it after playing its animation. */
      
     clickHandler: function (inSender, ev) {
         //var p = this.calcEventPosition(ev.pageX);
@@ -94,10 +94,10 @@ enyo.kind({
             return w;
         }
     },
-*/
+
     /**
      * replacing enyo.Slider.calcEventPosition() because not only it computes incorrectly but is also
-     * very inefficient.
+     * very inefficient. */
      
     calcEventPosition: function (eventPageX) {
         return this.calcTappedPosition(eventPageX);
@@ -163,7 +163,7 @@ enyo.kind({
      * dragging the scrubber outside of the slider rail.
      *
      * @param ev - It is an enyo drag event object
-     
+    */ 
     dragHandler: function (inSender, ev) {
         if (!this.handlingDrag) { return; }
         if (ev.stopPropagation) { ev.stopPropagation(); }
@@ -177,7 +177,7 @@ enyo.kind({
         this.setPositionImmediate((pos/w)*100);
         this.doChanging(this.position);
     },
-*/
+    
     /**
      * @param ev - It is an enyo dragfinish event object
      */
@@ -230,9 +230,10 @@ enyo.kind({
               { name: "resizeButton", kind: "Control", onclick: "onResizeClicked",
                     className: "zoom-larger-button" },
               { name: "timeRemain", className: "play-time-tally-right" },
-              { name: "seeker", kind: "PlexViewVideoSlider", className: "seeker-wide",
-                minimum: 0, maximum: 100,
-                onChanging: "onSeeking", onChange: "onSeeked", onTapped: "onSeekerTapped" },
+              { name: "seeker", kind: "ProgressSlider", className: "seeker-wide",
+                minimum: 0, maximum: 100, 
+                onChanging: "onSeeking",
+                onChange: "onSeeked", onTapped: "onSeekerTapped" },
                 
           ]
         },
@@ -437,8 +438,8 @@ enyo.kind({
             },
             seeked: function (ev) {
                 console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.seeked(): seek ACK, '+thisInst.video.currentTime+', instanceId='+thisInst.instanceId+' on "'+thisInst.pmo.title+'"');
-                //thisInst.onVideoSeeked(ev);
-                //thisInst.onVideoSeekedEventNotify(ev);
+                thisInst.onVideoSeeked(ev);
+                thisInst.onVideoSeekedEventNotify(ev);
             },
             ended: function (ev) {
                 console.log('****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.ended(): video end ACK, instanceId='+thisInst.instanceId+' on "'+thisInst.pmo.title+'"');
@@ -788,8 +789,8 @@ enyo.kind({
                           width: cBar.offsetWidth, height: cBar.offsetHeight
                         }
         };
-        console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+cBar.offsetLeft+", t:"+cBar.offsetTop+", w:"+cBar.offsetWidth+", h:"+cBar.offsetHeight);
-        console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+hBar.offsetLeft+", t:"+hBar.offsetTop+", w:"+hBar.offsetWidth+", h:"+hBar.offsetHeight);
+        //console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+cBar.offsetLeft+", t:"+cBar.offsetTop+", w:"+cBar.offsetWidth+", h:"+cBar.offsetHeight);
+        //console.log("****@@@@@@><@@@@@@**** vidslide PlexViewVideo.updateBarsDim(): l:"+hBar.offsetLeft+", t:"+hBar.offsetTop+", w:"+hBar.offsetWidth+", h:"+hBar.offsetHeight);
     },
 
     onVideoLoad: function (ev) {
@@ -897,21 +898,15 @@ enyo.kind({
             
             if (node.seekable) {
                 this.log("seekable, will DO it");
-                node.currentTime = Math.floor(timeSeekTo).toFixed(1);    
+                
+                node.currentTime = Math.floor(timeSeekTo).toFixed(1);
+                //this.playVideo();
             }
             else
                 this.log("NOT seekable");
                 
 
             this.lastSeekToRequested = Math.floor(timeSeekTo);
-
-            // schedule the 2nd attempt, as mediaserver some times just ignores it
-            if (!this.secondSeekRequestAttemptId) {
-                this.secondSeekRequestAttemptId = setTimeout(function () {
-                    thisInst.secondSeekRequestAttempt();
-                }, 3400);
-                console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.requestVideoSeek(): scheduled a 2nd attempt on T("+this.lastSeekToRequested+")");
-            }
 
             if (this.isPlaying) {
                 if (this.isControlBarShown) {
@@ -1045,10 +1040,14 @@ enyo.kind({
     onSeeking: function (inSender, newPos) {
         console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeking(newPos="+newPos+"): scrubber drag...");
         this.isScrubberSeeking = true;
+        //this.pauseVideo();
 
         this.updateTimeTallies(newPos);
         if (this.loadState != this.IS_LOADED || !this.video || !this.video) { return; }
 
+        //we don't actually send any request to seek here, since that would beat the shit out of the transcoder
+        //on the PMS, we use this only to be able to move the slider properly
+        //once user releases the slider, onSeeked is gonna get called'
         this.requestVideoSeek(newPos);
     },
 
