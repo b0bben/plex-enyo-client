@@ -1107,6 +1107,8 @@ enyo.kind({
                 if (this.isPlaying) { this.pauseVideo(); }
                 break;
             case 4:  // MEDIA_ERR_SRC_NOT_SUPPORTED
+                this.log("VIDEO ERROR: MEDIA_ERR_SRC_NOT_SUPPORTED");
+                msg = "VIDEO ERROR: MEDIA_ERR_SRC_NOT_SUPPORTED";
                 break;
             default:
                 break;

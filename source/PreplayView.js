@@ -376,13 +376,13 @@ enyo.kind({
     
   },
   resumeVideoHandler: function() {
-    var transcodingUrl = window.PlexReq.transcodeUrlForVideoUrl(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key, true);
+    var videoUrl = window.PlexReq.getPlayableUrlForVideoPart(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key, true);
 
-    this.owner.owner.startVideoPlayer(transcodingUrl,this.plexMediaObject, this.server, true);
+    this.owner.owner.startVideoPlayer(videoUrl,this.plexMediaObject, this.server, true);
   },
   fromStartVideoHandler: function() {
-    var transcodingUrl = window.PlexReq.transcodeUrlForVideoUrl(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key, false);
+    var videoUrl = window.PlexReq.getPlayableUrlForVideoPart(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key, false);
 
-    this.owner.owner.startVideoPlayer(transcodingUrl,this.plexMediaObject, this.server, false);    
+    this.owner.owner.startVideoPlayer(videoUrl,this.plexMediaObject, this.server, false);    
   },
 })

@@ -104,6 +104,7 @@ enyo.kind({
 		this.foundBonjourServers = [];
 		this.videoQuality = "6";
 		this.audioBoost = "100";
+		this.directPlayEnabled = true;
 		this.useAutoDiscovery = true;
 		this.plex_access_key = "";
 		this.prefs = undefined;
@@ -308,6 +309,50 @@ enyo.kind({
 			}
 		}
 	},
+	getPlayableUrlForVideoPart: function(pmo, server, partKey, offset) {
+		//wanna direct-play?
+		var url;
+
+		if (this.directPlayEnabled && this.isDirectPlayable(pmo)) {
+			url = server.baseUrl + partKey; //url to file part with no transcoding
+			this.log("!!! DIRECT-PLAYING");
+			this.isDirectPlaying = true;
+		}
+		else {
+			url = this.transcodeUrlForVideoUrl(pmo, server, partKey, offset);
+			this.log("!!! TRANSCODING");
+		}
+
+		return url;
+	},
+	isDirectPlayable: function(pmo) {
+		var canBeDirectPlayed = true;
+
+		this.log(pmo.Media);
+		//check container
+		switch (pmo.Media.container) {
+			case "mov":
+			case "mp4":
+			case "m4v":
+				this.log("container direct-playable");
+				break;
+			default:
+				canBeDirectPlayed = false;
+				break;
+		}
+
+		switch (pmo.Media.videoCodec) {
+			case "h264":
+				this.log("video codec direct-playable");
+				break;
+			default:
+				canBeDirectPlayed = false;
+				break;
+		}
+
+		return canBeDirectPlayed;
+
+	},
 	transcodeUrlForVideoUrl: function(pmo, server, videoUrl, offset) {
 		var deviceInfo = enyo.fetchDeviceInfo();
 		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
@@ -340,7 +385,7 @@ enyo.kind({
 	  //there's no step 9! 
 	  targetUrl += this.authWithUrl(targetUrl);
 	  
-	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:31};audioDecoders=aac{bitrate:160000}");
+	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:31};audioDecoders=mp3,aac{bitrate:160000}");
 	  
 	  return server.baseUrl + targetUrl;
 	  
@@ -358,15 +403,18 @@ enyo.kind({
 
 	},
 	stopTranscoder: function(server) {
-		var deviceInfo = enyo.fetchDeviceInfo();
-		
-		var session = deviceInfo ? deviceInfo.serialNumber : "1111";
-		this.log("session_id: "+ session);
+		//no need to send any stop command to transcoder if we're direct-playing the file
+		if (!this.isDirectPlaying) {
+			var deviceInfo = enyo.fetchDeviceInfo();
+			
+			var session = deviceInfo ? deviceInfo.serialNumber : "1111";
+			this.log("session_id: "+ session);
 
-		if (server.hasOwnProperty("baseUrl")) {
-			var url = "/video/:/transcode/segmented/stop?session=" + session;
-			var response = this.dataForUrlSync(server,url);
-			console.log("stopped transcoder, resp: " + response);
+			if (server.hasOwnProperty("baseUrl")) {
+				var url = "/video/:/transcode/segmented/stop?session=" + session;
+				var response = this.dataForUrlSync(server,url);
+				console.log("stopped transcoder, resp: " + response);
+			}			
 		}
 	},
 	selectAudioStream: function(server, partId, streamId) {

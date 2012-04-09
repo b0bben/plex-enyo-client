@@ -347,7 +347,7 @@ enyo.kind({
 	},
 	getChildren: function(pmo) {
 		window.PlexReq.setCallback(enyo.bind(this,"refreshGridWithMediaContainer"));
-		window.PlexReq.dataForUrlAsync(this.server,pmo.key);	
+		window.PlexReq.dataForUrlAsync(this.server,pmo.key);
 	},
 	goBack: function() {
 		this.log();

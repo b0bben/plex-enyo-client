@@ -169,10 +169,10 @@ enyo.kind({
 	 	this.$.pane.selectViewByName("videoPlayer");
 	 	//src = "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8";
 	    //src = "http://video.nationalgeographic.com/video/player/media-mp4/frog_bull/mp4/variant-playlist.m3u8";
-    this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
-  	this.$.videoPlayer.setResume(resume);
-  	this.$.videoPlayer.setPmo(pmo);
-    this.$.videoPlayer.setVideoSrc(src);
+	    this.$.videoPlayer.setServer(server); //ATTENTION! MUST COME BEFORE PMO
+	  	this.$.videoPlayer.setResume(resume);
+	  	this.$.videoPlayer.setPmo(pmo);
+	    this.$.videoPlayer.setVideoSrc(src);
 
 		//STATS LOGGING
 		if (window.Metrix) {
