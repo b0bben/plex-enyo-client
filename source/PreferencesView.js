@@ -86,6 +86,15 @@ enyo.kind({
 							]}
 						]},
 						{content:$L('Tells the Plex server to provide even higher audio volume then the original video provides.'), className: "prefs-body-text", style:"margin-bottom:8px"},
+						
+						//direct-play
+						{kind: "RowGroup", caption: $L("Direct Play"), components: [
+							{kind: enyo.Item, layoutKind: "HFlexLayout", components: [
+								{content: $L('Use Direct Play when possible?'), flex: 1, style: "margin-top: 5px"},
+								{kind: "ToggleButton", name: "directPlayToggleButton", onLabel: $L('YES'), offLabel: $L('NO'), onChange: "toggleDirectPlay"},
+							]}
+						]},
+						{content:$L('If turned on the client will try to play the file directly without using the transcoder.'), className: "prefs-body-text", style:"margin-bottom:8px"},
 					]},
 					{name: "console", kind: "HtmlContent", style: "font-size: 10pt; background-color: white; display:none;"},
 				]},
@@ -134,6 +143,7 @@ enyo.kind({
 		}
 
 		this.$.audioBoostLevel.setValue(window.PlexReq.audioBoost);
+		this.$.directPlayToggleButton.setState(window.PlexReq.useDirectPlay);
 		
 		//this.render();
 		//this.$.serverList.punt();
@@ -260,10 +270,15 @@ enyo.kind({
 	},
 	audioBoostChanged: function(inSender, inValue, inOldValue) {
 		this.log("audio boost: " + inValue);
-    if (inValue != inOldValue) {
+    	if (inValue != inOldValue) {
     	window.PlexReq.audioBoost = inValue;
 			window.PlexReq.savePrefs();
 		}
+	},
+	toggleDirectPlay: function(inSender, inState) {
+		this.log("Toggled direct-play to state: " + inState);
+		window.PlexReq.useDirectPlay = inState;
+		window.PlexReq.savePrefs();
 	},
 	destroy: function() {
 		this.log("destroying prefs, removing subscribtions");

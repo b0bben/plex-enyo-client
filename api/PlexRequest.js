@@ -104,7 +104,7 @@ enyo.kind({
 		this.foundBonjourServers = [];
 		this.videoQuality = "6";
 		this.audioBoost = "100";
-		this.directPlayEnabled = true;
+		this.useDirectPlay = true;
 		this.useAutoDiscovery = true;
 		this.plex_access_key = "";
 		this.prefs = undefined;
@@ -148,6 +148,7 @@ enyo.kind({
 			this.videoQuality = this.prefs.videoQuality || "6";
 			this.audioBoost = this.prefs.audioBoost || "100";
 			this.useAutoDiscovery = this.prefs.useAutoDiscovery || true;
+			this.useDirectPlay = this.prefs.useDirectPlay || true;
 			this.servers = [];
 			this.myplexServers = [];
 			//need to create PlexServer insatnces for reachability to work
@@ -177,10 +178,11 @@ enyo.kind({
 			videoQuality: this.videoQuality,
 			audioBoost: this.audioBoost,
 			useAutoDiscovery: this.useAutoDiscovery,
+			useDirectPlay: this.useDirectPlay,
 		};
-	  enyo.setCookie("prefs", enyo.json.stringify(this.prefs));
-	  //this.log("saved prefs: " + enyo.json.stringify(this.prefs));
-	  this.log();
+		enyo.setCookie("prefs", enyo.json.stringify(this.prefs));
+		//this.log("saved prefs: " + enyo.json.stringify(this.prefs));
+		this.log();
 	},
 
 	addServer: function(newServer) {
@@ -313,7 +315,7 @@ enyo.kind({
 		//wanna direct-play?
 		var url;
 
-		if (this.directPlayEnabled && this.isDirectPlayable(pmo)) {
+		if (this.useDirectPlay && this.isDirectPlayable(pmo)) {
 			url = server.baseUrl + partKey; //url to file part with no transcoding
 			this.log("!!! DIRECT-PLAYING");
 			this.isDirectPlaying = true;
@@ -321,6 +323,7 @@ enyo.kind({
 		else {
 			url = this.transcodeUrlForVideoUrl(pmo, server, partKey, offset);
 			this.log("!!! TRANSCODING");
+			this.isDirectPlaying = false;
 		}
 
 		return url;

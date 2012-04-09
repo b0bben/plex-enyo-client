@@ -53,11 +53,18 @@ enyo.kind({
       this.pmc = this.myplexMediaContainer;
       this.libraryTitle = $L("Shared library");
     }
-    //for (var i = 0; i < this.pmc.size; i++) {
-    //  var myplexServer = this.pmc.Directory[i];
-      var c = {kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", sections: this.pmc, caption: this.libraryTitle, owner:this};
-      this.sectionsUi.push(c);
-    //};    
+
+    //only show servers that are online
+    for (var i = 0; i < this.pmc.length; i++) {
+      var server = window.PlexReq.getServerWithMachineId(this.pmc[i].machineIdentifier);
+      if (server.online) {
+        //ok, server is online, add it's sections to UI
+        //TODO: remove offline sections  
+      }
+    }
+    var c = {kind: "plex.MyPlexSection", onRowSelected: "sectionRowSelected", sections: this.pmc, caption: this.libraryTitle, owner:this};
+    this.sectionsUi.push(c);  
+
     this.$.cells.destroyControls();
     this.$.serverList.render();
   },
