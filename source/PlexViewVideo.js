@@ -152,12 +152,12 @@ enyo.kind({
     /**
      * @param ev - It is an enyo dragfinish event object
      */
-    dragstartHandler: function (inSender, ev) {
+ /*   dragstartHandler: function (inSender, ev) {
         this.inherited(arguments);
         return false;    // returning false or undefined to stop the propagation; otherwise, a swipping
                          // drag would be erroneously interpreted as a swipe by the enyo.Carousel.
     },
-
+*/
     /**
      * overriding enyo.slider.dragHandler() as its calculation does not consider the boundary resulting
      * dragging the scrubber outside of the slider rail.
@@ -181,12 +181,12 @@ enyo.kind({
     /**
      * @param ev - It is an enyo dragfinish event object
      */
-     dragfinishHandler: function (inSender, ev) {
+/*     dragfinishHandler: function (inSender, ev) {
         this.inherited(arguments);
         if (ev.stopPropagation) { ev.stopPropagation(); }
         return false;    // returning false or undefined to stop the propagation; otherwise, a swipping
                          // drag would be erroneously interpreted as a swipe by the enyo.Carousel.
-    }
+    }*/
 });
 
 
@@ -308,13 +308,6 @@ enyo.kind({
 
         this.dblclickHandler = null; // HACK - this would eliminate the extra click event dispatch
 
-        // disable the secondary scroller from scrolling on video.  This does not impact to the
-        // scrolling by the Carousel.  DFISH-28100
-        /*this.$.scroller.setAutoHorizontal(false);
-        this.$.scroller.setAutoVertical(false);
-        this.$.scroller.setHorizontal(false);
-        this.$.scroller.setVertical(false);
-*/
         var thisInst = this;
         var handlers = this.windowEventHandlers = {
             blur: function (ev) {
@@ -337,23 +330,19 @@ enyo.kind({
         //this.$.scrim.hide();
     },
 	setFullScreen: function (boolFullScreen) {
-		  if (window.PalmSystem) {
-              enyo.setFullScreen(boolFullScreen);
-              console.log("enabled fullscreen-mode");
-		  }
-	  },
+        if (window.PalmSystem) {
+          enyo.setFullScreen(boolFullScreen);
+          console.log("enabled fullscreen-mode");
+        }
+    },
 	videoSrcChanged: function() {
        //TODO: show spinner
        if (this.videoSrc !== undefined) {
         this.log("video URL: "+this.videoSrc);
         this.autoStartOnLoad();
-        //this.video = document.getElementById('myHtml5Video');
-        //this.video.src = this.videoSrc;
-        //this.video.play();
-
-       }
+    }
         
-	},   
+	},
     pmoChanged: function() {
        if (this.pmo !== undefined) {
         this.$.scrim.show();
@@ -495,7 +484,7 @@ enyo.kind({
         this.loadState = this.IS_LOADING;
         containerEl.removeChild(this.$.image.node);
         containerEl.appendChild(node);
-        this.video=node;
+        this.video = node;
     },
 
     lockWindowOrientation: function () {
@@ -921,17 +910,17 @@ enyo.kind({
 
     secondSeekRequestAttempt: function () {
         delete this.secondSeekRequestAttemptId;
-        var pos2ndAttempt = undefined, shouldRetry = true;
+        var pos2ndAttempt, shouldRetry = true;
 
         // 2nd attempt takes the seekToPosition first, than the lastSeekToRequested
-        if (undefined != this.seekToPosition) {
+        if (this.seekToPosition) {
             pos2ndAttempt = this.seekToPosition;
             delete this.seekToPosition;
-            if (undefined != this.seekRequestRetryCount) { delete this.seekRequestRetryCount; }
-        } else if (undefined != this.lastSeekToRequested) {
+            if (this.seekRequestRetryCount) { delete this.seekRequestRetryCount; }
+        } else if (this.lastSeekToRequested) {
             pos2ndAttempt = this.lastSeekToRequested/this.video.duration*100;
             delete this.lastSeekToRequested;
-            if (undefined == this.seekRequestRetryCount) {
+            if (!this.seekRequestRetryCount) {
                 this.seekRequestRetryCount = 1;
             } else if (this.seekRequestRetryCount >= 3) {
                 shouldRetry = false;
@@ -940,11 +929,11 @@ enyo.kind({
                 this.seekRequestRetryCount++;
             }
         } else {
-            if (undefined != this.seekRequestRetryCount) { delete this.seekRequestRetryCount; }
+            if (this.seekRequestRetryCount) { delete this.seekRequestRetryCount; }
         }
 
         delete this.videoSeekingRequestPending;
-        if (undefined != pos2ndAttempt && shouldRetry) {
+        if (pos2ndAttempt && shouldRetry) {
             console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.secondSeekRequestAttempt(): 2nd attempt newPos="+pos2ndAttempt+"...");
             this.requestVideoSeek(pos2ndAttempt);
         }
@@ -966,7 +955,7 @@ enyo.kind({
         delete this.videoSeekingRequestPending;
         var newPos = this.seekToPosition;
 
-        if (undefined != newPos) {
+        if (newPos) {
             console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onVideoSeeked(): lastRequested="+this.lastSeekToRequested+", node.currentTime="+this.video.currentTime+", do pendingPos="+this.seekToPosition+", newPos="+newPos);
             delete this.seekToPosition;
             this.requestVideoSeek(newPos);
@@ -1073,7 +1062,7 @@ enyo.kind({
      * This method is called when mouseup on the scrubber.
      */
     onSeeked: function (inSender, newPos) {
-        if (undefined != this.lastOnSeekedPosition && this.lastOnSeekedPosition == newPos && newPos > 0) {
+        if (this.lastOnSeekedPosition && this.lastOnSeekedPosition == newPos && newPos > 0) {
             console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.onSeeked(newPos="+newPos+"): mis-fire, ignore...");
              // some times enyo.ProgressSlider may publish duplicate newPos
              return;
@@ -1124,7 +1113,7 @@ enyo.kind({
     /**
      * This method is meant to be called when tapping on a video from the albums grid intended to start
      * the tapped video as soon as it is loaded.  Calling this method is not the same as setting the
-     * vidoe.autoplay.  
+     * vidoe.autoplay.
      */
     autoStartOnLoad: function () {
         this.setInFocus(true);
@@ -1187,7 +1176,7 @@ enyo.kind({
 
         this.setPlayButtonState(false);
         this.isPlaying = false;
-        if (undefined != this.isAutoStart) { delete this.isAutoStart; }
+        if (this.isAutoStart) { delete this.isAutoStart; }
         this.stopMonitor();
 
         switch (this.loadState) {
@@ -1222,7 +1211,7 @@ enyo.kind({
     },
 
     mediaplayerInitiatedPauseHandler: function () {
-        if (undefined != this.isPauseRequestPending) { delete this.isPauseRequestPending; }
+        if (this.isPauseRequestPending) { delete this.isPauseRequestPending; }
         if (!this.isPlaying) { return; }
         this.isPlaying = false;
         this.stopMonitor();
@@ -1252,7 +1241,7 @@ enyo.kind({
 
     onResizeClicked: function (inSender, ev) {
         this.stopEvent(ev);
-        if (this.isTailgatingEvent()) { return; }  // swallow this tailgating event
+        //if (this.isTailgatingEvent()) { return; }  // swallow this tailgating event
 
         // because mediaserver's fit/fill mode does not work when it is paused, so do nothing in that case
         if (!this.isPlaying) { return; }
@@ -1307,7 +1296,7 @@ enyo.kind({
             containerWidth = window.innerWidth;
             containerHeight = window.innerHeight;
         } else {
-            // note that the fall back width/height taken from window.innerWidth/innerHeight 
+            // note that the fall back width/height taken from window.innerWidth/innerHeight
             // takes the adventage of the inability of mediaserver not be able to support arbitrary
             // size other than the device screen size.  However, once the mediaserver is able to
             // support it in the future, then the resize calculation code block commented out below
@@ -1437,12 +1426,12 @@ enyo.kind({
     startMonitor: function () {
         if (this.playMonitorId) { return; }
         var node = this.video;
-        var currentTime = undefined;
-        if (node && undefined != node.currentTime && !isNaN(node.currentTime)) {
+        var currentTime;
+        if (node && node.currentTime && !isNaN(node.currentTime)) {
             currentTime = node.currentTime;
         } else {
             currentTime = this.viewOffset;
-            if (undefined == currentTime || isNaN(currentTime)) { currentTime = 0; }
+            if (!currentTime || isNaN(currentTime)) { currentTime = 0; }
         }
 
         this.playTimeMeta.isMonitorInProgress = true;
@@ -1486,17 +1475,17 @@ enyo.kind({
      *                   the played time to display.
      */
     updateTimePlayedTally: function (newValue) {
-        var tPassed = 0.0, currTime = undefined;
+        var tPassed = 0.0, currTime;
         if (newValue !== undefined) {
             tPassed = newValue;
         } else if (this.loadState == this.IS_LOADED) {
             currTime = this.video.currentTime;
-            if (undefined != currTime && null != currTime) {
+            if (currTime) {
                 tPassed = this.video.currentTime;
             }
         } else {
             tPassed = this.viewOffset;
-            if (undefined == tPassed || tPassed < 0 || tPassed >= this.duration) { tPassed = 0.0; }
+            if (!tPassed || tPassed < 0 || tPassed >= this.duration) { tPassed = 0.0; }
         }
         this.$.timePlayed && this.$.timePlayed.setContent(this.secondsToTimeString(tPassed));
     },
@@ -1514,7 +1503,7 @@ enyo.kind({
             tRemain = tRemain - tPassed;
         } else {
             tPassed = this.viewOffset;
-            if (undefined != tPassed && tPassed >= 0 && tPassed < this.duration) {
+            if (tPassed && tPassed >= 0 && tPassed < this.duration) {
                 tRemain = tRemain - tPassed;
             }
         }
@@ -1525,8 +1514,8 @@ enyo.kind({
         var now = new Date().getTime();
         var percentage = 0.0;
         var tMeta = this.playTimeMeta;
-        var node, currentTime, duration, lastPlayTime = undefined;
-        if (newValue != undefined && !isNaN(newValue)) {
+        var node, currentTime, duration, lastPlayTime;
+        if (newValue && !isNaN(newValue)) {
             percentage = newValue;
             if (tMeta.isMonitorInProgress) {
                 tMeta.tLastSeeked = percentage/100*tMeta.tDuration;
@@ -1534,7 +1523,7 @@ enyo.kind({
             }
         } else if (this.loadState != this.IS_LOADED || !this.video || !this.video) {
             lastPlayTime = this.viewOffset;
-            if (undefined == lastPlayTime) { return; }
+            if (!lastPlayTime) { return; }
             percentage = lastPlayTime/this.duration*100;
         } else {
             // takes the numbers from node, falls back onto dbEntry if needed
@@ -1544,19 +1533,19 @@ enyo.kind({
             // guard against an incorrect reset to the currentTime by the mediaserver (DFISH-27433)
             if (this.updateSeekerByStartMonitor) {
                 delete this.updateSeekerByStartMonitor;
-                if (0 == currentTime) {
+                if (0 === currentTime) {
                     this.updateSeekerByZero = true;
                     return;
                 }
             } else if (this.updateSeekerByZero) {
-                if (0 == currentTime) {
+                if (0 === currentTime) {
                     return;
                 } else {
                     delete this.updateSeekerByZero;
                 }
             }
 
-            if (undefined == currentTime || isNaN(currentTime)) { return; }
+            if (!currentTime || isNaN(currentTime)) { return; }
 
             duration = tMeta.tDuration;
 
@@ -1577,7 +1566,7 @@ enyo.kind({
 
     updateOnLoadProgress: function (ev) {
         var buf = ev.target.buffered;
-        if (0 == buf.length) { return; }
+        if (0 === buf.length) { return; }
         var tBuf = buf.end(buf.length-1);
         var bufPos = Math.floor((tBuf/ev.target.duration)*100);
         this.$.seeker.setBarPosition(bufPos);
@@ -1629,7 +1618,7 @@ enyo.kind({
         console.log("****@@@@@@><@@@@@@**** vidslide  PlexViewVideo.adjustPlayStartTime(): instanceId="+this.instanceId+" ("+this.mediadService+"), node.paused="+this.video.paused+", seek to "+lastPlayTime);
         if (node.seekable) {
             this.log("seekable, will seek to: " + lastPlayTime);
-            node.currentTime = lastPlayTime.toFixed(1);    
+            node.currentTime = lastPlayTime.toFixed(1);
         }
         else
             this.log("NOT seekable");
@@ -1731,9 +1720,9 @@ enyo.kind({
     },
 
     onWindowBlurHandler: function () {
-        //this.isCarded = true;
-        //this.pauseAndShowControls();
-        //this.recordVideoState();
+        this.isCarded = true;
+        this.pauseAndShowControls();
+        this.recordVideoState();
     },
 
     onWindowCloseHandler: function () {
@@ -1841,11 +1830,11 @@ enyo.kind({
     },
 
     headsetStatusFailHandler: function (headsetService, resp) {
-        console.log("photos.PlexViewVideo: headsetRequestFailure  Error: "+enyo.json.stringify(resp));
+        console.log("PlexViewVideo: headsetRequestFailure  Error: "+enyo.json.stringify(resp));
     },
 
     mediaserverRequestFailHandler: function (mediaserverService, resp) {
-        console.log("photos.PlexViewVideo: mediaserverRequestFailure  Error: "+enyo.json.stringify(resp));
+        console.log("PlexViewVideo: mediaserverRequestFailure  Error: "+enyo.json.stringify(resp));
     },
 
     gesturestartHandler: function(inSender, ev) {
@@ -1856,6 +1845,6 @@ enyo.kind({
     },
     hideControlsWithTimeout: function(timeout) {
         var thisInst = this;
-        setTimeout(function () {thisInst.hideControlbars();}, timeout ? timeout : this.defaultHideControlTimeout);        
-    },
+        setTimeout(function () {thisInst.hideControlbars();}, timeout ? timeout : this.defaultHideControlTimeout);
+    }
 });
