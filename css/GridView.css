@@ -112,3 +112,8 @@
 	*/
 }
 
+.welcomemsg {
+	font: normal normal bold 18px/normal Arial, sans-serif;
+	color: gray;
+}
+

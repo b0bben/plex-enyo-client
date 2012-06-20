@@ -383,6 +383,6 @@ enyo.kind({
   fromStartVideoHandler: function() {
     var videoUrl = window.PlexReq.getPlayableUrlForVideoPart(this.plexMediaObject,this.server, this.plexMediaObject.Media.Part.key, false);
 
-    this.owner.owner.startVideoPlayer(videoUrl,this.plexMediaObject, this.server, false);    
-  },
-})
+    this.owner.owner.startVideoPlayer(videoUrl,this.plexMediaObject, this.server, false);
+  }
+});

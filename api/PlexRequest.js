@@ -23,7 +23,7 @@ var PlexServer = function(machineIdentifier,name,host,port,username,password,inc
 			try {
 				var xml = new JKL.ParseXML(this.baseUrl);
 				var data = xml.parse();
-				this.gotServerResponse(data);				
+				this.gotServerResponse(data);
 			}
 			catch (error)	{
 				console.log("error when trying to reach server for info: " + error);
@@ -388,7 +388,8 @@ enyo.kind({
 	  //there's no step 9! 
 	  targetUrl += this.authWithUrl(targetUrl);
 	  
-	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:baseline&resolution:720&level:31};audioDecoders=mp3,aac{bitrate:160000}");
+	  //targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-live-streaming,http-mp4-streaming,http-streaming-video,http-streaming-video-720p,http-mp4-video,http-mp4-video-720p;videoDecoders=h264{profile:main&resolution:720&level:41};audioDecoders=aac{bitrate:160000},mp3");
+	  targetUrl += "&X-Plex-Client-Capabilities=" + encodeURIComponent("protocols=http-mp4-streaming,http-mp4-video,http-streaming-video-720p,http-mp4-video-720p,http-live-streaming,http-streaming-video;videoDecoders=h264{profile:baseline&resolution:720&level:30};audioDecoders=aac");
 	  
 	  return server.baseUrl + targetUrl;
 	  

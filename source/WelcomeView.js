@@ -11,8 +11,8 @@ enyo.kind({
 				{kind: enyo.Image, pack: 'center',flex: 1, src: "images/sad_panda.png", style: "width: 508px; height: 399px;padding-bottom: 40px"},
 				{content: "This BETA version of Plex for webOS has expired."},
 				{content: "Please go to the App Catalog and look for a real version, or goto forums.plexapp.com and look for a new BETA."},
-				{content: "Thank you for your interest. //plex team"},
-			  {kind: enyo.Spacer},
+				{content: "Thank you for your interest."},
+				{kind: enyo.Spacer},
 	
 			  
 			  /*{kind: enyo.Video, pack: 'center', fitToWindow: true, src: "http://saturnus.mine.nu:32400/video/:/transcode/segmented/start.m3u8?url=http%3A%2F%2Fsaturnus.mine.nu%3A32400%2Flibrary%2Fparts%2F3395%2Ffile.avi&ratingKey=3492&identifier=com.plexapp.plugins.library&key=http%3A%2F%2Fsaturnus.mine.nu%3A32400%2Flibrary%2Fmetadata%2F3492&session=a83b42e021f2c7f9d3876c8797f6c0b1ede47d8c&quality=5&3g=0"},

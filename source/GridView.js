@@ -28,6 +28,12 @@ enyo.kind({
 		]},
 
 		]},
+		{flex: 1, name: "welcome_msg", layoutKind: "VFlexLayout", pack: "center", align: "center", className: "center-stuff",  components: [
+			{kind: enyo.Spacer},
+			{kind: enyo.Image, pack: 'center',flex: 1, src: "PlexMobile_512x512.png", style: "width: 256px; height: 256px;padding: 40px"},
+			{content: "Plex for webOS requires Plex Media Server ( www.plexapp.com ) ", className: "welcomemsg"},
+			{kind: enyo.Spacer},
+		]},
 
 		{name: "grid_list", kind: "VirtualList", className: "list", onSetupRow: "listSetupRow", height: "100%",components: [
 			{name: "cells", kind: "HFlexBox", pack: "start"}
@@ -70,6 +76,7 @@ enyo.kind({
 	},
 	parentMediaContainerChanged: function() {
 		if (this.parentMediaContainer !== undefined) {
+			this.$.welcome_msg.hide();
 			this.$.scrim.show();
 			//get different filtering options for this section, once that's received it's gonna ask for media containers
 			window.PlexReq.setCallback(enyo.bind(this,"gotFiltersForSection"));
