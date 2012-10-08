@@ -3,25 +3,25 @@
 _Main developer:_ b0bben
 _Uses example code from_ Palm/HP
 _Icons:_ Plex Inc.
-_Uses Parser by JavaScript Kantan Library for Parsing XML,Copyright 2005-2007 Kawasaki Yusuke <u-suke@kawa.net>
+_Uses Parser by JavaScript Kantan Library for Parsing XML,Copyright 2005-2007 Kawasaki Yusuke <u-suke@kawa.net>_
 
 ## Description
 This is the Plex client for the HP/Palm webOS, written in Enyo JS framework (version 1)
 It talks to Plex Media Server on your local network, or thru MyPlex.
 Following features from Plex Media Server are supported:
-* __Listing and watching movies, tvshows
-* __Listing and listening to music
-* __Multiple PMS servers
-* __MyPlex
+* __Listing and watching movies, tvshows__
+* __Listing and listening to music__
+* __Multiple PMS servers__
+* __MyPlex__
 
 Videos in format NOT SUPPORTED by the device are streamed using HLS (HttpLiveStreaming).
 Videos in format SUPPORTED by the device (HP TouchPad for example) are played without streaming. This works wonderfully, even scrubbing ;) 
 
 ## Issues
 Plex for webOS has a couple of issues, believe it or not, most important ones being:
-* __Problems with scrubbing (rev/ff) videos streamed via HLS
-* __No support for channels in Plex
-* __UX not optimal for phones
+* __Problems with scrubbing (rev/ff) videos streamed via HLS__
+* __No support for channels in Plex__
+* __UX not optimal for phones__
 Hopefully, someone will step up and contribute to fixing the above. :)
 
 ## License
