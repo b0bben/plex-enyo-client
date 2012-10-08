@@ -13,6 +13,7 @@ Following features from Plex Media Server are supported:
 * __Listing and listening to music__
 * __Multiple PMS servers__
 * __MyPlex__
+* __Automagically finds PMS servers on your network using Bonjour__
 
 Videos in format NOT SUPPORTED by the device are streamed using HLS (HttpLiveStreaming).
 Videos in format SUPPORTED by the device (HP TouchPad for example) are played without streaming. This works wonderfully, even scrubbing ;) 
