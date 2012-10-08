@@ -660,7 +660,7 @@ enyo.kind({
 		var auth = this.make_base_auth(user,pass);
 		var headers = {"Authorization":auth, 
 									"X-Plex-Product": "plex_webos", 
-									"X-Plex-Version": "0.5.5",
+									"X-Plex-Version": "0.7.3",
 									"X-Plex-Provides": "client",
 									"X-Plex-Client-Identifier": "bob_test",
 									"X-Plex-Platform": "webos",
